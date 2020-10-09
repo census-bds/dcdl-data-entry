@@ -20,6 +20,9 @@ class ImageForm(forms.ModelForm):
     class Meta:
         model = Image
         fields = ['year', 'image_type']
+    
+    def form_valid(self):
+        return True
 
 
 class SheetForm(forms.Form):

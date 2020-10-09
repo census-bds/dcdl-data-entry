@@ -196,3 +196,14 @@ class FormField(models.Model):
     form_type = models.CharField(max_length=200, choices=FORM_CHOICES)     
 
     field_name = models.CharField(max_length=50)
+
+
+class Entry(models.Model):
+    """
+    Class to track entry metadata (each time user clicks submit)
+    """
+
+    record_id = models.ForeignKey(Record, on_delete=models.CASCADE)
+    user_id = models.CharField(max_length=8)
+    submit_time = models.DateTimeField()
+    app_version = models.DecimalField(max_digits=4, decimal_places=1)
