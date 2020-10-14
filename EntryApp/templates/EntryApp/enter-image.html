@@ -20,15 +20,15 @@
             Please open this file:
         </p>
         <p>
-            {{ new_image.img_path }}
+            {{ image.img_path }}
         </p>
         <p>
             Enter the image year and whether it is a breaker or a sheet with records:
         </p> 
-        <form action='.' method="POST">
+        <form action="{% url 'EntryApp:image' image.id %}" method="POST">
             {% csrf_token %}
-            {{ form }}
-            <input type="submit" value="Submit">
+            {{ form.as_p }}
+            <input type="submit" value="Save">
         </form>
     </body>
 </html>

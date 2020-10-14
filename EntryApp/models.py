@@ -34,7 +34,7 @@ FORM_CHOICES = [
 ]
 
 #=====================================================#
-# DEFINE MODELS
+# MODELS FOR DATA ENTRY
 #=====================================================#
 
 class Image(models.Model):
@@ -61,13 +61,8 @@ class Image(models.Model):
     def __str__(self):
         return f'Image {self.img_path}: {self.year} {self.image_type}'
 
-
-    def completed(self):
-        """
-        Check if all users have entered data; check for conflicts
-        """
-        pass
-
+    def get_absolute_url(self):
+        return reverse('image', kwargs={'pk': self.pk})
     
 
 class Sheet(models.Model):
@@ -165,6 +160,10 @@ class Record(models.Model):
 
     def __str__(self):
         return f'Record {self.record_id}: {self.last_name, self.first_name}'
+
+#=====================================================#
+# MODELS FOR METADATA AND BACKEND
+#=====================================================#
 
 
 class Conflict(models.Model):
