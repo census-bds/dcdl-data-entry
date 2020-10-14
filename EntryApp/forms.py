@@ -34,6 +34,8 @@ class SheetForm(forms.Form):
         model = Sheet
         fields = ['year', 'form_type']
 
+    def form_valid(self):
+        return True
 
 class BreakerForm(forms.Form):
     """
@@ -44,6 +46,9 @@ class BreakerForm(forms.Form):
     class Meta:
         model = Breaker
         fields = ['year', 'state', 'county']
+
+    def form_valid(self):
+        return True
 
 
 class RecordForm(forms.Form):

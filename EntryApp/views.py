@@ -27,12 +27,11 @@ class BeginNewImageView(FormView):
     
     form_class = ImageForm
     template_name = "EntryApp/begin-new-image.html"
-    # new_image = get_new_image()  # need to change implementation here I think
-
+    
     # watch out for all complete - this object would then be None
+    # think about abstracting this further to handle whatever lookups I need
     new_image = Image.objects.filter(is_complete=False)[0]
-    # def get_new_image(self):
-    #     return Image.objects.filter(is_complete=False)[0]
+
 
     def get(self, request):
         context = {
@@ -43,9 +42,7 @@ class BeginNewImageView(FormView):
 
 
     def post(self, request):
-        """
-        Take user input of year + image type into DB
-        """
+
         form = self.form_class(request.POST)
 
         if form.is_valid():
@@ -55,18 +52,20 @@ class BeginNewImageView(FormView):
             # self.new_image.is_complete = True
             self.new_image.save()
 
-            # url = f"EntryApp/enter-{self.new_image.image_type}-data/{self.new_image.img_path}.html"
+            context = {
+                'image': self.new_image
+            }
             url = f"EntryApp/enter-{self.new_image.image_type}-data.html"
             # url = 'EntryApp/thank-you.html'
-            return render(request, url)
-        
-        return render(request, "EntryApp/begin-new-image.html")
+            return render(request, url, context)
+        else:
+            return render(request, "EntryApp/begin-new-image.html")
 
 
 class EnterSheetData(FormView):
     
     form_class = SheetForm
-    sheet = None
+    template_name = 'EntryApp/enter-sheet-data.html'
 
     def get(self, request):
 
@@ -88,31 +87,19 @@ class EnterBreakerData(FormView):
 
     form_class = BreakerForm
     template_name = 'EntryApp/enter-breaker-data.html'
-    initial = {
-        'image_id': None,
-        'img_path': None,
-        'breaker_id': None
-        }
+    # initial = {
+    #     'image_id': None,
+    #     'img_path': None,
+    #     'breaker_id': None
+    #     }
     
     def get(self, request):
         # self.initial['img_path'] = img_path
+        logger.info(f'request is {request}')
         context = {
-            'form': BreakerForm()
+            'form': self.form_class()
         }
         return render(request, f'EntryApp/enter-breaker-data.html', context)
-
-
-class CreateBreaker(CreateView):
-
-    model = Breaker 
-    fields = ['year', 'state', 'county', 'enum_dist']
-    template_name = 'EntryApp/enter-breaker-data.html'
-    pk_url_kwarg = 'post_pk'
-    context_object_name = 'post'
-
-    def form_valid(self, form):
-        post = form.save(commit=False)
-        
 
 
 def ThankYou(request):
