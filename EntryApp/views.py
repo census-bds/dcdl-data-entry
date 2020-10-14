@@ -1,6 +1,6 @@
 import logging
 from django.http import Http404
-from django.shortcuts import get_object_or_404, render, redirect
+from django.shortcuts import get_object_or_404, render, reverse
 from django.http import HttpResponse
 from django.views.generic import View, FormView, TemplateView, CreateView
 
@@ -8,6 +8,7 @@ from EntryApp.models import Breaker, Image, Sheet
 from EntryApp.forms import ImageForm, SheetForm, BreakerForm
 
 logger = logging.getLogger('EntryApp.views')
+
 
 class IndexView(TemplateView):
     """
@@ -20,47 +21,52 @@ class IndexView(TemplateView):
             'latest_image_list': latest_image_list
         }
         return render(request, 'EntryApp/index.html', context)
+    
+    def post(self, request):
+        get_next_image(request)
         
 
+def get_next_image(request):
+    '''
+    Look up next image for user to enter
+    This should probably be in a class, but I don't know where...
+    '''
 
-class BeginNewImageView(FormView):
+    new_image = Image.objects.filter(is_complete=False)[0]
+
+    if new_image:
+        url = f'EntryApp/enter-image.html'
+        context = {
+            'image': new_image
+        }
+        return render(request, url, context)
+    else:
+        raise Http404("Images are all complete.")
+
+
+class EnterImage(FormView):
     
     form_class = ImageForm
-    template_name = "EntryApp/begin-new-image.html"
-    # new_image = get_new_image()  # need to change implementation here I think
-
-    # watch out for all complete - this object would then be None
-    new_image = Image.objects.filter(is_complete=False)[0]
-    # def get_new_image(self):
-    #     return Image.objects.filter(is_complete=False)[0]
-
-    def get(self, request):
-        context = {
-            'new_image': self.new_image,
-            'form': self.form_class()
-        }
-        return render(request, 'EntryApp/begin-new-image.html', context)
+    template_name = "EntryApp/image.html"
+    
 
 
-    def post(self, request):
-        """
-        Take user input of year + image type into DB
-        """
-        form = self.form_class(request.POST)
-
-        if form.is_valid():
-            logger.info(f"form data is {form.cleaned_data}")
-            self.new_image.year = form.cleaned_data['year']
-            self.new_image.image_type = form.cleaned_data['image_type'].lower()
-            # self.new_image.is_complete = True
-            self.new_image.save()
-
-            # url = f"EntryApp/enter-{self.new_image.image_type}-data/{self.new_image.img_path}.html"
-            url = f"EntryApp/enter-{self.new_image.image_type}-data.html"
-            # url = 'EntryApp/thank-you.html'
-            return render(request, url)
-        
-        return render(request, "EntryApp/begin-new-image.html")
+def enter_image(request, pk):
+    """
+    Take user input of year + image type into DB
+    """
+    image = get_object_or_404(Image, pk=pk)
+    form = request.POST
+    try:
+        image.year = form['year']
+        image.image_type = form['image_type'].lower()
+    except KeyError:
+        return render(request, f'EntryApp/{image}/{pk}.html')
+    else:
+        # self.new_image.is_complete = True
+        image.save()
+    
+        return render(request, f'EntryApp/{image.image_type}/{image.pk}.html')
 
 
 class EnterSheetData(FormView):
