@@ -1,3 +1,10 @@
+"""
+FORMS FOR DCDL DATA ENTRY
+
+TO DO:
+-Validation methods
+"""
+
 from django import forms 
 from django.forms import formset_factory
 
@@ -25,17 +32,7 @@ class ImageForm(forms.ModelForm):
         return True
 
 
-class SheetForm(forms.Form):
-    """
-    Define form to enter sheet data (year and type)
-    """
-    
-    class Meta:
-        model = Sheet
-        fields = ['year', 'form_type']
-
-
-class BreakerForm(forms.Form):
+class BreakerForm(forms.ModelForm):
     """
     Class defining form where breaker data are entered
 
@@ -44,6 +41,19 @@ class BreakerForm(forms.Form):
     class Meta:
         model = Breaker
         fields = ['year', 'state', 'county']
+
+    def form_valid(self):
+        return True
+        
+
+class SheetForm(forms.ModelForm):
+    """
+    Define form to enter sheet data (year and type)
+    """
+    
+    class Meta:
+        model = Sheet
+        fields = ['year', 'form_type']
 
 
 class RecordForm(forms.Form):

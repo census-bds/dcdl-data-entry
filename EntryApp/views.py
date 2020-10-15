@@ -1,10 +1,16 @@
+"""
+VIEWS FOR DCDL DATA ENTRY
+
+TO DO:
+-a lot
+"""
 import logging
-from django.http import Http404
-from django.shortcuts import get_object_or_404, render, reverse
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
+from django.shortcuts import get_object_or_404, render, redirect
+from django.urls import reverse 
 from django.views.generic import View, FormView, TemplateView, CreateView
 
-from EntryApp.models import Breaker, Image, Sheet
+from EntryApp.models import Breaker, Image, Sheet, CurrentEntry
 from EntryApp.forms import ImageForm, SheetForm, BreakerForm
 
 logger = logging.getLogger('EntryApp.views')
@@ -19,54 +25,128 @@ class IndexView(TemplateView):
         latest_image_list = Image.objects.all()
         context = {
             'latest_image_list': latest_image_list
-        }
+            }
         return render(request, 'EntryApp/index.html', context)
-    
-    def post(self, request):
-        get_next_image(request)
-        
 
-def get_next_image(request):
+
+def seed_current_entry():
+    '''
+    Put dummy data into current entry table
+    I think I only need this once for each user...
+    ''' 
+    if CurrentEntry.objects.all():
+        return 
+    
+    else:
+
+        # these will be overwritten, I think, so values don't matter
+        an_image = Image.objects.all()[0]
+        a_breaker = Breaker.objects.all()[0]
+
+        current = CurrentEntry(jbid="jbid123", \
+                                img=an_image, \
+                                breaker = a_breaker, \
+                                sheet = None)
+        current.save()
+
+
+def get_next_image():
     '''
     Look up next image for user to enter
-    This should probably be in a class, but I don't know where...
     '''
 
+    # refine this 
     new_image = Image.objects.filter(is_complete=False)[0]
 
     if new_image:
-        url = f'EntryApp/enter-image.html'
-        context = {
-            'image': new_image
-        }
-        return render(request, url, context)
+        current = CurrentEntry.objects.get(jbid='jbid123')
+        current.save()
     else:
         raise Http404("Images are all complete.")
 
 
-class EnterImage(FormView):
+class BeginNewImageView(FormView):
     
     form_class = ImageForm
-    template_name = "EntryApp/image.html"
+    template_name = 'EntryApp/begin-new-image'
+
+    def get(self, request):
+
+        # logger.info(f'dir of image request is {dir(request)}')
+        seed_current_entry() # this ensures there's a value in CurrentEntry
+        get_next_image() # this loads the next image into CurrentEntry
+
+        context = {
+            'image': CurrentEntry.objects.get(jbid='jbid123').img,
+            'form': self.form_class()
+        }
+        return render(request, 'EntryApp/begin-new-image.html', context)
+
     
-
-
-def enter_image(request, pk):
-    """
-    Take user input of year + image type into DB
-    """
-    image = get_object_or_404(Image, pk=pk)
+def submit_image(request):
+    '''
+    View to submit image data from the ImageForm
+    '''
     form = request.POST
+    logger.info(form)
     try:
-        image.year = form['year']
-        image.image_type = form['image_type'].lower()
+        current_id = CurrentEntry.objects.get(jbid='jbid123').img.id
+        current = Image.objects.get(id=current_id)
+        current.year = form['year']
+        current.image_type = form['image_type'].lower()
+        # current.is_complete = True
+        logger.info(f'submit_image POST current value is {current}')
+        current.save()
+
+        return redirect(reverse('EntryApp:enter_breaker_data'))
+
     except KeyError:
-        return render(request, f'EntryApp/{image}/{pk}.html')
-    else:
-        # self.new_image.is_complete = True
-        image.save()
+        logger.info("KeyError in submit_image")
+        return render(request, 'EntryApp/begin-new-image.html')    
+
+
+class EnterBreakerData(FormView):
+
+    form_class = BreakerForm
+    template_name = 'EntryApp/enter-breaker-data.html'
     
-        return render(request, f'EntryApp/{image.image_type}/{image.pk}.html')
+    def get(self, request):
+        logger.info(f'breaker request is {request}')
+        context = {
+            'breaker_img_path': CurrentEntry.objects.get(jbid='jbid123').img.img_path,
+            'form': self.form_class()
+        }
+        return render(request, self.template_name, context)
+
+def submit_breaker(request):
+    '''
+    View to submit breaker data, definitely redundant
+    '''
+    form = request.POST
+    logger.info(f'Breaker form is{form}')
+    
+    try:
+        # first save the breaker data in Breaker
+        current_img = CurrentEntry.objects.get(jbid='jbid123').img
+        breaker, created = Breaker.objects.get_or_create(
+            img = current_img,
+            year = form['year'],
+            state = form['state'],
+            county = form['county']
+        )
+        logger.info(f'get_or_create() returned {created}')
+
+        # next update CurrentEntry
+        current = CurrentEntry.objects.get(jbid='jbid123')
+        current.breaker = breaker
+        current.save()
+
+        return redirect(reverse('EntryApp:index'))
+
+    except KeyError:
+        logger.warn("KeyError in submit_breaker post()")
+        return render(request, reverse('EntryApp:enter_breaker_data'))
+    
 
 
 class EnterSheetData(FormView):
@@ -86,39 +166,6 @@ class EnterSheetData(FormView):
         if form.is_valid():
 
             logger.info(f'SheetForm cleaned_data is {form.cleaned_data}')
-
-            
-
-
-class EnterBreakerData(FormView):
-
-    form_class = BreakerForm
-    template_name = 'EntryApp/enter-breaker-data.html'
-    initial = {
-        'image_id': None,
-        'img_path': None,
-        'breaker_id': None
-        }
-    
-    def get(self, request):
-        # self.initial['img_path'] = img_path
-        context = {
-            'form': BreakerForm()
-        }
-        return render(request, f'EntryApp/enter-breaker-data.html', context)
-
-
-class CreateBreaker(CreateView):
-
-    model = Breaker 
-    fields = ['year', 'state', 'county', 'enum_dist']
-    template_name = 'EntryApp/enter-breaker-data.html'
-    pk_url_kwarg = 'post_pk'
-    context_object_name = 'post'
-
-    def form_valid(self, form):
-        post = form.save(commit=False)
-        
 
 
 def ThankYou(request):

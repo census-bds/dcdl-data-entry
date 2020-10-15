@@ -25,7 +25,7 @@
         <p>
             Enter the image year and whether it is a breaker or a sheet with records:
         </p> 
-        <form action="{% url 'EntryApp:image' image.id %}" method="POST">
+        <form method="POST" action={% url 'EntryApp:submit_image' %}>
             {% csrf_token %}
             {{ form.as_p }}
             <input type="submit" value="Save">
