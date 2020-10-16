@@ -108,7 +108,7 @@ class Sheet(models.Model):
     problem = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'Image {self.img_path}: {self.year} {self.form_type}'
+        return f'Image {self.img.img_path}: {self.year} {self.form_type}' # FIX THIS
 
     @classmethod
     def list_records(cls):

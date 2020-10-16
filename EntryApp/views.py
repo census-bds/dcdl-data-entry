@@ -15,6 +15,9 @@ from EntryApp.forms import ImageForm, SheetForm, BreakerForm
 
 logger = logging.getLogger('EntryApp.views')
 
+#=====================================================#
+# INDEX AND HELPER
+#=====================================================#
 
 class IndexView(TemplateView):
     """
@@ -49,6 +52,9 @@ def seed_current_entry():
                                 sheet = None)
         current.save()
 
+#=====================================================#
+# IMAGE 
+#=====================================================#
 
 def get_next_image():
     '''
@@ -57,9 +63,11 @@ def get_next_image():
 
     # refine this 
     new_image = Image.objects.filter(is_complete=False)[0]
+    logger.info(f'get_new_image got {new_image.img_path}')
 
     if new_image:
         current = CurrentEntry.objects.get(jbid='jbid123')
+        current.img = new_image
         current.save()
     else:
         raise Http404("Images are all complete.")
@@ -98,12 +106,15 @@ def submit_image(request):
         logger.info(f'submit_image POST current value is {current}')
         current.save()
 
-        return redirect(reverse('EntryApp:enter_breaker_data'))
+        return redirect(reverse(f'EntryApp:enter_{current.image_type}_data'))
 
     except KeyError:
         logger.info("KeyError in submit_image")
         return render(request, 'EntryApp/begin-new-image.html')    
 
+#=====================================================#
+# BREAKER
+#=====================================================#
 
 class EnterBreakerData(FormView):
 
@@ -117,6 +128,7 @@ class EnterBreakerData(FormView):
             'form': self.form_class()
         }
         return render(request, self.template_name, context)
+
 
 def submit_breaker(request):
     '''
@@ -134,7 +146,7 @@ def submit_breaker(request):
             state = form['state'],
             county = form['county']
         )
-        logger.info(f'get_or_create() returned {created}')
+        logger.info(f'submit_breaker get_or_create() returned {created}')
 
         # next update CurrentEntry
         current = CurrentEntry.objects.get(jbid='jbid123')
@@ -147,7 +159,9 @@ def submit_breaker(request):
         logger.warn("KeyError in submit_breaker post()")
         return render(request, reverse('EntryApp:enter_breaker_data'))
     
-
+#=====================================================#
+# SHEET
+#=====================================================#
 
 class EnterSheetData(FormView):
     
@@ -156,20 +170,44 @@ class EnterSheetData(FormView):
 
     def get(self, request):
 
-        sheet = None
+        logger.info(f'EnterSheet get request')
+        context = {
+            'breaker': CurrentEntry.objects.get(jbid='jbid123').breaker,
+            'form': self.form_class()
+        }
+        return render(request, self.template_name, context)
 
 
-    def post(self, request):
+def submit_sheet(request):
+    '''
+    Function view to submit the data from the SheetForm
+    '''
+
+    form = request.POST 
+    logger.info(f'submit_sheet form: {form}')
+
+    try:
+        # first save the data in Sheet 
+        current_img = CurrentEntry.objects.get(jbid='jbid123').img
+        is_problem = form['problem'] if 'problem' in form.keys() else False
+        sheet, created = Sheet.objects.get_or_create(
+            img = current_img,
+            year = form['year'],
+            form_type = form['form_type'],
+            breaker = CurrentEntry.objects.get(jbid='jbid123').breaker,
+            problem = is_problem
+        )
+        logger.info(f'submit_sheet get_or_create() returned {created}')
+
+        # next update CurrentEntry
+        current = CurrentEntry.objects.get(jbid='jbid123')
+        current.sheet = sheet
+        current.save()
+
+        return redirect(reverse('EntryApp:index'))
+
+    except KeyError:
+        logger.warn("KeyError in submit_sheet post()")
+        return render(request, reverse('EntryApp:enter_sheet_data'))
+
         
-        form = self.form_class(request.POST)
-
-        if form.is_valid():
-
-            logger.info(f'SheetForm cleaned_data is {form.cleaned_data}')
-
-
-def ThankYou(request):
-    """
-    Dummy class for dev
-    """
-    return render(request, 'EntryApp/thank-you.html')    

@@ -16,11 +16,28 @@
         <!--[if lt IE 7]>
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
-        Enter sheet data here.
-        <form action='.' method="POST">
-            {% csrf_token %}
-            {{ form }}
-            <input type="submit" value="Submit">
-        </form>
+        <h2>Sheet data entry</h2>
+        <div id="breakerCheck">
+            <p>
+                This sheet will be associated with the breaker image {{breaker.img.img_path}}.
+                <ul>
+                    <li>Breaker year: {{ breaker.year }}</li>
+                    <li>Breaker state: {{breaker.state }}</li>
+                    <li>Breaker county: {{ breaker.county }}</li>
+                </ul>
+                If this seems incorrect, please check the problem box below.
+                [TO DO: think through how system should guide user to correct the issue]
+            </p>
+        </div>
+        <div id='sheetEntry'>
+            <p>
+                Select which kind of sheet this is.
+            </p>
+            <form action={% url 'EntryApp:submit_sheet' %} method="POST">
+                {% csrf_token %}
+                {{ form }}
+                <input type="submit" value="Submit">
+            </form>    
+        </div>
     </body>
 </html>

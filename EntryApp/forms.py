@@ -53,7 +53,7 @@ class SheetForm(forms.ModelForm):
     
     class Meta:
         model = Sheet
-        fields = ['year', 'form_type']
+        fields = ['year', 'form_type', 'problem']
 
 
 class RecordForm(forms.Form):
