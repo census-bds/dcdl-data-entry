@@ -17,9 +17,9 @@
             <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
         <![endif]-->
         <p>
-            Enter breaker data here for {{image.pk}}
+        Enter breaker data here for {{ breaker_img_path }}
         </p>
-        <form action='.' method="POST">
+        <form action={% url 'EntryApp:submit_breaker' %} method="post">
             {% csrf_token %}
             {{ form }}
             <input type="submit" value="Submit">
