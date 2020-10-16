@@ -25,7 +25,7 @@
         {% else %}
             <p>No images are available.</p>
         {% endif %}
-        <form action="begin-new-image/" method="get">
+        <form action={% url 'EntryApp:begin_new_image' %} method="get">
           {% csrf_token %}
           <input type="submit" value="New image">
       </form>
