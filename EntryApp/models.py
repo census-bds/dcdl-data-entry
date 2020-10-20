@@ -105,6 +105,7 @@ class Sheet(models.Model):
     form_type = models.CharField(max_length=200, choices=FORM_CHOICES)
     breaker = models.ForeignKey(Breaker, on_delete=models.CASCADE, null=True) # CHANGE THIS!!!
 
+    num_records = models.PositiveIntegerField(verbose_name = 'Number of records', null=True)
     problem = models.BooleanField(default=False)
 
     def __str__(self):
@@ -126,8 +127,8 @@ class Record(models.Model):
     """
 
     # link to the image 
-    record_id = models.PositiveSmallIntegerField(primary_key=True) # this is row (or col)
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE)
+    row_num = models.PositiveSmallIntegerField(verbose_name='Row number') # this is row (or col)
 
     # fields common among all year-forms
     first_name = models.CharField(max_length=50, null=True)
@@ -157,7 +158,7 @@ class Record(models.Model):
 
 
     def __str__(self):
-        return f'Record {self.record_id}: {self.last_name, self.first_name}'
+        return f'Record {self.row_num} from {self.sheet}: {self.last_name, self.first_name}'
 
 #=====================================================#
 # MODELS FOR METADATA AND BACKEND

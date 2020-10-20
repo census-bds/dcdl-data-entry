@@ -6,7 +6,6 @@ TO DO:
 """
 
 from django import forms 
-from django.forms import formset_factory
 
 from EntryApp.models import Breaker, Image, Record, Sheet, FormField
 
@@ -40,7 +39,7 @@ class BreakerForm(forms.ModelForm):
     """
     class Meta:
         model = Breaker
-        fields = ['year', 'state', 'county']
+        fields = ['state', 'county']
 
     def form_valid(self):
         return True
@@ -53,24 +52,7 @@ class SheetForm(forms.ModelForm):
     
     class Meta:
         model = Sheet
-        fields = ['year', 'form_type', 'problem']
-
-
-class RecordForm(forms.Form):
-    """
-    Class defining form for entry of single record
-
-    Instantiated with a year and form type
-    """
-
-    def __init__(self, year, form_type):
-        self.year = year
-        self.form_type = form_type
-
-    class Meta:
-        model = Record
-        fields = ['first_name', 'last_name']
-    
+        fields = ['form_type', 'num_records', 'problem']
 
 
   

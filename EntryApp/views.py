@@ -4,13 +4,16 @@ VIEWS FOR DCDL DATA ENTRY
 TO DO:
 -a lot
 """
+import datetime
 import logging
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse 
 from django.views.generic import View, FormView, TemplateView, CreateView
+from django.forms import modelformset_factory
 
-from EntryApp.models import Breaker, Image, Sheet, CurrentEntry
+
+from EntryApp.models import Breaker, Image, Sheet, CurrentEntry, Record
 from EntryApp.forms import ImageForm, SheetForm, BreakerForm
 
 logger = logging.getLogger('EntryApp.views')
@@ -69,6 +72,8 @@ def get_next_image():
         current = CurrentEntry.objects.get(jbid='jbid123')
         current.img = new_image
         current.save()
+        # consider changing this implementation so that if CurrentEntry is empty,
+        # we can populate it here rather than having a junk entry in Breaker
     else:
         raise Http404("Images are all complete.")
 
@@ -102,7 +107,7 @@ def submit_image(request):
         current = Image.objects.get(id=current_id)
         current.year = form['year']
         current.image_type = form['image_type'].lower()
-        # current.is_complete = True
+        current.is_complete = True
         logger.info(f'submit_image POST current value is {current}')
         current.save()
 
@@ -142,7 +147,7 @@ def submit_breaker(request):
         current_img = CurrentEntry.objects.get(jbid='jbid123').img
         breaker, created = Breaker.objects.get_or_create(
             img = current_img,
-            year = form['year'],
+            year = current_img.year,
             state = form['state'],
             county = form['county']
         )
@@ -190,11 +195,14 @@ def submit_sheet(request):
         # first save the data in Sheet 
         current_img = CurrentEntry.objects.get(jbid='jbid123').img
         is_problem = form['problem'] if 'problem' in form.keys() else False
+        if 'problem' in form.keys():
+            logger.info(f"problem value is {form['problem']}")
         sheet, created = Sheet.objects.get_or_create(
             img = current_img,
-            year = form['year'],
+            year = current_img.year,
             form_type = form['form_type'],
             breaker = CurrentEntry.objects.get(jbid='jbid123').breaker,
+            num_records = form['num_records'],
             problem = is_problem
         )
         logger.info(f'submit_sheet get_or_create() returned {created}')
@@ -204,10 +212,48 @@ def submit_sheet(request):
         current.sheet = sheet
         current.save()
 
-        return redirect(reverse('EntryApp:index'))
+        return redirect(reverse('EntryApp:enter_records'))
 
     except KeyError:
         logger.warn("KeyError in submit_sheet post()")
         return render(request, reverse('EntryApp:enter_sheet_data'))
 
+#=====================================================#
+# RECORD 
+#=====================================================#
+
+def enter_records(request):
+    '''
+    View where the user can enter 1 or more person records
+    '''
+
+    # get the current metadata
+    current = CurrentEntry.objects.get(jbid="jbid123")
+    num_records = current.sheet.num_records
+
+    # to do: implement this as a lookup based on curent year and form
+    record_fields = [
+        'row_num',
+        'first_name',
+        'middle_init',
+        'last_name',
+        'age',
+        'sex'
+    ]
+
+    RecordFormSet = modelformset_factory(Record, fields=record_fields, extra=num_records)
+
+    if request.method == 'POST':
+        formset = RecordFormSet(request.POST, request.FILES)
         
+        if formset.is_valid():
+            for r in formset.cleaned_data:
+                r['sheet'] = current.sheet
+                r['entry_time'] = datetime.datetime.now()
+                logger.info(f'record value is {r}') 
+                record, created = Record.objects.get_or_create(**r)
+        
+    else:
+        formset = RecordFormSet()
+    
+    return render(request, 'EntryApp/enter-records.html', {'formset': formset})
