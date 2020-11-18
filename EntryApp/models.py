@@ -46,7 +46,7 @@ class Image(models.Model):
 
     # we will bulk load DB with all images to enter 
     img_path = models.CharField(max_length=200)
-    jbid = models.CharField(max_length=20, default='jbid123')
+    jbid = models.CharField(max_length=20, default='jbid000')
 
     # these values will be populated as entry proceeds
     year = models.IntegerField(null=True, choices=YEAR_CHOICES)
@@ -64,14 +64,15 @@ class Image(models.Model):
 
 class Breaker(models.Model):
     """
-    Class defining a breaker sheet (subclass of image)
+    Class defining a breaker sheet
     """
     
+    # required fields
     img = models.ForeignKey(Image, on_delete=models.CASCADE)
-    year = models.IntegerField(null=True, choices=YEAR_CHOICES)
+    jbid = models.CharField(max_length=7)
 
-    # geography fields
     # TO DO: fix types and do validation
+    year = models.IntegerField(null=True, choices=YEAR_CHOICES)
     state = models.CharField(max_length=2, null=True) # valid list of states
     county = models.CharField(max_length=30, null=True)
     enum_dist = models.CharField(max_length=30, null=True)
@@ -99,11 +100,13 @@ class Sheet(models.Model):
                 ???
     """
 
+    # required fields
     img = models.ForeignKey(Image, on_delete=models.CASCADE)
-    year = models.IntegerField(null=True, choices=YEAR_CHOICES)
+    breaker = models.ForeignKey(Breaker, on_delete=models.CASCADE)
+    jbid = models.CharField(max_length=7) 
 
+    year = models.IntegerField(null=True, choices=YEAR_CHOICES)
     form_type = models.CharField(max_length=200, choices=FORM_CHOICES)
-    breaker = models.ForeignKey(Breaker, on_delete=models.CASCADE, null=True) # CHANGE THIS!!!
 
     num_records = models.PositiveIntegerField(verbose_name = 'Number of records', null=True)
     problem = models.BooleanField(default=False)
@@ -152,7 +155,7 @@ class Record(models.Model):
     total_persons = models.PositiveIntegerField(null=True)
 
     # entry info
-    jbid = models.CharField(max_length=50, null=True)
+    jbid = models.CharField(max_length=7, null=True)
     entry_time = models.DateTimeField()
     is_illegible = models.BooleanField(blank=True, null=True)
 
@@ -167,7 +170,7 @@ class Record(models.Model):
 class CurrentEntry(models.Model):
 
     img = models.ForeignKey(Image, on_delete=models.CASCADE)
-    jbid = models.CharField(max_length=20, default='jbid123')
+    jbid = models.CharField(max_length=20, default='jbid000')
     breaker = models.ForeignKey(Breaker, on_delete=models.CASCADE)
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, null=True)
 
