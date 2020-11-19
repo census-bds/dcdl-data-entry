@@ -82,7 +82,7 @@ class Breaker(models.Model):
     smsa = models.CharField(max_length=30, null=True)
     
     def __str__(self):
-        return f'Breaker {self.img} from {self.year}'
+        return f'Breaker {self.img} from {self.jbid}'
 
     @classmethod
     def get_related_sheets(cls):
@@ -112,7 +112,7 @@ class Sheet(models.Model):
     problem = models.BooleanField(default=False)
 
     def __str__(self):
-        return f'Image {self.img.img_path}: {self.year} {self.form_type}' # FIX THIS
+        return f'{self.img}: {self.form_type}' # FIX THIS
 
     @classmethod
     def list_records(cls):
@@ -122,6 +122,21 @@ class Sheet(models.Model):
         return Record.objects.filter(sheet=cls)
 
 
+class OtherImage(models.Model):
+    '''
+    Class defining an image that is neither a breaker nor a sheet
+
+    Attributes: image object, year, free text notes
+    '''
+
+    img = models.ForeignKey(Image, on_delete=models.CASCADE)
+    year = models.PositiveIntegerField(choices=YEAR_CHOICES)
+    description = models.TextField(max_length=500)
+
+    def __str__(self):
+        return f'{self.img}: OtherImage'
+
+
 class Record(models.Model):
     """
     Class defining a single record (one person)
@@ -129,9 +144,10 @@ class Record(models.Model):
     A sheet image contains 1+ records
     """
 
-    # link to the image 
+    # required link to the image 
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE)
     row_num = models.PositiveSmallIntegerField(verbose_name='Row number') # this is row (or col)
+    jbid = models.CharField(max_length=7) # change to non-null
 
     # fields common among all year-forms
     first_name = models.CharField(max_length=50, null=True)
@@ -155,13 +171,12 @@ class Record(models.Model):
     total_persons = models.PositiveIntegerField(null=True)
 
     # entry info
-    jbid = models.CharField(max_length=7, null=True)
     entry_time = models.DateTimeField()
     is_illegible = models.BooleanField(blank=True, null=True)
 
 
     def __str__(self):
-        return f'Record {self.row_num} from {self.sheet}: {self.last_name, self.first_name}'
+        return f'Record {self.row_num} {self.jbid} on {self.sheet}: {self.last_name, self.first_name}'
 
 #=====================================================#
 # MODELS FOR METADATA AND BACKEND

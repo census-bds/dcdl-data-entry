@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from EntryApp.models import Breaker, Image, Sheet, CurrentEntry, Record
-from EntryApp.forms import ImageForm, SheetForm, BreakerForm
+from EntryApp.forms import ImageForm, SheetForm, BreakerForm, BaseRecordFormSet
 
 logger = logging.getLogger('EntryApp.views')
 
@@ -90,7 +90,7 @@ def get_next_image(request):
 
     # refine this, probably
     try: 
-        new_image = Image.objects.filter(is_complete=False)[0]
+        new_image = Image.objects.filter(is_complete=False).filter(jbid=request.user)[0]
         logger.info(f'get_new_image got {new_image.img_path}')
 
         if new_image:
@@ -155,6 +155,7 @@ class EnterBreakerData(LoginRequiredMixin, FormView):
         }
         return render(request, self.template_name, context)
 
+
 @login_required
 def submit_breaker(request):
     '''
@@ -168,6 +169,7 @@ def submit_breaker(request):
         current_img = CurrentEntry.objects.get(jbid=request.user).img
         breaker, created = Breaker.objects.get_or_create(
             img = current_img,
+            jbid = request.user,
             year = current_img.year,
             state = form['state'],
             county = form['county']
@@ -267,7 +269,8 @@ def enter_records(request):
         'sex'
     ]
 
-    RecordFormSet = modelformset_factory(Record, fields=record_fields, extra=num_records)
+    RecordFormSet = modelformset_factory(Record, fields=record_fields, extra=num_records, formset=BaseRecordFormSet)
+    
 
     if request.method == 'POST':
         formset = RecordFormSet(request.POST, request.FILES)
@@ -281,6 +284,23 @@ def enter_records(request):
                 record, created = Record.objects.get_or_create(**r)
         
     else:
-        formset = RecordFormSet()
+        formset = RecordFormSet(queryset=Record.objects.none)
     
     return render(request, 'EntryApp/enter-records.html', {'formset': formset})
+
+
+def export_records(request):
+    '''
+    '''
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachement; filename="records.csv"'
+
+    writer = csv.writer(response)
+
+    # change this so you can pick the table
+    records = list(Record.objects.all())
+    for r in records:
+        writer.writerow([r.row_num, r.first_name, r.last_name])
+    
+    return response

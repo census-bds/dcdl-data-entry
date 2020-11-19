@@ -6,7 +6,6 @@ TO DO:
 """
 
 from django import forms 
-
 from EntryApp.models import Breaker, Image, Record, Sheet, FormField
 
 STATE_LIST = [
@@ -55,4 +54,11 @@ class SheetForm(forms.ModelForm):
         fields = ['form_type', 'num_records', 'problem']
 
 
-  
+class BaseRecordFormSet(forms.BaseModelFormSet):
+    '''
+    Subclass for RecordFormSet so that formset returns no existing data
+    '''
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.queryset = Record.objects.none()
