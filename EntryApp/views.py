@@ -4,8 +4,12 @@ VIEWS FOR DCDL DATA ENTRY
 TO DO:
 -a lot
 """
+import csv
 import datetime
 import logging
+
+from djqscsv import render_to_csv_response
+
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse 
@@ -15,8 +19,8 @@ from django.contrib.auth.models import Permission, User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from EntryApp.models import Breaker, Image, Sheet, CurrentEntry, Record
-from EntryApp.forms import ImageForm, SheetForm, BreakerForm, BaseRecordFormSet
+from EntryApp.models import Breaker, Image, Sheet, CurrentEntry, Record, FormField
+from EntryApp.forms import ImageForm, SheetForm, BreakerForm, BaseRecordFormSet, ExportForm
 
 logger = logging.getLogger('EntryApp.views')
 
@@ -249,6 +253,21 @@ def submit_sheet(request):
 # RECORD 
 #=====================================================#
 
+class EnterSheetData(LoginRequiredMixin, FormView):
+    
+    form_class = SheetForm
+    template_name = 'EntryApp/enter-sheet-data.html'
+
+    def get(self, request):
+
+        logger.info(f'EnterSheet get request')
+        context = {
+            'breaker': CurrentEntry.objects.get(jbid=request.user).breaker,
+            'form': self.form_class()
+        }
+        return render(request, self.template_name, context)
+
+
 @login_required
 def enter_records(request):
     '''
@@ -282,6 +301,13 @@ def enter_records(request):
                 r['jbid'] = request.user
                 logger.info(f'record value is {r}') 
                 record, created = Record.objects.get_or_create(**r)
+
+                if created:
+                    logger.info(f'{record} created.')
+                else:
+                    logger.info(f'{record} updated.')
+                    
+            return render(request, reverse('EntryApp:index'))
         
     else:
         formset = RecordFormSet(queryset=Record.objects.none)
@@ -289,18 +315,37 @@ def enter_records(request):
     return render(request, 'EntryApp/enter-records.html', {'formset': formset})
 
 
+#================================#
+# EXPORT RECORDS VIEW
+#================================#
+
+class SelectExportFormView(LoginRequiredMixin, FormView):
+    
+    form_class = ExportForm
+    template_name = 'EntryApp/select-record-export.html'
+
+    def get(self, request):
+
+        logger.info(f'ExportForm get request')
+        context = {
+            'form': self.form_class()
+        }
+        return render(request, self.template_name, context)
+
+
 def export_records(request):
     '''
+    View that looks up selected model and gathers records for csv export
     '''
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachement; filename="records.csv"'
-
     writer = csv.writer(response)
 
-    # change this so you can pick the table
-    records = list(Record.objects.all())
-    for r in records:
-        writer.writerow([r.row_num, r.first_name, r.last_name])
+    form = request.POST
+    logger.info("export_records POST request")
     
-    return response
+    chosen_model = ExportForm.tables[int(form['table_choice'])]['model']
+    
+    records = chosen_model.objects.all().values()
+    return render_to_csv_response(records)

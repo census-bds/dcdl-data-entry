@@ -62,3 +62,19 @@ class BaseRecordFormSet(forms.BaseModelFormSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.queryset = Record.objects.none()
+
+
+class ExportForm(forms.Form):
+    '''
+    Define form where users can export existing records to csv to inspect
+    '''
+    
+    tables = {
+        1: {'label': 'Image', 'model': Image},
+        2: {'label': 'Sheet', 'model': Sheet},
+        3: {'label': 'Breaker', 'model': Breaker},
+        4: {'label': 'Record', 'model': Record},
+    }
+    choices = [(t[0], t[1]['label']) for t in tables.items()]
+    table_choice = forms.ChoiceField(label='Choose table to export', \
+        choices=choices)

@@ -12,5 +12,6 @@ urlpatterns = [
     path('enter-sheet-data/', views.EnterSheetData.as_view(), name='enter_sheet_data'),
     path('enter-breaker-data/', views.EnterBreakerData.as_view(), name='enter_breaker_data'),
     path('enter-records/', views.enter_records, name='enter_records'),
+    path('select-record-export/', views.SelectExportFormView.as_view(), name='select_records'),
     path('export-records/', views.export_records, name='export_records')
 ]
