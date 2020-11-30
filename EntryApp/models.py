@@ -57,6 +57,10 @@ class Image(models.Model):
     date_complete = models.DateTimeField(null=True)
     problem = models.BooleanField(default=False)
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields = ['img_path', 'jbid'], name='unique_img_entry')
+        ]
 
     def __str__(self):
         return f'Image {self.img_path}: {self.year} {self.image_type}'
@@ -67,6 +71,11 @@ class Breaker(models.Model):
     Class defining a breaker sheet
     """
     
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields = ['img', 'jbid'], name='unique_breaker_entry')
+        ]
+
     # required fields
     img = models.ForeignKey(Image, on_delete=models.CASCADE)
     jbid = models.CharField(max_length=7)
@@ -81,6 +90,8 @@ class Breaker(models.Model):
     place = models.CharField(max_length=30, null=True)
     smsa = models.CharField(max_length=30, null=True)
     
+
+
     def __str__(self):
         return f'Breaker {self.img} from {self.jbid}'
 
@@ -99,6 +110,11 @@ class Sheet(models.Model):
     Attributes: image objects, year, form_type, breaker object,
                 ???
     """
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields = ['img', 'jbid'], name='unique_sheet_entry')
+        ]
 
     # required fields
     img = models.ForeignKey(Image, on_delete=models.CASCADE)
@@ -129,7 +145,13 @@ class OtherImage(models.Model):
     Attributes: image object, year, free text notes
     '''
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields = ['img', 'jbid'], name='unique_other_entry')
+        ]
+
     img = models.ForeignKey(Image, on_delete=models.CASCADE)
+    jbid = models.CharField(max_length=7)
     year = models.PositiveIntegerField(choices=YEAR_CHOICES)
     description = models.TextField(max_length=500)
 
@@ -161,7 +183,7 @@ class Record(models.Model):
     # fields that appear in some year-forms but not all
     race = models.CharField(max_length=50, null=True) 
     page_no = models.PositiveIntegerField(null=True)
-    line_no = models.PositiveIntegerField(null=True) # this may be row or col no
+    line_no = models.PositiveIntegerField(null=True) 
     serial_no = models.IntegerField(null=True)
     block = models.CharField(max_length=50, null=True)
     sample_key_gq = models.CharField(max_length=50, null=True)

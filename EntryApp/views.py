@@ -127,14 +127,18 @@ def submit_image(request):
     '''
     form = request.POST
     logger.info(form)
+
     try:
-        current_id = CurrentEntry.objects.get(jbid=request.user).img.id
-        image = Image.objects.get(id=current_id)
-        image.year = form['year']
-        image.image_type = form['image_type'].lower()
-        image.is_complete = True # FOR DEV
+        current = CurrentEntry.objects.get(jbid=request.user)
+        image, created = Image.objects.update_or_create(
+            img_path = current.img.img_path, 
+            jbid = request.user,
+            defaults = {'year': form['year'],
+            'image_type': form['image_type'].lower(),
+            'is_complete': True
+            }
+        )
         logger.info(f'submit_image POST current value is {image}')
-        image.save() 
 
         return redirect(reverse(f'EntryApp:enter_{image.image_type}_data'))
 
@@ -171,14 +175,14 @@ def submit_breaker(request):
     try:
         # first save the breaker data in Breaker
         current_img = CurrentEntry.objects.get(jbid=request.user).img
-        breaker, created = Breaker.objects.get_or_create(
+        breaker, created = Breaker.objects.update_or_create(
             img = current_img,
             jbid = request.user,
-            year = current_img.year,
-            state = form['state'],
-            county = form['county']
+            defaults = {'year': current_img.year,
+                        'state': form['state'],
+                        'county': form['county']}
         )
-        logger.info(f'submit_breaker get_or_create() returned {created}')
+        logger.info(f'submit_breaker update_or_create() returned {created}')
 
         # next update CurrentEntry
         current = CurrentEntry.objects.get(jbid=request.user)
@@ -227,16 +231,18 @@ def submit_sheet(request):
         if 'problem' in form.keys():
             logger.info(f"problem value is {form['problem']}")
         
-        sheet, created = Sheet.objects.get_or_create(
+        sheet, created = Sheet.objects.update_or_create(
             img = current_img,
-            year = current_img.year,
             jbid = request.user,
-            form_type = form['form_type'],
-            breaker = CurrentEntry.objects.get(jbid=request.user).breaker,
-            num_records = form['num_records'],
-            problem = is_problem
+            year = current_img.year,
+           defaults = {
+                'form_type': form['form_type'],
+                'breaker': CurrentEntry.objects.get(jbid=request.user).breaker,
+                'num_records': form['num_records'],
+                'problem': is_problem
+                }
         )
-        logger.info(f'submit_sheet get_or_create() returned {created}')
+        logger.info(f'submit_sheet update_or_create() returned {created}')
 
         # next update CurrentEntry
         current = CurrentEntry.objects.get(jbid=request.user)
