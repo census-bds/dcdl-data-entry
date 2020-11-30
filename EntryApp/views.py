@@ -278,15 +278,11 @@ def enter_records(request):
     current = CurrentEntry.objects.get(jbid=request.user)
     num_records = current.sheet.num_records
 
-    # to do: implement this as a lookup based on curent year and form
-    record_fields = [
-        'row_num',
-        'first_name',
-        'middle_init',
-        'last_name',
-        'age',
-        'sex'
-    ]
+    # this query would fail if sheet is None but that shouldn't happen
+    field_query = FormField.objects.filter(year=current.img.year).filter(form_type=current.sheet.form_type)
+    logger.info(f'FormField query length was {len(field_query)}') 
+    record_fields = [f.field_name for f in list(field_query)]
+    logger.info(f'form records fields are {record_fields}')
 
     RecordFormSet = modelformset_factory(Record, fields=record_fields, extra=num_records, formset=BaseRecordFormSet)
     
@@ -307,7 +303,7 @@ def enter_records(request):
                 else:
                     logger.info(f'{record} updated.')
                     
-            return render(request, reverse('EntryApp:index'))
+            return redirect(reverse('EntryApp:index'))
         
     else:
         formset = RecordFormSet(queryset=Record.objects.none)

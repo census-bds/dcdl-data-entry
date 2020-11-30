@@ -1,7 +1,7 @@
 """
 Module for generating fake data for the models
 """
-from EntryApp import models
+from EntryApp.models import Image, Breaker, Sheet, OtherImage, Record, FormField
 
 
 def generate_n_Images(n, users, fake_suffix = ''):
@@ -22,7 +22,7 @@ def generate_n_Images(n, users, fake_suffix = ''):
         for f in fake_paths:
 
             if first:
-                img = models.Image(img_path=f, \
+                img = Image(img_path=f, \
                                     jbid=u, \
                                     year=1970, \
                                     image_type='breaker', \
@@ -31,7 +31,7 @@ def generate_n_Images(n, users, fake_suffix = ''):
                 first = False
 
             else:
-                img = models.Image(img_path=f, \
+                img = Image(img_path=f, \
                                     jbid=u, \
                                     is_complete=False, \
                                     year=None, 
@@ -40,25 +40,19 @@ def generate_n_Images(n, users, fake_suffix = ''):
             img.save()
 
 
-def delete_fake_Image(img_list = ''):
+def delete_data(model):
     """
-    Delete the fake images from DB 
-    Default is to delete all
+    Delete data from a model
 
     Takes: 
-    - optional list of img file paths
+    - model object
     Returns:
     - None
     """
 
-    if img_list:
-        images = [models.Image.filter(img_file_path=i) for i in img_list]
-
-    else:
-        img_list = models.Image.objects.all()
-    
-    for img in img_list:
-        img.delete()
+    data = model.objects.all()
+    for d in data:
+        d.delete()
 
 
 def populate_models(users=['jbid123', 'jbid456']):
@@ -69,8 +63,8 @@ def populate_models(users=['jbid123', 'jbid456']):
     generate_n_Images(10, users)
 
     for u in users:
-        first_img = models.Image.objects.filter(jbid=u)[0]
-        b = models.Breaker(img=first_img, jbid=u)
+        first_img = Image.objects.filter(jbid=u)[0]
+        b = Breaker(img=first_img, jbid=u)
         b.save()
 
 
@@ -79,7 +73,7 @@ def refresh_db():
     Refresh the database so Images aren't complete and other tables are empty
     '''
 
-    for m in [models.Record, models.Sheet, models.Breaker, models.Image]:
+    for m in [Record, Sheet, Breaker, Image]:
         rows = m.objects.all()
         for r in rows:
             r.delete()

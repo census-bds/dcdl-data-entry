@@ -144,9 +144,11 @@ class Record(models.Model):
     A sheet image contains 1+ records
     """
 
-    # required link to the image 
+    # required to uniquely identify the record  
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE)
-    row_num = models.PositiveSmallIntegerField(verbose_name='Row number') # this is row (or col)
+    page_num = models.PositiveSmallIntegerField(verbose_name='Page number', null=True)
+    row_num = models.PositiveSmallIntegerField(verbose_name='Row number', null=True) 
+    col_num = models.PositiveSmallIntegerField(verbose_name='Column number', null=True)
     jbid = models.CharField(max_length=7) # change to non-null
 
     # fields common among all year-forms
@@ -166,8 +168,13 @@ class Record(models.Model):
     relp = models.CharField(max_length=50, null=True)
     ind = models.CharField(max_length=50, null=True)
     occp = models.CharField(max_length=50, null=True)
+    hhincome = models.CharField(max_length=50, null=True)
+    educ = models.CharField(max_length=50, null=True)
+    citizenship = models.CharField(max_length=50, null=True)
+    ancestry = models.CharField(max_length=50, null=True)
     birth_year = models.PositiveIntegerField(null=True)
     birth_month = models.CharField(max_length=15, null=True)
+    birth_quarter = models.CharField(max_length=15, null=True)
     total_persons = models.PositiveIntegerField(null=True)
 
     # entry info
@@ -220,10 +227,8 @@ class FormField(models.Model):
     look up which fields to serve the user when they are entering data
     """
 
-    year = models.PositiveIntegerField()
-    image_type = models.CharField(max_length=8, null=True, choices = IMAGE_TYPE_CHOICES)
+    year = models.FloatField()
     form_type = models.CharField(max_length=200, choices=FORM_CHOICES)     
-
     field_name = models.CharField(max_length=50)
 
 
