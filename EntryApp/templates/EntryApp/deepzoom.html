@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="">
+    </head>
+    <body>
+        Deepzoom test site
+        <br>
+        <!-- <div id="img_test">
+            {% load static %}
+            <img src = "{% static deepzoom_obj.slug %}">
+        </div> -->
+        {% get_media_prefix as MEDIA_PREFIX %}
+        media prefix is {{ MEDIA_PREFIX }}
+        {% load deepzoom_tags %}
+        <div id="deepzoom_div"></div>
+        <script>{% deepzoom_js deepzoom_obj "deepzoom_div" %}</script>
+    </body>
+</html>

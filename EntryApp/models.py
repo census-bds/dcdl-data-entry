@@ -8,6 +8,7 @@ TO DO:
 
 from django.db import models
 from django.urls import reverse
+from deepzoom.models import DeepZoom, UploadedImage
 
 #=====================================================#
 # CHOICES (BETTER TO DO THIS AS A CONFIG FILE MAYBE)
@@ -263,3 +264,17 @@ class Entry(models.Model):
     jbid = models.CharField(max_length=8)
     submit_time = models.DateTimeField()
     app_version = models.DecimalField(max_digits=4, decimal_places=1)
+
+#=====================================================#
+# MODEL FOR IMAGE VIEWER
+#=====================================================#
+
+class ImageScan(UploadedImage):
+    '''
+    Overrides UploadedImage base class for scanned images
+    '''
+
+    img = models.ForeignKey(Image, on_delete=models.CASCADE)
+
+
+import deepzoom.signals

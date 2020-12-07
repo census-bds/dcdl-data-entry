@@ -43,6 +43,11 @@ LOGGING = {
             'handlers': ['console'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': False,
+        },
+        'deepzoom.models': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
         }
     }
 }
@@ -61,6 +66,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'deepzoom.apps.DeepZoomAppConfig'
 ]
 
 MIDDLEWARE = [
@@ -84,6 +90,7 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                'django.template.context_processors.media',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -137,10 +144,28 @@ USE_L10N = True
 
 USE_TZ = True
 
+# 
+LOGIN_REDIRECT_URL = '/EntryApp/'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = 'Z:/1950-1980 censuses/cecile_dev/dcdl/EntryApp/static/EntryApp/'
 
-LOGIN_REDIRECT_URL = '/EntryApp/'
+MEDIA_ROOT = 'Z:/1950-1980 censuses/cecile_dev/dcdl/deepzoom_images'
+MEDIA_URL = '/deepzoom_images/' # don't know if this is right
+
+# STATICFILES_DIRS = (
+#     os.path.abspath(os.path.join(TEST_ROOT, 'static')), 
+# )
+
+
+# deepzoom params
+DEEPZOOM_PARAMS = {
+        'tile_size': 256,
+        'tile_overlap': 1,
+        'tile_format': "jpg",
+        'image_quality': 0.85,
+        'resize_filter': "antialias"
+    }
