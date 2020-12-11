@@ -20,8 +20,8 @@
             <img src = "{% static deepzoom_obj.slug %}">
         </div> -->
         {% get_media_prefix as MEDIA_PREFIX %}
-        media prefix is {{ MEDIA_PREFIX }}
-        {% load deepzoom_tags %}
+        deepzoom_obj is {{ deepzoom_obj }}
+        {% load deepzoom_js_custom %}
         <div id="deepzoom_div"></div>
         <script>{% deepzoom_js deepzoom_obj "deepzoom_div" %}</script>
     </body>

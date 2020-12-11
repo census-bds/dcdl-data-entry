@@ -16,7 +16,7 @@ from django.forms import modelformset_factory
 from django.contrib.auth.models import Permission, User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.template import RequestContext
+from django.template import RequestContext, loader
 
 
 from djqscsv import render_to_csv_response
@@ -362,12 +362,12 @@ def export_records(request):
 def deepzoom_view(request, passed_slug=None):
     try:
         _deepzoom_obj = DeepZoom.objects.get(slug=passed_slug)
-        logger.info(f'deepzoom view: \n\t {_deepzoom_obj}')
-        logger.info(f'deepzoom image: \n\t {_deepzoom_obj.deepzoom_image}')
+        logger.info(f'deepzoom object: \n\t {_deepzoom_obj}')
+        logger.info(f'deepzoom object image: \n\t {_deepzoom_obj.deepzoom_image}')
     except DeepZoom.DoesNotExist:
         raise Http404
     return render(
                 request,
                 'EntryApp/deepzoom.html',
-                 context = RequestContext({'deepzoom_obj': _deepzoom_obj}).flatten(), # something is up with this
+                 context = {'deepzoom_obj': _deepzoom_obj}, 
                 )

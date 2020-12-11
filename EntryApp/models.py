@@ -54,7 +54,7 @@ class Image(models.Model):
     image_type = models.CharField(max_length=8, null=True, choices = IMAGE_TYPE_CHOICES)
     
     # metadata
-    is_complete = models.BooleanField(null=True)
+    is_complete = models.BooleanField(null=True) # need a validation constraint here
     date_complete = models.DateTimeField(null=True)
     problem = models.BooleanField(default=False)
 
@@ -92,16 +92,8 @@ class Breaker(models.Model):
     smsa = models.CharField(max_length=30, null=True)
     
 
-
     def __str__(self):
         return f'Breaker {self.img} from {self.jbid}'
-
-    @classmethod
-    def get_related_sheets(cls):
-        """
-        Return list of Sheets associated with this instance of breaker
-        """
-        return Sheet.objects.filter(breaker=cls)
 
 
 class Sheet(models.Model):
@@ -130,13 +122,6 @@ class Sheet(models.Model):
 
     def __str__(self):
         return f'{self.img}: {self.form_type}' # FIX THIS
-
-    @classmethod
-    def list_records(cls):
-        """
-        List records associated with this sheet image
-        """
-        return Record.objects.filter(sheet=cls)
 
 
 class OtherImage(models.Model):
