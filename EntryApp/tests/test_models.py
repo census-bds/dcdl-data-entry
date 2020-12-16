@@ -16,9 +16,6 @@ class TestImageModel(TestCase):
                             image_type='sheet', \
                             is_complete=False)
 
-    def setUp(self):
-        pass
-
     def test_uniqueness(self):
         # test that we can't enter an img_path/jbid combo more than once
         dup_img = Image(img_path='test_img.png', \
@@ -42,9 +39,6 @@ class TestBreakerModel(TestCase):
         Breaker.objects.create(breaker_img, \
                             jbid='ajbid000')
 
-    def setUp(self):
-        pass
-
     def test_uniqueness(self):
         # test that we can't enter an img_path/jbid combo more than once
         breaker_img = Image(img_path='test_img.png', \
@@ -67,9 +61,6 @@ class TestSheetModel(TestCase):
                             image_type='breaker')
         Breaker.objects.create(breaker_img, \
                             jbid='ajbid000')
-
-    def setUp(self):
-        pass
 
     def test_uniqueness(self):
         # test that we can't enter an img_path/jbid combo more than once

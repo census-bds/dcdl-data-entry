@@ -19,10 +19,29 @@
             {% load static %}
             <img src = "{% static deepzoom_obj.slug %}">
         </div> -->
-        {% get_media_prefix as MEDIA_PREFIX %}
+        <!-- {% get_media_prefix as MEDIA_PREFIX %} -->
         deepzoom_obj is {{ deepzoom_obj }}
-        {% load deepzoom_js_custom %}
-        <div id="deepzoom_div"></div>
-        <script>{% deepzoom_js deepzoom_obj "deepzoom_div" %}</script>
+        <!-- {% load deepzoom_js_custom %} -->
+        <div id="deepzoom_div" class="openseadragon" style="width: 800px; height: 600px;"></div>
+        <!-- {% deepzoom_js deepzoom_obj "deepzoom_div" %} -->
+        {% load static %}{% get_static_prefix as STATIC_PREFIX %}{% get_media_prefix as MEDIA_PREFIX %}
+        media prefix is {{ MEDIA_PREFIX }}
+        <!-- <script src="{{ STATIC_PREFIX }}deepzoom/js/vendor/openseadragon/openseadragon.min.js"></script> -->
+        <script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
+        <script>
+        //django-deepzoom by David J Cox
+        //
+        //Create and initialize deepzoom viewer.
+        var viewer = OpenSeadragon({
+            id: "deepzoom_div",
+            prefixUrl: "/static/deepzoom/js/vendor/openseadragon/images/",
+            // tileSources: "/deepzoom_images/deepzoom_images/{{ deepzoom_obj.slug }}/{{ deepzoom_obj.deepzoom_image|safe }}",
+            tileSources: {
+                type: 'image',
+                 url: "/static/EntryApp/{{ deepzoom_obj.slug }}.jpg"},
+            navigationControlAnchor: OpenSeadragon.ControlAnchor.BOTTOM_RIGHT,
+            zoomPerClick: 1.6
+        });
+        </script>
     </body>
 </html>

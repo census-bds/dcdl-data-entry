@@ -153,12 +153,12 @@ LOGIN_REDIRECT_URL = '/EntryApp/'
 STATIC_URL = '/static/'
 STATIC_ROOT = 'Z:/1950-1980 censuses/cecile_dev/dcdl/EntryApp/static/EntryApp/'
 
-MEDIA_ROOT = 'Z:/1950-1980 censuses/cecile_dev/dcdl/deepzoom_images'
 MEDIA_URL = '/deepzoom_images/' # don't know if this is right
+MEDIA_ROOT = 'Z:/1950-1980 censuses/cecile_dev/dcdl/deepzoom_images'
 
-# STATICFILES_DIRS = (
-#     os.path.abspath(os.path.join(TEST_ROOT, 'static')), 
-# )
+STATICFILES_DIRS = (
+    os.path.abspath(MEDIA_ROOT), 
+)
 
 
 # deepzoom params

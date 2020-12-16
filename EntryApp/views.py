@@ -54,7 +54,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
 class BeginNewImageView(LoginRequiredMixin, FormView):
     
     form_class = ImageForm
-    template_name = 'EntryApp/begin-new-image'
+    template_name = 'EntryApp/begin-new-image.html'
 
     def get(self, request):
 
@@ -65,14 +65,14 @@ class BeginNewImageView(LoginRequiredMixin, FormView):
             'image': CurrentEntry.objects.get(jbid=request.user).img,
             'form': self.form_class()
         }
-        return render(request, 'EntryApp/begin-new-image.html', context)
+        return render(request, self.template_name, context)
 
 
-@login_required
 def seed_current_entry(request):
     '''
+    Helper function for BeginNewImageView
     Put dummy data into current entry table
-    I think I only need this once for each user...
+    I think I only need this once for each user... or fixtures make this irrelevant
     ''' 
     if CurrentEntry.objects.filter(jbid=request.user):
         return 
@@ -89,10 +89,10 @@ def seed_current_entry(request):
         current.save()
 
 
-@login_required
 def get_next_image(request):
     '''
-    Look up next image for user to enter
+    Helper function for BeginNewImageView
+    Look up next image for user to enter and put it in CurrentEntry
     '''
 
     # refine this, probably
@@ -262,19 +262,19 @@ def submit_sheet(request):
 # RECORD 
 #=====================================================#
 
-class EnterSheetData(LoginRequiredMixin, FormView):
+# class EnterSheetData(LoginRequiredMixin, FormView):
     
-    form_class = SheetForm
-    template_name = 'EntryApp/enter-sheet-data.html'
+#     form_class = SheetForm
+#     template_name = 'EntryApp/enter-sheet-data.html'
 
-    def get(self, request):
+#     def get(self, request):
 
-        logger.info(f'EnterSheet get request')
-        context = {
-            'breaker': CurrentEntry.objects.get(jbid=request.user).breaker,
-            'form': self.form_class()
-        }
-        return render(request, self.template_name, context)
+#         logger.info(f'EnterSheet get request')
+#         context = {
+#             'breaker': CurrentEntry.objects.get(jbid=request.user).breaker,
+#             'form': self.form_class()
+#         }
+#         return render(request, self.template_name, context)
 
 
 @login_required
@@ -364,6 +364,8 @@ def deepzoom_view(request, passed_slug=None):
         _deepzoom_obj = DeepZoom.objects.get(slug=passed_slug)
         logger.info(f'deepzoom object: \n\t {_deepzoom_obj}')
         logger.info(f'deepzoom object image: \n\t {_deepzoom_obj.deepzoom_image}')
+        _deepzoom_obj.deepzoom_image =  f'uploaded_images/{passed_slug}.jpg'
+        logger.info(f'deepzoom object image, adjusted: \n\t {_deepzoom_obj.deepzoom_image}')
     except DeepZoom.DoesNotExist:
         raise Http404
     return render(

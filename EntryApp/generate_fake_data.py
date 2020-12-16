@@ -80,13 +80,3 @@ def refresh_db():
 
     populate_models() 
 
-    
-#================================#
-# GENERATE FIXTURE IN JSON
-#================================#
-
-def generate_image_json():
-    '''
-    Generate image records in JSON for use as fixture for testing
-    '''
-    pass
