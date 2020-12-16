@@ -1,31 +1,17 @@
-<!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>DCDL Data Entry: Index</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="">
-    </head>
-    <body>
-     <!--[if lt IE 7]>
-            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
-        <![endif]-->
-        {% if latest_image_list %}
-            <ul>
-            {% for image in latest_image_list %}
-                <li>{{ image.img_path }}</li>
-            {% endfor %}
-            </ul>
-        {% else %}
-            <p>No images are available.</p>
-        {% endif %}
-        <form action={% url 'EntryApp:begin_new_image' %} method="get">
+{% extends "base.html" %}
+
+{% block content %}
+    <p>Images available for {{ user }}:</p>
+    {% if latest_image_list %}
+        <ul>
+        {% for image in latest_image_list %}
+            <li>{{ image.img_path }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No images are available.</p>
+    {% endif %}
+    <form action={% url 'EntryApp:begin_new_image' %} method="get">
           {% csrf_token %}
           <input type="submit" value="New image">
       </form>
@@ -34,6 +20,5 @@
             {% csrf_token %}
     <input type="submit" value="Export records">
     </form>
-  </body>
-</html>
+{% endblock content %}
 

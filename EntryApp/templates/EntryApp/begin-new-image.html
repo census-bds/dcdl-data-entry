@@ -1,34 +1,27 @@
-<!DOCTYPE html>
-<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
-<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
-<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
-<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Begin new image</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="">
-    </head>
-    <body>
-        <!--[if lt IE 7]>
-            <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="#">upgrade your browser</a> to improve your experience.</p>
-        <![endif]-->
-        <p>
-            Please open this file:
-        </p>
-        <p>
-            {{ image.img_path }}
-        </p>
-        <p>
-            Enter the image year and whether it is a breaker or a sheet with records:
-        </p> 
-        <form method="POST" action={% url 'EntryApp:submit_image' %}>
-            {% csrf_token %}
-            {{ form.as_p }}
-            <input type="submit" value="Save">
-        </form>
-    </body>
-</html>
+{% extends "base.html" %}
+
+{% block header %}
+<p>Enter the image year and whether it is a breaker or a sheet with records:</p> 
+{% endblock header %}
+{% block content %}
+    <form method="POST" action={% url 'EntryApp:submit_image' %}>
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="submit" value="Save">
+    </form>
+    <br>
+    <div id="openseadragon1" style="width: 800px; height: 600px;"></div>
+    <script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
+   <script type="text/javascript">
+        var Viewer = OpenSeadragon({
+            id: "openseadragon1",
+            prefixUrl: "/static/deepzoom/js/vendor/openseadragon/images/",
+            tileSources: {
+                type: 'image',
+                url: "/deepzoom_images/uploaded_images/{{ slug }}"
+            },
+            buildPyramid: false
+        });
+    </script>
+{% endblock content %}
+

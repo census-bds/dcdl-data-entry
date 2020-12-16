@@ -151,14 +151,14 @@ LOGIN_REDIRECT_URL = '/EntryApp/'
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = 'Z:/1950-1980 censuses/cecile_dev/dcdl/EntryApp/static/EntryApp/'
+STATIC_ROOT = 'Z:/1950-1980 censuses/cecile_dev/dcdl/static'
 
 MEDIA_URL = '/deepzoom_images/' # don't know if this is right
 MEDIA_ROOT = 'Z:/1950-1980 censuses/cecile_dev/dcdl/deepzoom_images'
 
-STATICFILES_DIRS = (
-    os.path.abspath(MEDIA_ROOT), 
-)
+# STATICFILES_DIRS = (
+#     os.path.abspath(MEDIA_ROOT), 
+# )
 
 
 # deepzoom params

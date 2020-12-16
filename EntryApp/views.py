@@ -2,7 +2,8 @@
 VIEWS FOR DCDL DATA ENTRY
 
 TO DO:
--a lot
+-convert to fully class-based views
+-integrate openseadragon info into views
 """
 import csv
 import datetime
@@ -61,9 +62,11 @@ class BeginNewImageView(LoginRequiredMixin, FormView):
         seed_current_entry(request) # this ensures there's a value in CurrentEntry
         get_next_image(request) # this loads the next image into CurrentEntry
 
+        img = CurrentEntry.objects.get(jbid=request.user).img
         context = {
-            'image': CurrentEntry.objects.get(jbid=request.user).img,
-            'form': self.form_class()
+            'image': img,
+            'form': self.form_class(),
+            'slug': img.img_path + '.jpeg' # DEV!!! FOR PUPPY IMAGE 
         }
         return render(request, self.template_name, context)
 
