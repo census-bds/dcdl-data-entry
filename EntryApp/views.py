@@ -19,9 +19,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.template import RequestContext, loader
 
-
 from djqscsv import render_to_csv_response
-from deepzoom.models import DeepZoom
 
 from EntryApp.models import Breaker, Image, Sheet, CurrentEntry, Record, FormField
 from EntryApp.forms import ImageForm, SheetForm, BreakerForm, BaseRecordFormSet, ExportForm
@@ -66,7 +64,7 @@ class BeginNewImageView(LoginRequiredMixin, FormView):
         context = {
             'image': img,
             'form': self.form_class(),
-            'slug': img.img_path + '.jpeg' # DEV!!! FOR PUPPY IMAGE 
+            'slug': img.img_path + '.jpg' 
         }
         return render(request, self.template_name, context)
 
@@ -164,8 +162,8 @@ class EnterBreakerData(LoginRequiredMixin, FormView):
     def get(self, request):
         logger.info(f'breaker request is {request}')
         context = {
-            'breaker_img_path': CurrentEntry.objects.get(jbid=request.user).img.img_path,
-            'form': self.form_class()
+            'breaker_img_path': CurrentEntry.objects.get(jbid=request.user).img.img_path + '.jpg',
+            'form': self.form_class(),
         }
         return render(request, self.template_name, context)
 
@@ -213,9 +211,11 @@ class EnterSheetData(LoginRequiredMixin, FormView):
     def get(self, request):
 
         logger.info(f'EnterSheet get request')
+        current = CurrentEntry.objects.get(jbid=request.user)
         context = {
-            'breaker': CurrentEntry.objects.get(jbid=request.user).breaker,
-            'form': self.form_class()
+            'breaker': current.breaker,
+            'form': self.form_class(),
+            'slug': current.img.img_path + '.jpg' 
         }
         return render(request, self.template_name, context)
 
@@ -265,21 +265,6 @@ def submit_sheet(request):
 # RECORD 
 #=====================================================#
 
-# class EnterSheetData(LoginRequiredMixin, FormView):
-    
-#     form_class = SheetForm
-#     template_name = 'EntryApp/enter-sheet-data.html'
-
-#     def get(self, request):
-
-#         logger.info(f'EnterSheet get request')
-#         context = {
-#             'breaker': CurrentEntry.objects.get(jbid=request.user).breaker,
-#             'form': self.form_class()
-#         }
-#         return render(request, self.template_name, context)
-
-
 @login_required
 def enter_records(request):
     '''
@@ -291,6 +276,7 @@ def enter_records(request):
     num_records = current.sheet.num_records
 
     # this query would fail if sheet is None but that shouldn't happen
+    logger.info(f'FormField: year of current entry is {current.img.year}')
     field_query = FormField.objects.filter(year=current.img.year).filter(form_type=current.sheet.form_type)
     logger.info(f'FormField query length was {len(field_query)}') 
     record_fields = [f.field_name for f in list(field_query)]
@@ -320,7 +306,11 @@ def enter_records(request):
     else:
         formset = RecordFormSet(queryset=Record.objects.none)
     
-    return render(request, 'EntryApp/enter-records.html', {'formset': formset})
+    context = {
+        'formset': formset,
+        'slug': current.img.img_path + '.jpg'
+    }
+    return render(request, 'EntryApp/enter-records.html', context)
 
 
 #================================#
@@ -357,22 +347,3 @@ def export_records(request):
     
     records = chosen_model.objects.all().values()
     return render_to_csv_response(records)
-
-#================================#
-# DEEP ZOOM
-#================================#
-
-def deepzoom_view(request, passed_slug=None):
-    try:
-        _deepzoom_obj = DeepZoom.objects.get(slug=passed_slug)
-        logger.info(f'deepzoom object: \n\t {_deepzoom_obj}')
-        logger.info(f'deepzoom object image: \n\t {_deepzoom_obj.deepzoom_image}')
-        _deepzoom_obj.deepzoom_image =  f'uploaded_images/{passed_slug}.jpg'
-        logger.info(f'deepzoom object image, adjusted: \n\t {_deepzoom_obj.deepzoom_image}')
-    except DeepZoom.DoesNotExist:
-        raise Http404
-    return render(
-                request,
-                'EntryApp/deepzoom.html',
-                 context = {'deepzoom_obj': _deepzoom_obj}, 
-                )

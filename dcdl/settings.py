@@ -44,11 +44,6 @@ LOGGING = {
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': False,
         },
-        'deepzoom.models': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': True,
-        }
     }
 }
 
@@ -66,7 +61,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'deepzoom.apps.DeepZoomAppConfig'
+    'deepzoom.apps.DeepZoomAppConfig' #I'd like to get rid of this but it's throwing an error when I do
 ]
 
 MIDDLEWARE = [
@@ -153,19 +148,9 @@ LOGIN_REDIRECT_URL = '/EntryApp/'
 STATIC_URL = '/static/'
 STATIC_ROOT = 'Z:/1950-1980 censuses/cecile_dev/dcdl/static'
 
-MEDIA_URL = '/deepzoom_images/' # don't know if this is right
-MEDIA_ROOT = 'Z:/1950-1980 censuses/cecile_dev/dcdl/deepzoom_images'
+MEDIA_URL = '/images/' # this is the thing to change
+MEDIA_ROOT = 'Z:/1950-1980 censuses/cecile_dev/dcdl/images'
 
 # STATICFILES_DIRS = (
 #     os.path.abspath(MEDIA_ROOT), 
 # )
-
-
-# deepzoom params
-DEEPZOOM_PARAMS = {
-        'tile_size': 256,
-        'tile_overlap': 1,
-        'tile_format': "jpg",
-        'image_quality': 0.85,
-        'resize_filter': "antialias"
-    }

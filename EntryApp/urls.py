@@ -14,5 +14,4 @@ urlpatterns = [
     path('enter-records/', views.enter_records, name='enter_records'),
     path('select-record-export/', views.SelectExportFormView.as_view(), name='select_records'),
     path('export-records/', views.export_records, name='export_records'),
-    path('deepzoom/<slug:passed_slug>', views.deepzoom_view, name='v_deepzoom'),
 ] 

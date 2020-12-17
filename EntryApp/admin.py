@@ -1,6 +1,5 @@
 from django.contrib import admin
 
-from .models import Conflict, ImageScan
+from .models import Image
 
-admin.site.register(Conflict)
-admin.site.register(ImageScan)
+admin.site.register(Image)
