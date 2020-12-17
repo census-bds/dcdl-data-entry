@@ -26,7 +26,7 @@ class ImageForm(forms.ModelForm):
         model = Image
         fields = ['year', 'image_type']
     
-    def form_valid(self):
+    def form_valid(self, form):
         return True
 
 

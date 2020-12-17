@@ -128,9 +128,10 @@ def get_next_image(request):
 def submit_image(request):
     '''
     View to submit image data from the ImageForm
+    This view has no template: it just submits and redirects
     '''
     form = request.POST
-    logger.info(form)
+    logger.info(f'submit_image view got form {form}')
 
     try:
         current = CurrentEntry.objects.get(jbid=request.user)
@@ -139,7 +140,7 @@ def submit_image(request):
             jbid = request.user,
             defaults = {'year': form['year'],
             'image_type': form['image_type'].lower(),
-            'is_complete': True
+            'is_complete': False # FOR DEV!!
             }
         )
         logger.info(f'submit_image POST current value is {image}')

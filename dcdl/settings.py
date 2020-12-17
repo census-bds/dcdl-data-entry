@@ -151,6 +151,7 @@ STATIC_ROOT = 'Z:/1950-1980 censuses/cecile_dev/dcdl/static'
 MEDIA_URL = '/images/' # this is the thing to change
 MEDIA_ROOT = 'Z:/1950-1980 censuses/cecile_dev/dcdl/images'
 
-# STATICFILES_DIRS = (
-#     os.path.abspath(MEDIA_ROOT), 
-# )
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, 'boot'), 
+    os.path.join(BASE_DIR, 'static'), 
+)

@@ -73,6 +73,9 @@ class BeginNewImageTests(TestCase):
         response = self.client.get(reverse('EntryApp:begin_new_image'))
         self.assertEqual(response.context['form'].fields['image_type'].label, 'Image type') 
 
+
+class SubmitImageTests(TestCase):
+
     def test_image_form(self):
         ''' Test that the app can submit data for the image specified '''
         User = get_user_model()
@@ -82,7 +85,7 @@ class BeginNewImageTests(TestCase):
         f = {'year': 1960, 'image_type': 'breaker'}
         # f.fields['year'] = 1960
         # f.fields['image_type'] = 'breaker'
-        response = self.client.post(reverse('EntryApp:begin_new_image'), kwargs=f)
+        response = self.client.post(reverse('EntryApp:s'), kwargs=f)
         logger.info(f'test_image_form response is {response.content}')
         # self.assertEqual(response.status_code, 200)
         self.assertEqual(CurrentEntry.objects.get(jbid=TEMP_USERNAME).img.img_path, 'test_image.png')
