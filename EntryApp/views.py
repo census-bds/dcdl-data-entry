@@ -64,9 +64,29 @@ class BeginNewImageView(LoginRequiredMixin, FormView):
         context = {
             'image': img,
             'form': self.form_class(),
-            'slug': img.img_path + '.jpg' 
+            'slug': img.img_path 
         }
         return render(request, self.template_name, context)
+
+    def post(self, request):    
+        try:
+            form = request.POST
+            current = CurrentEntry.objects.get(jbid=request.user)
+            image, created = Image.objects.update_or_create(
+                img_path = current.img.img_path, 
+                jbid = request.user,
+                defaults = {'year': form['year'],
+                'image_type': form['image_type'].lower(),
+                'is_complete': True # FOR DEV!!
+                }
+            )
+            logger.info(f'submit_image POST current value is {image}')
+
+            return redirect(reverse(f'EntryApp:enter_{image.image_type}_data'))
+
+        except KeyError:
+            logger.info("KeyError in submit_image")
+            return render(request, 'EntryApp/begin-new-image.html')  
 
 
 def seed_current_entry(request):
@@ -80,14 +100,13 @@ def seed_current_entry(request):
     
     else:
         # these will be overwritten, I think, so values don't matter
+        logger.info(f'seed_current_entry inserting into CurrentEntry')
         an_image = Image.objects.all()[0]
-        a_breaker = Breaker.objects.all()[0]
-
-        current = CurrentEntry(jbid=request.user, \
-                                img=an_image, \
-                                breaker = a_breaker, \
-                                sheet = None)
-        current.save()
+        a_breaker = Breaker.objects.create(jbid=request.user, img=an_image) 
+        current = CurrentEntry.objects.create(jbid=request.user, \
+                                            img=an_image, \
+                                            breaker = a_breaker, \
+                                            sheet = None)
 
 
 def get_next_image(request):
@@ -103,53 +122,13 @@ def get_next_image(request):
 
         if new_image:
             current = CurrentEntry.objects.get(jbid=request.user)
-
-            # # if there's nothing in current entry, insert image and empty breaker
-            # if not current:
-            #     current = CurrentEntry(
-            #         img = new_image, \
-            #         jbid = request.user, \
-            #         breaker = Breaker(img = None), \
-            #         sheet = None
-            #     )
-            #     current.save()
-
-            # # otherwise we just update the image we're on
-            # else:
             current.img = new_image
             current.save()
-
+            
     except Exception as e:
         print(e)
         raise Http404("get_next_image might not have found images to enter.")
 
-
-@login_required    
-def submit_image(request):
-    '''
-    View to submit image data from the ImageForm
-    This view has no template: it just submits and redirects
-    '''
-    form = request.POST
-    logger.info(f'submit_image view got form {form}')
-
-    try:
-        current = CurrentEntry.objects.get(jbid=request.user)
-        image, created = Image.objects.update_or_create(
-            img_path = current.img.img_path, 
-            jbid = request.user,
-            defaults = {'year': form['year'],
-            'image_type': form['image_type'].lower(),
-            'is_complete': False # FOR DEV!!
-            }
-        )
-        logger.info(f'submit_image POST current value is {image}')
-
-        return redirect(reverse(f'EntryApp:enter_{image.image_type}_data'))
-
-    except KeyError:
-        logger.info("KeyError in submit_image")
-        return render(request, 'EntryApp/begin-new-image.html')    
 
 #=====================================================#
 # BREAKER
@@ -163,7 +142,7 @@ class EnterBreakerData(LoginRequiredMixin, FormView):
     def get(self, request):
         logger.info(f'breaker request is {request}')
         context = {
-            'breaker_img_path': CurrentEntry.objects.get(jbid=request.user).img.img_path + '.jpg',
+            'breaker_img_path': CurrentEntry.objects.get(jbid=request.user).img.img_path,
             'form': self.form_class(),
         }
         return render(request, self.template_name, context)
@@ -216,7 +195,7 @@ class EnterSheetData(LoginRequiredMixin, FormView):
         context = {
             'breaker': current.breaker,
             'form': self.form_class(),
-            'slug': current.img.img_path + '.jpg' 
+            'slug': current.img.img_path
         }
         return render(request, self.template_name, context)
 
@@ -309,7 +288,7 @@ def enter_records(request):
     
     context = {
         'formset': formset,
-        'slug': current.img.img_path + '.jpg'
+        'slug': current.img.img_path 
     }
     return render(request, 'EntryApp/enter-records.html', context)
 

@@ -4,7 +4,7 @@
 <p>Enter the image year and whether it is a breaker or a sheet with records:</p> 
 {% endblock header %}
 {% block content %}
-    <form method="POST" action={% url 'EntryApp:submit_image' %}>
+    <form method="POST" >
         {% csrf_token %}
         {{ form.as_p }}
         <input type="submit" value="Save">
@@ -25,3 +25,4 @@
     </script>
 {% endblock content %}
 
+<!-- action={% url 'EntryApp:submit_image' %} -->
