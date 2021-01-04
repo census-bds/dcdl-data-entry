@@ -74,7 +74,7 @@ def create_image_fixture(path, users, out, ext="*.jpg"):
                         'is_complete': False, 
                         'year': None, 
                         'image_type': None, 
-                        'date_complete': None
+                        'timestamp': None
                     }
                 })
             i+=1

@@ -77,7 +77,8 @@ class BeginNewImageView(LoginRequiredMixin, FormView):
                 jbid = request.user,
                 defaults = {'year': form['year'],
                 'image_type': form['image_type'].lower(),
-                'is_complete': True # FOR DEV!!
+                'is_complete': True,
+                'timestamp': datetime.datetime.now()
                 }
             )
             logger.info(f'submit_image POST current value is {image}')
@@ -164,7 +165,9 @@ def submit_breaker(request):
             jbid = request.user,
             defaults = {'year': current_img.year,
                         'state': form['state'],
-                        'county': form['county']}
+                        'county': form['county'],
+                        'timestamp': datetime.datetime.now()
+                        }
         )
         logger.info(f'submit_breaker update_or_create() returned {created}')
 
@@ -225,7 +228,8 @@ def submit_sheet(request):
                 'form_type': form['form_type'],
                 'breaker': CurrentEntry.objects.get(jbid=request.user).breaker,
                 'num_records': form['num_records'],
-                'problem': is_problem
+                'problem': is_problem,
+                'timestamp': datetime.datetime.now()
                 }
         )
         logger.info(f'submit_sheet update_or_create() returned {created}')
@@ -271,7 +275,7 @@ def enter_records(request):
         if formset.is_valid():
             for r in formset.cleaned_data:
                 r['sheet'] = current.sheet
-                r['entry_time'] = datetime.datetime.now()
+                r['timestamp'] = datetime.datetime.now()
                 r['jbid'] = request.user
                 logger.info(f'record value is {r}') 
                 record, created = Record.objects.get_or_create(**r)

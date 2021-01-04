@@ -54,7 +54,7 @@ class Image(models.Model):
     
     # metadata
     is_complete = models.BooleanField(null=True) # need a validation constraint here
-    date_complete = models.DateTimeField(null=True)
+    timestamp = models.DateTimeField(null=True)
     problem = models.BooleanField(default=False)
 
     class Meta:
@@ -79,10 +79,11 @@ class Breaker(models.Model):
     # required fields
     img = models.ForeignKey(Image, on_delete=models.CASCADE)
     jbid = models.CharField(max_length=7)
+    timestamp =  models.DateTimeField(null=True)
 
-    # TO DO: fix types and do validation
+    # TO DO: validation for states
     year = models.IntegerField(null=True, choices=YEAR_CHOICES)
-    state = models.CharField(max_length=2, null=True) # valid list of states
+    state = models.CharField(max_length=2, null=True)
     county = models.CharField(max_length=30, null=True)
     enum_dist = models.CharField(max_length=30, null=True)
     mcd = models.CharField(max_length=30, null=True)
@@ -112,6 +113,7 @@ class Sheet(models.Model):
     img = models.ForeignKey(Image, on_delete=models.CASCADE)
     breaker = models.ForeignKey(Breaker, on_delete=models.CASCADE)
     jbid = models.CharField(max_length=7) 
+    timestamp =  models.DateTimeField(null=True)
 
     year = models.IntegerField(null=True, choices=YEAR_CHOICES)
     form_type = models.CharField(max_length=200, choices=FORM_CHOICES)
@@ -139,6 +141,8 @@ class OtherImage(models.Model):
     jbid = models.CharField(max_length=7)
     year = models.PositiveIntegerField(choices=YEAR_CHOICES)
     description = models.TextField(max_length=500)
+    timestamp =  models.DateTimeField(null=True)
+
 
     def __str__(self):
         return f'{self.img}: OtherImage'
@@ -185,7 +189,7 @@ class Record(models.Model):
     total_persons = models.PositiveIntegerField(null=True)
 
     # entry info
-    entry_time = models.DateTimeField()
+    timestamp =  models.DateTimeField(null=True)
     is_illegible = models.BooleanField(blank=True, null=True)
 
 
@@ -210,22 +214,6 @@ class CurrentEntry(models.Model):
         return f'CurrentEntry breaker img is {self.breaker_img}'
 
 
-class Conflict(models.Model):
-    """
-    Class to track records that conflict after double-entry
-
-    Tracks the record id and (maybe?) which fields dont't match
-    """
-
-    # keys: record ID is actually a unique ID for a record (which links to image)
-    conflict_id = models.PositiveBigIntegerField(primary_key=True)
-    record_id = models.ForeignKey(Record, on_delete=models.CASCADE) 
-    conflict_fields = models.TextField()
-
-    def __str__(self):
-        return f'Conflict {self.conflict_id} on Record {self.record_id}'
-
-
 class FormField(models.Model):
     """
     Class to track form x field metadata, i.e. which fields are in which forms
@@ -240,14 +228,3 @@ class FormField(models.Model):
 
     def __str__(self):
         return f'FormField {self.year} {self.form_type}: {self.field_name}'
-
-
-class Entry(models.Model):
-    """
-    Class to track entry metadata (each time user clicks submit)
-    """
-
-    record_id = models.ForeignKey(Record, on_delete=models.CASCADE)
-    jbid = models.CharField(max_length=8)
-    submit_time = models.DateTimeField()
-    app_version = models.DecimalField(max_digits=4, decimal_places=1)
