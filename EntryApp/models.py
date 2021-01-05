@@ -204,7 +204,7 @@ class CurrentEntry(models.Model):
 
     img = models.ForeignKey(Image, on_delete=models.CASCADE)
     jbid = models.CharField(max_length=20, default='jbid000')
-    breaker = models.ForeignKey(Breaker, on_delete=models.CASCADE)
+    breaker = models.ForeignKey(Breaker, on_delete=models.SET_NULL, null=True)
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, null=True)
 
     def __str__(self):

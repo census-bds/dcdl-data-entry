@@ -108,6 +108,7 @@ def seed_current_entry(request):
                                             img=an_image, \
                                             breaker = a_breaker, \
                                             sheet = None)
+        a_breaker.delete()
 
 
 def get_next_image(request):
@@ -163,7 +164,8 @@ def submit_breaker(request):
         breaker, created = Breaker.objects.update_or_create(
             img = current_img,
             jbid = request.user,
-            defaults = {'year': current_img.year,
+            defaults = {
+                        'year': current_img.year,
                         'state': form['state'],
                         'county': form['county'],
                         'timestamp': datetime.datetime.now()
@@ -197,8 +199,8 @@ class EnterSheetData(LoginRequiredMixin, FormView):
         current = CurrentEntry.objects.get(jbid=request.user)
         context = {
             'breaker': current.breaker,
-            'form': self.form_class(),
-            'slug': current.img.img_path
+            'form': self.form_class(jbid=request.user, initial={'breaker_choice': current.breaker.pk}),
+            'slug': current.img.img_path,
         }
         return render(request, self.template_name, context)
 
@@ -216,17 +218,26 @@ def submit_sheet(request):
         # first save the data in Sheet 
         current_img = CurrentEntry.objects.get(jbid=request.user).img
 
-        is_problem = form['problem'] if 'problem' in form.keys() else False
+        # handle problem checkbox
+        is_problem = True if 'problem' in form.keys() else False
         if 'problem' in form.keys():
             logger.info(f"problem value is {form['problem']}")
         
+        # handle breaker change dropdown
+        associated_breaker = CurrentEntry.objects.get(jbid=request.user).breaker
+        form_breaker = Breaker.objects.get(pk=form['breaker_choice'])
+        if form_breaker != associated_breaker:
+            logger.info(f"user changed breaker assignment to {type(form['breaker_choice'])}")
+            associated_breaker = form_breaker
+
+        logger.info(f"associated breaker: {type(associated_breaker)}")
         sheet, created = Sheet.objects.update_or_create(
             img = current_img,
             jbid = request.user,
             year = current_img.year,
            defaults = {
                 'form_type': form['form_type'],
-                'breaker': CurrentEntry.objects.get(jbid=request.user).breaker,
+                'breaker': associated_breaker,
                 'num_records': form['num_records'],
                 'problem': is_problem,
                 'timestamp': datetime.datetime.now()
@@ -244,6 +255,7 @@ def submit_sheet(request):
     except KeyError:
         logger.warn("KeyError in submit_sheet post()")
         return render(request, reverse('EntryApp:enter_sheet_data'))
+    
 
 #=====================================================#
 # RECORD 
@@ -331,3 +343,8 @@ def export_records(request):
     
     records = chosen_model.objects.all().values()
     return render_to_csv_response(records)
+
+#================================#
+# PROBLEM VIEW: SHEET-BREAKER LINK
+#================================#
+

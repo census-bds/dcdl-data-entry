@@ -10,22 +10,22 @@
                     <li>Breaker state: {{breaker.state }}</li>
                     <li>Breaker county: {{ breaker.county }}</li>
                 </ul>
-                If this seems incorrect, please check the problem box below.
-                [TO DO: think through how system should guide user to correct the issue]
+                If this sheet should be associated with a different breaker for which you've already entered data, please select it below. If you don't see the correct breaker in the list, please check the problem box.
             </p>
         </div>
 {% endblock header %}
 {% block content %}
         <div id='sheetEntry'>
             <p>
-                Select which kind of sheet this is.
+                Select which kind of sheet this is and how many individual records it contains.
             </p>
             <form action={% url 'EntryApp:submit_sheet' %} method="POST">
                 {% csrf_token %}
-                {{ form }}
+                {{ form.as_p }}
                 <input type="submit" value="Submit">
             </form>    
         </div>
+    </br>
         <div id="openseadragon1" style="width: 800px; height: 600px;"></div>
         <script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
        <script type="text/javascript">

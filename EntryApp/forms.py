@@ -6,7 +6,7 @@ TO DO:
 """
 
 from django import forms 
-from EntryApp.models import Breaker, Image, Record, Sheet, FormField
+from EntryApp.models import Breaker, Image, Record, Sheet, FormField, CurrentEntry
 
 STATE_LIST = [
                 'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', \
@@ -47,11 +47,21 @@ class BreakerForm(forms.ModelForm):
 class SheetForm(forms.ModelForm):
     """
     Define form to enter sheet data (year and type)
+
+    Constructed using a jbid so possible breakers list can be populated
     """
     
     class Meta:
         model = Sheet
         fields = ['form_type', 'num_records', 'problem']
+
+    breaker_choice = forms.ChoiceField(label='Select a different breaker:')
+
+    def __init__(self, jbid, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        choices = [(b.pk, str(b.year)+ ' ' + b.county + ' ' + b.img.img_path) for b in Breaker.objects.filter(jbid=jbid)]
+        self.fields['breaker_choice'].choices = choices
+        self.fields['breaker_choice'].initial = CurrentEntry.objects.get(jbid=jbid).breaker
 
 
 class BaseRecordFormSet(forms.BaseModelFormSet):

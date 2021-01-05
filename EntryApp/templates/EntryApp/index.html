@@ -1,5 +1,7 @@
 {% extends "base.html" %}
-
+{% block header %}
+    <h2>Decennial Census Digitization and Data Linkage</h2>
+{% endblock header %}
 {% block content %}
     <p>Images available for {{ user }}:</p>
     {% if latest_image_list %}
