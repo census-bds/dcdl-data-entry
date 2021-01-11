@@ -34,7 +34,6 @@ class BreakerForm(forms.ModelForm):
     """
     Class defining form where breaker data are entered
 
-
     """
     class Meta:
         model = Breaker
@@ -72,6 +71,16 @@ class BaseRecordFormSet(forms.BaseModelFormSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.queryset = Record.objects.none()
+
+
+class BaseBreakerFormSet(forms.BaseModelFormSet):
+    '''
+    Subclass for BreakerFormSet so that it returns no existing data
+    '''
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.queryset = Breaker.objects.none()
 
 
 class ExportForm(forms.Form):

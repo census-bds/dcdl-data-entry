@@ -1,13 +1,24 @@
 {% extends "base.html" %}
 
 {% block header %}
+    <h2>Breaker data entry</h2>
         Enter breaker data here for {{ breaker_img_path }}
 {% endblock header %}
 {% block content %}
-        <form action={% url 'EntryApp:submit_breaker' %} method="post">
+<form method="post">
+    <table>
+        {% csrf_token %}
+        {{ formset }}
+    </table>
+    <input type="submit" value="Submit">
+</form>
+    <form method="post">
+        {{ formset.management_form }}
+        <table>
             {% csrf_token %}
-            {{ form }}
-            <input type="submit" value="Submit">
+            <!-- {{ formset }} -->
+        </table>
+            <!-- <input type="submit" value="Submit"> -->
         </form>
         <br>
         <div id="openseadragon1" style="width: 800px; height: 600px;"></div>

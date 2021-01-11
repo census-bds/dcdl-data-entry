@@ -85,7 +85,7 @@ class Breaker(models.Model):
     year = models.IntegerField(null=True, choices=YEAR_CHOICES)
     state = models.CharField(max_length=2, null=True)
     county = models.CharField(max_length=30, null=True)
-    enum_dist = models.CharField(max_length=30, null=True)
+    enumeration_district = models.CharField(max_length=30, null=True)
     mcd = models.CharField(max_length=30, null=True)
     tract = models.CharField(max_length=30, null=True)
     place = models.CharField(max_length=30, null=True)

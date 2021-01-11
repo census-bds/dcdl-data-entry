@@ -22,7 +22,7 @@ from django.template import RequestContext, loader
 from djqscsv import render_to_csv_response
 
 from EntryApp.models import Breaker, Image, Sheet, CurrentEntry, Record, FormField
-from EntryApp.forms import ImageForm, SheetForm, BreakerForm, BaseRecordFormSet, ExportForm
+from EntryApp.forms import ImageForm, SheetForm, BreakerForm, BaseRecordFormSet, BaseBreakerFormSet, ExportForm
 
 logger = logging.getLogger('EntryApp.views')
 
@@ -138,16 +138,61 @@ def get_next_image(request):
 
 class EnterBreakerData(LoginRequiredMixin, FormView):
 
-    form_class = BreakerForm
     template_name = 'EntryApp/enter-breaker-data.html'
     
     def get(self, request):
         logger.info(f'breaker request is {request}')
+
+        current = CurrentEntry.objects.get(jbid=request.user)
+
+        field_query = FormField.objects.filter(year=current.img.year).filter(form_type="breaker")
+        logger.info(f'FormField query length was {len(field_query)}') 
+        breaker_fields = [f.field_name for f in list(field_query)]
+
+        BreakerFormSet = modelformset_factory(Breaker, fields=breaker_fields,formset=BaseBreakerFormSet)
+        formset = BreakerFormSet(queryset=Breaker.objects.none)
+
         context = {
-            'breaker_img_path': CurrentEntry.objects.get(jbid=request.user).img.img_path,
-            'form': self.form_class(),
-        }
+            'breaker_img_path': current.img.img_path,
+            'formset': formset,
+        }    
         return render(request, self.template_name, context)
+
+    def post(self, request):
+        form = request.POST
+        logger.info(f'Breaker form is{form}')
+
+        current = CurrentEntry.objects.get(jbid=request.user)
+
+        field_query = FormField.objects.filter(year=current.img.year).filter(form_type="breaker")
+        logger.info(f'FormField query length was {len(field_query)}') 
+        breaker_fields = [f.field_name for f in list(field_query)]
+
+        BreakerFormSet = modelformset_factory(Breaker, fields=breaker_fields, formset=BaseBreakerFormSet)
+        formset = BreakerFormSet(request.POST, request.FILES)
+
+        logger.info(f'Breaker formset clean data should have length 1: {formset.cleaned_data}')
+
+        try:
+            b = formset.cleaned_data[0]
+            b['img'] = current.img
+            b['year'] = current.img.year
+            b['jbid'] = request.user
+            b['timestamp'] = datetime.datetime.now()
+            breaker, created = Breaker.objects.update_or_create(**b)
+            logger.info(f'submit_breaker update_or_create() returned {created}')
+
+            # next update CurrentEntry
+            current = CurrentEntry.objects.get(jbid=request.user)
+            current.breaker = breaker
+            current.save()
+
+            return redirect(reverse('EntryApp:index'))
+
+        except KeyError:
+            logger.warn("KeyError in submit_breaker post()")
+            return render(request, reverse('EntryApp:enter_breaker_data'))
+
 
 
 @login_required
@@ -155,34 +200,7 @@ def submit_breaker(request):
     '''
     View to submit breaker data
     '''
-    form = request.POST
-    logger.info(f'Breaker form is{form}')
     
-    try:
-        # first save the breaker data in Breaker
-        current_img = CurrentEntry.objects.get(jbid=request.user).img
-        breaker, created = Breaker.objects.update_or_create(
-            img = current_img,
-            jbid = request.user,
-            defaults = {
-                        'year': current_img.year,
-                        'state': form['state'],
-                        'county': form['county'],
-                        'timestamp': datetime.datetime.now()
-                        }
-        )
-        logger.info(f'submit_breaker update_or_create() returned {created}')
-
-        # next update CurrentEntry
-        current = CurrentEntry.objects.get(jbid=request.user)
-        current.breaker = breaker
-        current.save()
-
-        return redirect(reverse('EntryApp:index'))
-
-    except KeyError:
-        logger.warn("KeyError in submit_breaker post()")
-        return render(request, reverse('EntryApp:enter_breaker_data'))
     
 #=====================================================#
 # SHEET
@@ -213,6 +231,7 @@ def submit_sheet(request):
 
     form = request.POST 
     logger.info(f'submit_sheet form: {form}')
+
 
     try:
         # first save the data in Sheet 

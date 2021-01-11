@@ -43,6 +43,16 @@ def load_images(path, users, ext = ".jpg"):
     return
 
 
+def delete_table_data(tables):
+    '''
+    Deletes all rows in specified tables
+
+    Takes: list of tables
+    Returns: None
+    -
+    '''
+
+
 def create_image_fixture(path, users, out, ext="*.jpg"):
     '''
     Creates a JSON fixture to load for the image table
