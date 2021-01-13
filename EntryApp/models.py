@@ -82,7 +82,7 @@ class Breaker(models.Model):
     timestamp =  models.DateTimeField(null=True)
 
     # TO DO: validation for states
-    year = models.IntegerField(null=True, choices=YEAR_CHOICES)
+    year = models.IntegerField(null=True, choices=YEAR_CHOICES[:3]) # remove 1990 as option
     state = models.CharField(max_length=2, null=True)
     county = models.CharField(max_length=30, null=True)
     enumeration_district = models.CharField(max_length=30, null=True)

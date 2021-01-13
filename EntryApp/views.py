@@ -39,9 +39,11 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
         logger.info(f'user info:\n \t {request.user}')
         latest_image_list = Image.objects.filter(jbid=request.user)
+        user_complete_list = Image.objects.filter(jbid=request.user).filter(is_complete=True)
         context = {
             'user': request.user,
-            'latest_image_list': latest_image_list
+            'num_completed': len(user_complete_list), 
+            'num_images': len(latest_image_list),
             }
         return render(request, 'EntryApp/index.html', context)
 
@@ -194,14 +196,6 @@ class EnterBreakerData(LoginRequiredMixin, FormView):
             return render(request, reverse('EntryApp:enter_breaker_data'))
 
 
-
-@login_required
-def submit_breaker(request):
-    '''
-    View to submit breaker data
-    '''
-    
-    
 #=====================================================#
 # SHEET
 #=====================================================#
@@ -360,7 +354,7 @@ def export_records(request):
     
     chosen_model = ExportForm.tables[int(form['table_choice'])]['model']
     
-    records = chosen_model.objects.all().values()
+    records = chosen_model.objects.filter(jbid=request.user).values()
     return render_to_csv_response(records)
 
 #================================#
