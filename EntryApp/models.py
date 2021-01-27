@@ -3,14 +3,13 @@ MODELS FOR DCDL DATA ENTRY
 
 TO DO:
 -Validation (or do in forms?)
--Nulls and blanks: MAKE SURE SHEETS HAVE BREAKERS
 """
 
 from django.db import models
 from django.urls import reverse
 
 #=====================================================#
-# CHOICES (BETTER TO DO THIS AS A CONFIG FILE MAYBE)
+# CHOICES 
 #=====================================================#
 
 YEAR_CHOICES = [
@@ -49,13 +48,14 @@ class Image(models.Model):
     jbid = models.CharField(max_length=20, default='jbid000')
 
     # these values will be populated as entry proceeds
-    year = models.IntegerField(null=True, choices=YEAR_CHOICES)
+    year = models.IntegerField(null=True)
     image_type = models.CharField(max_length=8, null=True, choices = IMAGE_TYPE_CHOICES)
     
     # metadata
     is_complete = models.BooleanField(null=True) # need a validation constraint here
     timestamp = models.DateTimeField(null=True)
     problem = models.BooleanField(default=False)
+    prob_description = models.TextField(verbose_name="Please describe the problem.", null=True)
 
     class Meta:
         constraints = [
@@ -80,9 +80,11 @@ class Breaker(models.Model):
     img = models.ForeignKey(Image, on_delete=models.CASCADE)
     jbid = models.CharField(max_length=7)
     timestamp =  models.DateTimeField(null=True)
+    problem = models.BooleanField(default=False)
 
     # TO DO: validation for states
-    year = models.IntegerField(null=True, choices=YEAR_CHOICES[:3]) # remove 1990 as option
+    year = models.IntegerField(null=True, choices=YEAR_CHOICES[:3]) 
+    # ^ remove 1990 as option because that census did not include breakers
     state = models.CharField(max_length=2, null=True)
     county = models.CharField(max_length=30, null=True)
     enumeration_district = models.CharField(max_length=30, null=True)
@@ -113,11 +115,14 @@ class Sheet(models.Model):
     img = models.ForeignKey(Image, on_delete=models.CASCADE)
     breaker = models.ForeignKey(Breaker, on_delete=models.CASCADE)
     jbid = models.CharField(max_length=7) 
+
+    # auto-filled, not required
     timestamp =  models.DateTimeField(null=True)
-
     year = models.IntegerField(null=True, choices=YEAR_CHOICES)
-    form_type = models.CharField(max_length=200, choices=FORM_CHOICES)
+    problem = models.BooleanField(default=False)
 
+    # for entry
+    form_type = models.CharField(max_length=200, choices=FORM_CHOICES)
     num_records = models.PositiveIntegerField(verbose_name = 'Number of records', null=True)
     problem = models.BooleanField(default=False)
 
@@ -142,7 +147,7 @@ class OtherImage(models.Model):
     year = models.PositiveIntegerField(choices=YEAR_CHOICES)
     description = models.TextField(max_length=500)
     timestamp =  models.DateTimeField(null=True)
-
+    problem = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.img}: OtherImage'

@@ -1,16 +1,14 @@
 {% extends "base.html" %}
 
 {% block header %}
-<h2>Step 1: Image entry</h2>
-<p>Enter the image year and whether it is a breaker or a sheet with records:</p> 
+    <h2>Report a problem</h2>
 {% endblock header %}
 {% block content %}
-    <form method="POST" >
+    <div id="problem-form">
+        Please check the box below if the data entered [is bad]. Please use the text box to describe the issue.
         {% csrf_token %}
         {{ form.as_p }}
-        <input type="submit" value="Save">
-    </form>
-    <br>
+    </div>
     <div id="openseadragon1" style="width: 800px; height: 600px;"></div>
     <script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
    <script type="text/javascript">

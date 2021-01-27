@@ -8,6 +8,31 @@ TO DO:
 from django import forms 
 from EntryApp.models import Breaker, Image, Record, Sheet, FormField, CurrentEntry
 
+
+
+#=====================================================#
+# CHOICES 
+#=====================================================#
+
+YEAR_CHOICES = [
+    (1960, 1960),
+    (1970, 1970),
+    (1980, 1980),
+    (1990, 1990),
+]
+
+IMAGE_TYPE_CHOICES = [
+    ("breaker", "Breaker"),
+    ("sheet", "Sheet"),
+    ("other", "Other")
+]
+
+# TO DO: get names to match actual taxonomy - check w/Katie
+FORM_CHOICES = [
+    ('short', 'Short'),
+    ('long', 'Long')
+]
+
 STATE_LIST = [
                 'AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', \
                 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', \
@@ -16,16 +41,19 @@ STATE_LIST = [
                 'TX', 'UT',	'VT', 'VA',	'WA', 'WV',	'WI', 'WY'
             ]
 
+#================================#
+# FORMS FOR DATA ENTRY
+#================================#
 
-class ImageForm(forms.ModelForm):
+class ImageForm(forms.Form):
     """
     Form where user records the year and form type to which a sheet belongs 
     """
 
-    class Meta:
-        model = Image
-        fields = ['year', 'image_type']
-    
+    year = forms.MultipleChoiceField(widget=forms.RadioSelect, choices=YEAR_CHOICES, label='Year')
+    image_type = forms.MultipleChoiceField(widget=forms.RadioSelect, choices=IMAGE_TYPE_CHOICES, label='Image type')
+
+    # TO DO    
     def form_valid(self, form):
         return True
 
@@ -33,11 +61,11 @@ class ImageForm(forms.ModelForm):
 class BreakerForm(forms.ModelForm):
     """
     Class defining form where breaker data are entered
-
+    NOTE: fields get dynamically defined in views.py based on which year it is
     """
     class Meta:
         model = Breaker
-        fields = ['state', 'county']
+        fields = ['state']
 
     def form_valid(self):
         return True
@@ -49,12 +77,15 @@ class SheetForm(forms.ModelForm):
 
     Constructed using a jbid so possible breakers list can be populated
     """
+
+    form_type = forms.ChoiceField(choices=FORM_CHOICES, widget=forms.RadioSelect, label='Form type')
+    num_records = forms.IntegerField(min_value=0)
+    breaker_choice = forms.ChoiceField(label='Select a different breaker:')
     
     class Meta:
         model = Sheet
-        fields = ['form_type', 'num_records', 'problem']
+        fields = ['problem']
 
-    breaker_choice = forms.ChoiceField(label='Select a different breaker:')
 
     def __init__(self, jbid, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -62,6 +93,37 @@ class SheetForm(forms.ModelForm):
         self.fields['breaker_choice'].choices = choices
         self.fields['breaker_choice'].initial = CurrentEntry.objects.get(jbid=jbid).breaker
 
+#================================#
+# DATA MANAGEMENT FORMS
+#================================#
+
+class ExportForm(forms.Form):
+    '''
+    Define form where users can export existing records to csv to inspect
+    '''
+    
+    tables = {
+        1: {'label': 'Image', 'model': Image},
+        2: {'label': 'Sheet', 'model': Sheet},
+        3: {'label': 'Breaker', 'model': Breaker},
+        4: {'label': 'Record', 'model': Record},
+    }
+    choices = [(t[0], t[1]['label']) for t in tables.items()]
+    table_choice = forms.ChoiceField(label='Choose table to export', \
+        choices=choices)
+
+class ProblemForm(forms.Form):
+    '''
+    Define form where users can record a problem with a data entry task
+    '''
+
+    problem = forms.BooleanField(label="Check here to indicate bad data")
+    description = forms.CharField(widget=forms.Textarea)
+
+
+#================================#
+# BASE CLASSES
+#================================#
 
 class BaseRecordFormSet(forms.BaseModelFormSet):
     '''
@@ -83,17 +145,3 @@ class BaseBreakerFormSet(forms.BaseModelFormSet):
         self.queryset = Breaker.objects.none()
 
 
-class ExportForm(forms.Form):
-    '''
-    Define form where users can export existing records to csv to inspect
-    '''
-    
-    tables = {
-        1: {'label': 'Image', 'model': Image},
-        2: {'label': 'Sheet', 'model': Sheet},
-        3: {'label': 'Breaker', 'model': Breaker},
-        4: {'label': 'Record', 'model': Record},
-    }
-    choices = [(t[0], t[1]['label']) for t in tables.items()]
-    table_choice = forms.ChoiceField(label='Choose table to export', \
-        choices=choices)

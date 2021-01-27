@@ -6,11 +6,11 @@ app_name = 'EntryApp'
 urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
     path('begin-new-image/', views.BeginNewImageView.as_view(), name='begin_new_image'),
-    # path('submit-breaker/', views.submit_breaker, name="submit_breaker"),
-    path('submit-sheet/', views.submit_sheet, name="submit_sheet"),
     path('enter-sheet-data/', views.EnterSheetData.as_view(), name='enter_sheet_data'),
     path('enter-breaker-data/', views.EnterBreakerData.as_view(), name='enter_breaker_data'),
     path('enter-records/', views.enter_records, name='enter_records'),
     path('select-record-export/', views.SelectExportFormView.as_view(), name='select_records'),
     path('export-records/', views.export_records, name='export_records'),
+    path('report-problem/', views.report_problem, name='report_problem'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
 ] 

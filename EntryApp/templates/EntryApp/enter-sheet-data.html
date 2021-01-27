@@ -19,7 +19,7 @@
             <p>
                 Select which kind of sheet this is and how many individual records it contains.
             </p>
-            <form action={% url 'EntryApp:submit_sheet' %} method="POST">
+            <form method="POST">
                 {% csrf_token %}
                 {{ form.as_p }}
                 <input type="submit" value="Submit">
@@ -40,3 +40,5 @@
             });
         </script>
 {% endblock content %}
+{% block logout %}
+{% endblock logout %}
