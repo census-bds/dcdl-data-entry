@@ -21,8 +21,15 @@
         <div id="content">
             {% block content %}{% endblock content %}
         </div>
-        <div id="comment">
-            {% block comment %}{% endblock comment %}
+        <div id="problem">
+            {% block problem %}
+            <div id="report-problem">
+                <form action={% url 'EntryApp:report_problem' %}>
+                    {% csrf_token %}
+                    <input type="submit" value="Report a problem">
+                </form>
+            </div>
+            {% endblock problem %}
         </div>
         <div id='nav-logout'>
             <br>

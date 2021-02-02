@@ -387,31 +387,43 @@ def report_problem(request):
         form = request.POST
         problem_image = current.img
         logger.info(f'report_problem POST request for {current.img.img_path}')
+        logger.info(f'report_problem problem_image pk is {problem_image.pk}')
 
-
-        # need to figure out what kind of image it is?
+        # do I need to figure out what kind of image it is?
         try:
 
-            # first flag the problem at the image level
-            problem_image.update(
-                problem = form['problem'],
-                prob_description = form['description'] 
+            # flag the problem at the image level
+            is_problem = True if 'problem' in form.keys() else False
+            
+            if problem_image.is_complete:
+                defaults = {
+                    'problem': is_problem,
+                    'prob_description': form['description']
+                }
+
+            else:
+                defaults = {
+                    'is_complete': True,
+                    'problem': is_problem,
+                    'prob_description': form['description']
+                }
+            
+            problem_image, updated = Image.objects.update_or_create(
+                jbid = request.user,
+                pk = problem_image.pk,
+                defaults = defaults 
             )
 
-            if problem_image.image_type == "breaker":
-                Breaker.objects.get(pk=problem_image.pk).update(problem=True)
-            
-            elif problem_image.image_type == "sheet":
-                Sheet.objects.get(pk=problem_image.pk).update(problem=True)
-            
-            elif problem_image.image_type == "other":
-                OtherImage.objects.get(pk=problem_image.pk).update(problem=True)
+            return redirect(reverse('EntryApp:index'))
 
-            elif problem_image.image_type is None:
-                logger.info("Image problem recorded with unknown image type.")
-            
-            else:
-                logger.warn("Image problem recorded with unexpected image type.")
-        
         except Exception as e:
             logger.warn(f"Exception in report_problem: ", e)
+            return render(
+                request, \
+                'EntryApp/report-problem.html',
+                {
+                    'image': current.img,
+                    'slug': current.img.img_path,
+                    'form': ProblemForm()
+                }
+        )
