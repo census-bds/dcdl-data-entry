@@ -13,4 +13,5 @@ urlpatterns = [
     path('export-records/', views.export_records, name='export_records'),
     path('report-problem/', views.report_problem, name='report_problem'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
+    path('test-dummy-image/', views.TestImageView.as_view(), name='test_dummy_image'),
 ] 

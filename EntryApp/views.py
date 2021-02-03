@@ -233,7 +233,6 @@ class EnterSheetData(LoginRequiredMixin, FormView):
             # first save the data in Sheet 
             current_img = CurrentEntry.objects.get(jbid=request.user).img
 
-            # handle breaker change dropdown
             associated_breaker = CurrentEntry.objects.get(jbid=request.user).breaker
 
             logger.info(f"associated breaker: {type(associated_breaker)}")
@@ -440,3 +439,16 @@ def report_problem(request):
                     'form': ProblemForm()
                 }
         )
+
+#================================#
+# DUMMY VIEW
+#================================#
+
+class TestImageView(LoginRequiredMixin, TemplateView):
+    '''
+    View for testing image types separately from rest of app
+    '''
+
+    def get(self, request):
+        context = {'slug': 'tester_tiff_autumn.tif'}
+        return render(request, 'test_dummy_image.html', context)

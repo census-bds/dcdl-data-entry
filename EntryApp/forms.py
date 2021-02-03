@@ -110,7 +110,7 @@ class ProblemForm(forms.Form):
     '''
 
     problem = forms.BooleanField(label="Check here to indicate bad data")
-    description = forms.CharField(widget=forms.Textarea)
+    description = forms.CharField(widget=forms.Textarea, required=False)
 
 
 #================================#
