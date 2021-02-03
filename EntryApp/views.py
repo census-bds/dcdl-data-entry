@@ -7,6 +7,7 @@ TO DO:
 import csv
 import datetime
 import logging
+import re
 
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render, redirect
@@ -215,7 +216,7 @@ class EnterSheetData(LoginRequiredMixin, FormView):
         current = CurrentEntry.objects.get(jbid=request.user)
         context = {
             'breaker': current.breaker,
-            'form': self.form_class(jbid=request.user, initial={'breaker_choice': current.breaker.pk}),
+            'form': self.form_class(),
             'slug': current.img.img_path,
         }
         return render(request, self.template_name, context)
@@ -232,17 +233,8 @@ class EnterSheetData(LoginRequiredMixin, FormView):
             # first save the data in Sheet 
             current_img = CurrentEntry.objects.get(jbid=request.user).img
 
-            # handle problem checkbox
-            is_problem = True if 'problem' in form.keys() else False
-            if 'problem' in form.keys():
-                logger.info(f"problem value is {form['problem']}")
-            
             # handle breaker change dropdown
             associated_breaker = CurrentEntry.objects.get(jbid=request.user).breaker
-            form_breaker = Breaker.objects.get(pk=form['breaker_choice'])
-            if form_breaker != associated_breaker:
-                logger.info(f"user changed breaker assignment to {type(form['breaker_choice'])}")
-                associated_breaker = form_breaker
 
             logger.info(f"associated breaker: {type(associated_breaker)}")
             sheet, created = Sheet.objects.update_or_create(
@@ -253,7 +245,6 @@ class EnterSheetData(LoginRequiredMixin, FormView):
                     'form_type': form['form_type'],
                     'breaker': associated_breaker,
                     'num_records': form['num_records'],
-                    'problem': is_problem,
                     'timestamp': datetime.datetime.now()
                     }
             )
@@ -362,6 +353,23 @@ def export_records(request):
 # PROBLEM VIEW
 #================================#
 
+def parse_http_referral(url):
+    '''
+    Helper function for report_problem view
+    Parses referring url from HTTP request to extract site of problem
+    
+    Takes: string from the HTTP request referring url 
+    Returns: string name of model affected
+    '''
+    if url:
+        page_name = re.search('(?<=EntryApp/).+/', url).group(0)[:-1]
+        logger.info(f"parse_http_referral: {page_name}") 
+        return page_name
+    else:
+        logger.info(f'parse_http_referral did not get a url, returning empty string.')
+        return ""
+
+
 @login_required
 def report_problem(request):
     '''
@@ -369,9 +377,12 @@ def report_problem(request):
     '''
 
     current = CurrentEntry.objects.get(jbid=request.user) 
+    flagged_view = None
 
     if request.method == "GET":
         logger.info(f'report_problem GET request for {current.img.img_path}')
+        logger.info(f"report_problem referred from {request.META['HTTP_REFERER']}")
+        flagged_view = parse_http_referral(request.META['HTTP_REFERER'])
         return render(
                 request, \
                 'EntryApp/report-problem.html',
@@ -398,14 +409,16 @@ def report_problem(request):
             if problem_image.is_complete:
                 defaults = {
                     'problem': is_problem,
-                    'prob_description': form['description']
+                    'prob_description': form['description'],
+                    'flagged_view': flagged_view
                 }
 
             else:
                 defaults = {
                     'is_complete': True,
                     'problem': is_problem,
-                    'prob_description': form['description']
+                    'prob_description': form['description'],
+                    'flagged_view': flagged_view
                 }
             
             problem_image, updated = Image.objects.update_or_create(

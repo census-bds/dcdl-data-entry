@@ -56,6 +56,7 @@ class Image(models.Model):
     timestamp = models.DateTimeField(null=True)
     problem = models.BooleanField(default=False)
     prob_description = models.TextField(verbose_name="Please describe the problem.", null=True)
+    flagged_view = models.CharField(max_length=30, null=True)
 
     class Meta:
         constraints = [
@@ -124,7 +125,6 @@ class Sheet(models.Model):
     # for entry
     form_type = models.CharField(max_length=200, choices=FORM_CHOICES)
     num_records = models.PositiveIntegerField(verbose_name = 'Number of records', null=True)
-    problem = models.BooleanField(default=False)
 
     def __str__(self):
         return f'{self.img}: {self.form_type}' # FIX THIS

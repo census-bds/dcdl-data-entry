@@ -79,19 +79,11 @@ class SheetForm(forms.ModelForm):
     """
 
     form_type = forms.ChoiceField(choices=FORM_CHOICES, widget=forms.RadioSelect, label='Form type')
-    num_records = forms.IntegerField(min_value=0)
-    breaker_choice = forms.ChoiceField(label='Select a different breaker:')
     
     class Meta:
         model = Sheet
-        fields = ['problem']
+        fields = ['num_records']
 
-
-    def __init__(self, jbid, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        choices = [(b.pk, str(b.year)+ ' ' + b.county + ' ' + b.img.img_path) for b in Breaker.objects.filter(jbid=jbid)]
-        self.fields['breaker_choice'].choices = choices
-        self.fields['breaker_choice'].initial = CurrentEntry.objects.get(jbid=jbid).breaker
 
 #================================#
 # DATA MANAGEMENT FORMS
