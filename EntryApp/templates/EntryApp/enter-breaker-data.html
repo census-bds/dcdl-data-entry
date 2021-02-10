@@ -5,20 +5,22 @@
         Enter breaker data here for {{ breaker_img_path }}
 {% endblock header %}
 {% block content %}
-<form method="post">
+<div id="entryform">
+<!-- <form method="post">
     <table>
         {% csrf_token %}
         {{ formset }}
     </table>
     <input type="submit" value="Submit">
-</form>
+</form> -->
+</div>
     <form method="post">
         {{ formset.management_form }}
         <table>
             {% csrf_token %}
-            <!-- {{ formset }} -->
+            {{ formset }}
         </table>
-            <!-- <input type="submit" value="Submit"> -->
+            <input type="submit" value="Submit">
         </form>
         <br>
         <div id="openseadragon1" style="width: 800px; height: 600px;"></div>
@@ -35,3 +37,5 @@
             });
         </script>
 {% endblock content %}
+{% block logout %}
+{% endblock logout %}

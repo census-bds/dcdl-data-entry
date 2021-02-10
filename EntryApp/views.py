@@ -2,12 +2,12 @@
 VIEWS FOR DCDL DATA ENTRY
 
 TO DO:
--convert to fully class-based views
 -integrate openseadragon info into views
 """
 import csv
 import datetime
 import logging
+import re
 
 from django.http import HttpResponse, Http404
 from django.shortcuts import get_object_or_404, render, redirect
@@ -21,8 +21,8 @@ from django.template import RequestContext, loader
 
 from djqscsv import render_to_csv_response
 
-from EntryApp.models import Breaker, Image, Sheet, CurrentEntry, Record, FormField
-from EntryApp.forms import ImageForm, SheetForm, BreakerForm, BaseRecordFormSet, BaseBreakerFormSet, ExportForm
+from EntryApp.models import Image, Breaker, OtherImage, Sheet, Record, CurrentEntry, FormField
+from EntryApp.forms import ImageForm, SheetForm, BreakerForm, BaseRecordFormSet, BaseBreakerFormSet, ExportForm, ProblemForm
 
 logger = logging.getLogger('EntryApp.views')
 
@@ -73,6 +73,7 @@ class BeginNewImageView(LoginRequiredMixin, FormView):
     def post(self, request):    
         try:
             form = request.POST
+            logger.info(f'BeginNewImage post() form is {form}')
             current = CurrentEntry.objects.get(jbid=request.user)
             image, created = Image.objects.update_or_create(
                 img_path = current.img.img_path, 
@@ -83,12 +84,12 @@ class BeginNewImageView(LoginRequiredMixin, FormView):
                 'timestamp': datetime.datetime.now()
                 }
             )
-            logger.info(f'submit_image POST current value is {image}')
+            logger.info(f'BeginNewImage post() current image is {image}')
 
             return redirect(reverse(f'EntryApp:enter_{image.image_type}_data'))
 
         except KeyError:
-            logger.info("KeyError in submit_image")
+            logger.info("KeyError in post() for BeginNewImage")
             return render(request, 'EntryApp/begin-new-image.html')  
 
 
@@ -166,6 +167,7 @@ class EnterBreakerData(LoginRequiredMixin, FormView):
 
         current = CurrentEntry.objects.get(jbid=request.user)
 
+        # define fields based on which year it is
         field_query = FormField.objects.filter(year=current.img.year).filter(form_type="breaker")
         logger.info(f'FormField query length was {len(field_query)}') 
         breaker_fields = [f.field_name for f in list(field_query)]
@@ -193,7 +195,7 @@ class EnterBreakerData(LoginRequiredMixin, FormView):
 
         except KeyError:
             logger.warn("KeyError in submit_breaker post()")
-            return render(request, reverse('EntryApp:enter_breaker_data'))
+            return render(request, reverse(self.template_name))
 
 
 #=====================================================#
@@ -206,68 +208,57 @@ class EnterSheetData(LoginRequiredMixin, FormView):
     template_name = 'EntryApp/enter-sheet-data.html'
 
     def get(self, request):
+        '''
+        Handle GET request and return page with empty form
+        '''
 
-        logger.info(f'EnterSheet get request')
+        logger.info(f'EnterSheet GET request')
         current = CurrentEntry.objects.get(jbid=request.user)
         context = {
             'breaker': current.breaker,
-            'form': self.form_class(jbid=request.user, initial={'breaker_choice': current.breaker.pk}),
+            'form': self.form_class(),
             'slug': current.img.img_path,
         }
         return render(request, self.template_name, context)
 
-
-@login_required
-def submit_sheet(request):
-    '''
-    Function view to submit the data from the SheetForm
-    '''
-
-    form = request.POST 
-    logger.info(f'submit_sheet form: {form}')
-
-
-    try:
-        # first save the data in Sheet 
-        current_img = CurrentEntry.objects.get(jbid=request.user).img
-
-        # handle problem checkbox
-        is_problem = True if 'problem' in form.keys() else False
-        if 'problem' in form.keys():
-            logger.info(f"problem value is {form['problem']}")
+    def post(self, request):
+        '''
+        Handle POST request with populated form; save form data to DB
+        '''
         
-        # handle breaker change dropdown
-        associated_breaker = CurrentEntry.objects.get(jbid=request.user).breaker
-        form_breaker = Breaker.objects.get(pk=form['breaker_choice'])
-        if form_breaker != associated_breaker:
-            logger.info(f"user changed breaker assignment to {type(form['breaker_choice'])}")
-            associated_breaker = form_breaker
+        form = request.POST 
+        logger.info(f'EnterSheet POST request form: {form}')
 
-        logger.info(f"associated breaker: {type(associated_breaker)}")
-        sheet, created = Sheet.objects.update_or_create(
-            img = current_img,
-            jbid = request.user,
-            year = current_img.year,
-           defaults = {
-                'form_type': form['form_type'],
-                'breaker': associated_breaker,
-                'num_records': form['num_records'],
-                'problem': is_problem,
-                'timestamp': datetime.datetime.now()
-                }
-        )
-        logger.info(f'submit_sheet update_or_create() returned {created}')
+        try:
+            # first save the data in Sheet 
+            current_img = CurrentEntry.objects.get(jbid=request.user).img
 
-        # next update CurrentEntry
-        current = CurrentEntry.objects.get(jbid=request.user)
-        current.sheet = sheet
-        current.save()
+            associated_breaker = CurrentEntry.objects.get(jbid=request.user).breaker
 
-        return redirect(reverse('EntryApp:enter_records'))
+            logger.info(f"associated breaker: {type(associated_breaker)}")
+            sheet, created = Sheet.objects.update_or_create(
+                img = current_img,
+                jbid = request.user,
+                year = current_img.year,
+            defaults = {
+                    'form_type': form['form_type'],
+                    'breaker': associated_breaker,
+                    'num_records': form['num_records'],
+                    'timestamp': datetime.datetime.now()
+                    }
+            )
+            logger.info(f'EnterSheetDataView update_or_create() returned {created}')
 
-    except KeyError:
-        logger.warn("KeyError in submit_sheet post()")
-        return render(request, reverse('EntryApp:enter_sheet_data'))
+            # next update CurrentEntry
+            current = CurrentEntry.objects.get(jbid=request.user)
+            current.sheet = sheet
+            current.save()
+
+            return redirect(reverse('EntryApp:enter_records'))
+
+        except KeyError:
+            logger.warn("KeyError in submit_sheet post()")
+            return render(request, reverse(self.template_name))
     
 
 #=====================================================#
@@ -339,7 +330,7 @@ class SelectExportFormView(LoginRequiredMixin, FormView):
         }
         return render(request, self.template_name, context)
 
-
+@login_required
 def export_records(request):
     '''
     View that looks up selected model and gathers records for csv export
@@ -358,6 +349,106 @@ def export_records(request):
     return render_to_csv_response(records)
 
 #================================#
-# PROBLEM VIEW: SHEET-BREAKER LINK
+# PROBLEM VIEW
 #================================#
 
+def parse_http_referral(url):
+    '''
+    Helper function for report_problem view
+    Parses referring url from HTTP request to extract site of problem
+    
+    Takes: string from the HTTP request referring url 
+    Returns: string name of model affected
+    '''
+    if url:
+        page_name = re.search('(?<=EntryApp/).+/', url).group(0)[:-1]
+        logger.info(f"parse_http_referral: {page_name}") 
+        return page_name
+    else:
+        logger.info(f'parse_http_referral did not get a url, returning empty string.')
+        return ""
+
+
+@login_required
+def report_problem(request):
+    '''
+    View to render problem form so user can record an issue
+    '''
+
+    current = CurrentEntry.objects.get(jbid=request.user) 
+    flagged_view = None
+
+    if request.method == "GET":
+        logger.info(f'report_problem GET request for {current.img.img_path}')
+        logger.info(f"report_problem referred from {request.META['HTTP_REFERER']}")
+        flagged_view = parse_http_referral(request.META['HTTP_REFERER'])
+        return render(
+                request, \
+                'EntryApp/report-problem.html',
+                {
+                    'image': current.img,
+                    'slug': current.img.img_path,
+                    'form': ProblemForm()
+                }
+        )
+    
+    elif request.method == "POST":
+
+        form = request.POST
+        problem_image = current.img
+        logger.info(f'report_problem POST request for {current.img.img_path}')
+        logger.info(f'report_problem problem_image pk is {problem_image.pk}')
+
+        # do I need to figure out what kind of image it is?
+        try:
+
+            # flag the problem at the image level
+            is_problem = True if 'problem' in form.keys() else False
+            
+            if problem_image.is_complete:
+                defaults = {
+                    'problem': is_problem,
+                    'prob_description': form['description'],
+                    'flagged_view': flagged_view
+                }
+
+            else:
+                defaults = {
+                    'is_complete': True,
+                    'problem': is_problem,
+                    'prob_description': form['description'],
+                    'flagged_view': flagged_view
+                }
+            
+            problem_image, updated = Image.objects.update_or_create(
+                jbid = request.user,
+                pk = problem_image.pk,
+                defaults = defaults 
+            )
+
+            return redirect(reverse('EntryApp:index'))
+
+        except Exception as e:
+            logger.warn(f"Exception in report_problem: ", e)
+            return render(
+                request, \
+                'EntryApp/report-problem.html',
+                {
+                    'image': current.img,
+                    'slug': current.img.img_path,
+                    'form': ProblemForm()
+                }
+        )
+
+#================================#
+# DUMMY VIEW
+#================================#
+
+class TestImageView(LoginRequiredMixin, TemplateView):
+    '''
+    View for testing image types separately from rest of app
+    '''
+
+    def get(self, request):
+        context = {'slug': 'tester_tiff_autumn.tif'}
+        return render(request, 'test_dummy_image.html', context)

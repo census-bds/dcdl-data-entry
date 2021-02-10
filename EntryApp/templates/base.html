@@ -21,5 +21,33 @@
         <div id="content">
             {% block content %}{% endblock content %}
         </div>
+        <div id="problem">
+            {% block problem %}
+            <div id="report-problem">
+                <form action={% url 'EntryApp:report_problem' %}>
+                    {% csrf_token %}
+                    <input type="submit" value="Report a problem">
+                </form>
+            </div>
+            {% endblock problem %}
+        </div>
+        <div id='nav-logout'>
+            <br>
+            {% block navigation %}
+            <div id='home-button'>
+                <form action={% url 'EntryApp:index' %}>
+                    <input type="submit" value="Return to main page">
+                </form>
+            </div>
+            {% endblock navigation %}
+            {% block logout %}
+                <div id='logout'>
+                    <form action={% url 'EntryApp:logout' %}>
+                        {% csrf_token %}
+                        <input type="submit" value="Log out">
+                    </form>
+                </div>
+            {% endblock logout %}
+        </div>
     </body>
 </html>

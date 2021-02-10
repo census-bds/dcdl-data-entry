@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'deepzoom.apps.DeepZoomAppConfig' #I'd like to get rid of this but it's throwing an error when I do
+    'deepzoom.apps.DeepZoomAppConfig' #I'd like to get rid of this but it's throwing an error when I do because there is a deepzoom table in an old migration
 ]
 
 MIDDLEWARE = [
