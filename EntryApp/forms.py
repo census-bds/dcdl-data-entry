@@ -158,66 +158,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, Layout
 from crispy_forms.bootstrap import Div
 
-
-class TestCrispyForm(forms.Form):
-
-    last_name = forms.CharField(max_length=30)
-    middle_init = forms.CharField(max_length=2)
-    first_name = forms.CharField(max_length=30)
-    age = forms.IntegerField(min_value=0, max_value=120)
-    relp = forms.ChoiceField(
-        choices=[
-            ('hh_head', 'Head of household'),
-            ('wife', 'Wife'),
-            ('child', 'Child'),
-            ('other_relative', 'Other relative'),
-            ('roomer/boarder', 'Roomer, boarder, lodger'),
-            ('patient/inmate', 'Patient or inmate'),
-            ('other', 'Other not related to head')
-            ],
-        widget=forms.RadioSelect
-        )
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.helper = FormHelper()
-        self.helper.form_id = 'id-exampleForm'
-        self.helper.form_method = 'post'
-        self.helper.form_action = 'submit_survey'
-        
-        self.helper.form_class = 'form-inline'
-        # self.helper.field_template = 'bootstrap3/layout/inline_field.html'
-        self.helper.label_class = 'sr-only'
-        self.helper.form_show_labels = False
-        self.helper.layout = Layout(
-            Div(
-                Div(
-                    'last_name',
-                    Div(
-                        Div(
-                            'first_name',
-                            css_class='col-sm-2'
-                        ),
-                        Div(
-                            'middle_init',
-                            css_class='col-sm-1'
-                        ),
-                        css_class='row'
-                        ),
-                    css_class='col-sm-3'),
-                Div(
-                    'relp',
-                    css_class='col-sm-2'
-                ),
-                Div(
-                    'age',
-                    css_class='col-sm-1'
-                ),
-            css_class='row'),
-            Div(
-                Submit('submit', 'Add', css_class='btn btn-primary')
-                )
-        )
+import EntryApp.layouts as layouts
 
 
 class CrispyFormSetHelper(FormHelper):
@@ -227,53 +168,12 @@ class CrispyFormSetHelper(FormHelper):
     This FormHelper applies CSS styling and defines layout.
     TO DO: load custom layouts for each form type
     '''
-    def __init__(self, *args, **kwargs):
+    def __init__(self, year, form, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.form_method='post'
         self.form_class='form-inline'
         self.label_class = 'sr-only'
-        self.layout = Layout(
-                            Div(
-                                Div(
-                                    'last_name',
-                                    Div(
-                                        Div(
-                                            'first_name',
-                                            css_class='col-sm-1'
-                                        ),
-                                        Div(
-                                            'middle_init',
-                                            css_class='col-sm-1'
-                                        ),
-                                        css_class='row'
-                                        ),
-                                    css_class='col-sm-1'),
-                                # Div(
-                                #     'relp',
-                                #     css_class='col-sm-1'
-                                # ),
-                                Div(
-                                    'age',
-                                    css_class='col-sm-1'
-                                ),
-                                Div(
-                                    'sex',
-                                    css_class='col-sm-1'
-                                ),
-                                Div(
-                                    'birth_month',
-                                    css_class='col-sm-1'
-                                ),
-                                # Div(
-                                #     'serial_no',
-                                #     css_class='col-sm-1'
-                                # ),
-                                # Div(
-                                #     'block',
-                                #     css_class='col-sm-1'
-                                # ),
-                            css_class='row')
-                        )
+        self.layout = layouts.FORM_DICT[year][form]
         self.render_required_fields=True
         self.add_input(Submit("submit", "Submit"))
 

@@ -453,38 +453,14 @@ class TestImageView(LoginRequiredMixin, TemplateView):
         context = {'slug': 'tester_tiff_autumn.tif'}
         return render(request, 'test_dummy_image.html', context)
 
-from django.forms.models import inlineformset_factory, formset_factory
-from EntryApp.forms import TestCrispyForm, CrispyFormSetHelper #RecordForm
-
-# class TestCrispyFormView(FormView):
-#     '''
-#     View for testing django-crispy-forms functionality
-#     '''
-#     example_form = RecordForm
-#     template_name = 'EntryApp/test-crispy.html'
-
-
-#     def get(self, request):
-#         logger.info(f'request is {request}')
-#         context = {
-#             'example_form': self.example_form()
-#         }
-#         return render(request, self.template_name, context)
-
-#     def post(self, request, *args, **kwargs):
-#         form = self.example_form(request.POST)
-#         if form.is_valid():
-#             return redirect(reverse('EntryApp:index'))
-        
-#         return render(request, self.template_name, {'example_form': self.example_form})
-
+from EntryApp.forms import CrispyFormSetHelper #RecordForm
 
 def test_crispy_formset_view(request):
     '''
     View for testing django crispy formsets
     '''
 
-    field_q = FormField.objects.filter(year=1970).filter(form_type='short')
+    field_q = FormField.objects.filter(year=1970).filter(form_type='long')
     fields = [f.field_name for f in list(field_q)]
     logger.info(f'crispy formset fields are {fields}')
     TestCrispyFormset = modelformset_factory(
@@ -494,7 +470,7 @@ def test_crispy_formset_view(request):
             formset=BaseRecordFormSet
         )
     formset = TestCrispyFormset() 
-    helper = CrispyFormSetHelper()
+    helper = CrispyFormSetHelper(year=1970, form='long')
     context = {
         'formset': formset,
         'helper': helper

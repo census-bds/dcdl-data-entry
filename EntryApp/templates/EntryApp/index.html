@@ -21,7 +21,6 @@
     </form>
 {% endblock content %}
 {% block problem %}
-
     <br>
     <form action={% url 'EntryApp:test_crispy_formset' %}>
         {% csrf_token %}
