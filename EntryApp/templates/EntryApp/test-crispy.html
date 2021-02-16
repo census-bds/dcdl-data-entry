@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block header %}
+<h2>Crispy form test page</h2>
+{% endblock header %}
+
+{% block content %}
+
+{% load crispy_forms_tags %}
+
+<div id='the_crispy_form'>
+    This is the crispy form.
+    {% crispy example_form %}
+</div>
+
+{% endblock content %}
+
+
+{% block problem %}
+{% endblock problem %}

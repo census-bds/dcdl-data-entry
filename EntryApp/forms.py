@@ -24,13 +24,13 @@ YEAR_CHOICES = [
 IMAGE_TYPE_CHOICES = [
     ("breaker", "Breaker"),
     ("sheet", "Sheet"),
-    ("other", "Other")
+    ("other", "Other"),
 ]
 
 # TO DO: get names to match actual taxonomy - check w/Katie
 FORM_CHOICES = [
     ('short', 'Short'),
-    ('long', 'Long')
+    ('long', 'Long'),
 ]
 
 STATE_LIST = [
@@ -38,7 +38,17 @@ STATE_LIST = [
                 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', \
                 'MI', 'MN', 'MS', 'MO',	'MT', 'NE',	'NV', 'NH',	'NJ', 'NM',	'NY', \
                 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', \
-                'TX', 'UT',	'VT', 'VA',	'WA', 'WV',	'WI', 'WY'
+                'TX', 'UT',	'VT', 'VA',	'WA', 'WV',	'WI', 'WY',
+            ]
+
+RELP_CHOICES=[
+            ('hh_head', 'Head of household'),
+            ('wife', 'Wife'),
+            ('child', 'Child'),
+            ('other_relative', 'Other relative'),
+            ('roomer/boarder', 'Roomer, boarder, lodger'),
+            ('patient/inmate', 'Patient or inmate'),
+            ('other', 'Other not related to head'),
             ]
 
 #================================#
@@ -50,7 +60,10 @@ class ImageForm(forms.Form):
     Form where user records the year and form type to which a sheet belongs 
     """
 
-    year = forms.MultipleChoiceField(widget=forms.RadioSelect, choices=YEAR_CHOICES, label='Year')
+    year = forms.MultipleChoiceField(
+                widget=forms.RadioSelect,
+                choices=YEAR_CHOICES, label='Year'
+            )
     image_type = forms.MultipleChoiceField(widget=forms.RadioSelect, choices=IMAGE_TYPE_CHOICES, label='Image type')
 
     # TO DO    
@@ -82,7 +95,7 @@ class SheetForm(forms.ModelForm):
     
     class Meta:
         model = Sheet
-        fields = ['num_records']
+        fields = ['num_records']    
 
 
 #================================#
@@ -137,3 +150,154 @@ class BaseBreakerFormSet(forms.BaseModelFormSet):
         self.queryset = Breaker.objects.none()
 
 
+#================================#
+# FOR DEV
+#================================#
+
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Submit, Layout
+from crispy_forms.bootstrap import Div
+
+
+class TestCrispyForm(forms.Form):
+
+    last_name = forms.CharField(max_length=30)
+    middle_init = forms.CharField(max_length=2)
+    first_name = forms.CharField(max_length=30)
+    age = forms.IntegerField(min_value=0, max_value=120)
+    relp = forms.ChoiceField(
+        choices=[
+            ('hh_head', 'Head of household'),
+            ('wife', 'Wife'),
+            ('child', 'Child'),
+            ('other_relative', 'Other relative'),
+            ('roomer/boarder', 'Roomer, boarder, lodger'),
+            ('patient/inmate', 'Patient or inmate'),
+            ('other', 'Other not related to head')
+            ],
+        widget=forms.RadioSelect
+        )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.helper = FormHelper()
+        self.helper.form_id = 'id-exampleForm'
+        self.helper.form_method = 'post'
+        self.helper.form_action = 'submit_survey'
+        
+        self.helper.form_class = 'form-inline'
+        # self.helper.field_template = 'bootstrap3/layout/inline_field.html'
+        self.helper.label_class = 'sr-only'
+        self.helper.form_show_labels = False
+        self.helper.layout = Layout(
+            Div(
+                Div(
+                    'last_name',
+                    Div(
+                        Div(
+                            'first_name',
+                            css_class='col-sm-2'
+                        ),
+                        Div(
+                            'middle_init',
+                            css_class='col-sm-1'
+                        ),
+                        css_class='row'
+                        ),
+                    css_class='col-sm-3'),
+                Div(
+                    'relp',
+                    css_class='col-sm-2'
+                ),
+                Div(
+                    'age',
+                    css_class='col-sm-1'
+                ),
+            css_class='row'),
+            Div(
+                Submit('submit', 'Add', css_class='btn btn-primary')
+                )
+        )
+
+
+class CrispyFormSetHelper(FormHelper):
+    '''
+    Custom FormHelper for Record formset layout
+
+    This FormHelper applies CSS styling and defines layout.
+    TO DO: load custom layouts for each form type
+    '''
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.form_method='post'
+        self.form_class='form-inline'
+        self.label_class = 'sr-only'
+        self.layout = Layout(
+                            Div(
+                                Div(
+                                    'last_name',
+                                    Div(
+                                        Div(
+                                            'first_name',
+                                            css_class='col-sm-1'
+                                        ),
+                                        Div(
+                                            'middle_init',
+                                            css_class='col-sm-1'
+                                        ),
+                                        css_class='row'
+                                        ),
+                                    css_class='col-sm-1'),
+                                # Div(
+                                #     'relp',
+                                #     css_class='col-sm-1'
+                                # ),
+                                Div(
+                                    'age',
+                                    css_class='col-sm-1'
+                                ),
+                                Div(
+                                    'sex',
+                                    css_class='col-sm-1'
+                                ),
+                                Div(
+                                    'birth_month',
+                                    css_class='col-sm-1'
+                                ),
+                                # Div(
+                                #     'serial_no',
+                                #     css_class='col-sm-1'
+                                # ),
+                                # Div(
+                                #     'block',
+                                #     css_class='col-sm-1'
+                                # ),
+                            css_class='row')
+                        )
+        self.render_required_fields=True
+        self.add_input(Submit("submit", "Submit"))
+
+
+# class RecordForm(forms.ModelForm):
+#     '''
+#     Defines record entry form using Record model
+
+#     Note: layout is defined in the formset class. To change approaches so that
+#     there is one record per page, override __init__ here and copy in helper 
+#     form layout from the formset class.
+#     '''
+
+#     class Meta:
+#         model = Record
+#         fields = [
+#             'first_name',
+#             'middle_init',
+#             'last_name',
+#              'age',
+#             #  'sex',
+#             #  'birth_month',
+#             ]
+
+#     def __init__(self, fields, *args, **kwargs):
+#         self.Meta.fields = fields
+#         super().__init__(*args, **kwargs)

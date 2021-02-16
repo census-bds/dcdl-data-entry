@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block header %}
+<h2>Crispy form test page</h2>
+{% endblock header %}
+
+{% block content %}
+
+{% load crispy_forms_tags %}
+
+<div id='the_crispy_formset'>
+    This is the crispy formset.
+    {% crispy formset helper %}
+    <br>
+    <br>
+    <br>
+
+
+{% endblock content %}
+
+
+{% block problem %}
+{% endblock problem %}

@@ -9,7 +9,7 @@ import datetime
 import logging
 import re
 
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse 
 from django.views.generic import View, FormView, TemplateView, CreateView
@@ -441,7 +441,7 @@ def report_problem(request):
         )
 
 #================================#
-# DUMMY VIEW
+# DUMMY VIEWS
 #================================#
 
 class TestImageView(LoginRequiredMixin, TemplateView):
@@ -452,3 +452,51 @@ class TestImageView(LoginRequiredMixin, TemplateView):
     def get(self, request):
         context = {'slug': 'tester_tiff_autumn.tif'}
         return render(request, 'test_dummy_image.html', context)
+
+from django.forms.models import inlineformset_factory, formset_factory
+from EntryApp.forms import TestCrispyForm, CrispyFormSetHelper #RecordForm
+
+# class TestCrispyFormView(FormView):
+#     '''
+#     View for testing django-crispy-forms functionality
+#     '''
+#     example_form = RecordForm
+#     template_name = 'EntryApp/test-crispy.html'
+
+
+#     def get(self, request):
+#         logger.info(f'request is {request}')
+#         context = {
+#             'example_form': self.example_form()
+#         }
+#         return render(request, self.template_name, context)
+
+#     def post(self, request, *args, **kwargs):
+#         form = self.example_form(request.POST)
+#         if form.is_valid():
+#             return redirect(reverse('EntryApp:index'))
+        
+#         return render(request, self.template_name, {'example_form': self.example_form})
+
+
+def test_crispy_formset_view(request):
+    '''
+    View for testing django crispy formsets
+    '''
+
+    field_q = FormField.objects.filter(year=1970).filter(form_type='short')
+    fields = [f.field_name for f in list(field_q)]
+    logger.info(f'crispy formset fields are {fields}')
+    TestCrispyFormset = modelformset_factory(
+            Record,
+            fields = fields,
+            extra = 2,
+            formset=BaseRecordFormSet
+        )
+    formset = TestCrispyFormset() 
+    helper = CrispyFormSetHelper()
+    context = {
+        'formset': formset,
+        'helper': helper
+    }
+    return render(request, 'EntryApp/test-crispy-formset.html', context)
