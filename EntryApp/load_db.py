@@ -37,7 +37,7 @@ def load_images(path, users, ext = "*.jpg"):
     for f in files:
         for u in users:
 
-            img = Image(img_path=f.split("\\    ")[-1], \
+            img = Image(img_path=os.path.split(f)[-1], \
                     jbid=u, \
                     is_complete=False, \
                     year=None, 
@@ -97,13 +97,17 @@ def create_image_fixture(path, users, out, ext="*.jpg"):
         json.dump(image, json_file)
 
 
-def load_form_fields(field_tbl_path):
+def load_form_fields(field_tbl_path, reload=True):
     '''
     Load the formfield table into the DB (1 row at a time)
 
     Takes:
     - path string to csv file mapping fields to years
+    - optional boolean if keeping what's in the FormField model
     '''
+
+    if reload:
+        FormField.objects.all().delete()
 
     with open(field_tbl_path) as f:
         csvreader = csv.reader(f)

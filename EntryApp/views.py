@@ -13,7 +13,7 @@ from django.http import HttpResponse, Http404, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse 
 from django.views.generic import View, FormView, TemplateView, CreateView
-from django.forms import modelformset_factory
+from django.forms import formset_factory, modelformset_factory, RadioSelect
 from django.contrib.auth.models import Permission, User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -22,7 +22,7 @@ from django.template import RequestContext, loader
 from djqscsv import render_to_csv_response
 
 from EntryApp.models import Image, Breaker, OtherImage, Sheet, Record, CurrentEntry, FormField
-from EntryApp.forms import ImageForm, SheetForm, BreakerForm, BaseRecordFormSet, BaseBreakerFormSet, ExportForm, ProblemForm
+from EntryApp.forms import ImageForm, SheetForm, BreakerForm, RecordForm, BaseRecordFormSet, BaseBreakerFormSet, ExportForm, ProblemForm
 
 logger = logging.getLogger('EntryApp.views')
 
@@ -282,12 +282,29 @@ def enter_records(request):
     record_fields = [f.field_name for f in list(field_query)]
     logger.info(f'form records fields are {record_fields}')
 
-    RecordFormSet = modelformset_factory(Record, fields=record_fields, extra=num_records, formset=BaseRecordFormSet)
-    
+
+    RecordFormSet = modelformset_factory(
+        Record,
+        form=RecordForm,
+        fields=record_fields,
+        extra=num_records,
+        formset=BaseRecordFormSet,
+        widgets={
+            'relp': RadioSelect,
+            'sex': RadioSelect
+        }
+    )
+    helper = CrispyFormSetHelper(
+        year=current.img.year,
+        form=current.sheet.form_type
+    )
 
     if request.method == 'POST':
-        formset = RecordFormSet(request.POST, request.FILES)
         
+        logger.info(f'enter_record view POST request')
+        formset = RecordFormSet(request.POST, request.FILES)
+        logger.info(f'{formset.is_valid()}')
+
         if formset.is_valid():
             for r in formset.cleaned_data:
                 r['sheet'] = current.sheet
@@ -308,6 +325,7 @@ def enter_records(request):
     
     context = {
         'formset': formset,
+        'helper': helper,
         'slug': current.img.img_path 
     }
     return render(request, 'EntryApp/enter-records.html', context)
@@ -453,24 +471,40 @@ class TestImageView(LoginRequiredMixin, TemplateView):
         context = {'slug': 'tester_tiff_autumn.tif'}
         return render(request, 'test_dummy_image.html', context)
 
-from EntryApp.forms import CrispyFormSetHelper #RecordForm
+from EntryApp.forms import CrispyFormSetHelper 
+import django.forms as forms
 
 def test_crispy_formset_view(request):
     '''
     View for testing django crispy formsets
     '''
 
-    field_q = FormField.objects.filter(year=1970).filter(form_type='long')
+    field_q = FormField.objects.filter(year=1990).filter(form_type='short')
     fields = [f.field_name for f in list(field_q)]
     logger.info(f'crispy formset fields are {fields}')
     TestCrispyFormset = modelformset_factory(
-            Record,
-            fields = fields,
-            extra = 2,
-            formset=BaseRecordFormSet
-        )
+        Record,
+        fields=fields,
+        extra=2,
+        formset=BaseRecordFormSet,
+        widgets = {
+            'relp_1960': forms.RadioSelect,
+            'relp_1970': forms.RadioSelect,
+            'relp_1980': forms.RadioSelect,
+            'relp_1990': forms.RadioSelect,
+            'sex': forms.RadioSelect,
+            'race_1960': forms.RadioSelect,
+            'race_1970': forms.RadioSelect,
+            'race_1980': forms.RadioSelect,
+            'race_1990': forms.RadioSelect,
+            'birth_quarter': forms.RadioSelect,
+            'birth_decade': forms.RadioSelect,
+            'birth_year': forms.RadioSelect,
+            'marital_status': forms.RadioSelect
+        }
+    )
     formset = TestCrispyFormset() 
-    helper = CrispyFormSetHelper(year=1970, form='long')
+    helper = CrispyFormSetHelper(year=1990, form='short')
     context = {
         'formset': formset,
         'helper': helper

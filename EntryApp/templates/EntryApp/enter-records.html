@@ -1,20 +1,26 @@
 {% extends "base.html" %}
 
+<style>
+    textinput {
+        max-width: 100%;
+    }
+</style>
+
 {% block header %}
         <h2>Step 3: Enter individual records from sheet</h2>
 {% endblock header %}
-{% block content %}        
-        <form method="post">
-            {{ formset.management_form }}
-            <table>
-                {% csrf_token %}
-                {{ formset }}
-            </table>
-            <input type="submit" value="Submit">
-        </form>
-        <div id="openseadragon1" style="width: 800px; height: 600px;"></div>
+{% block content %}    
+
+{% load crispy_forms_tags %}
+
+
+    <div id='crispyformset'>
+    {% crispy formset helper %}
+    </div>
+    <br>
+    <div id="openseadragon1" style="width: 800px; height: 600px;">
         <script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
-       <script type="text/javascript">
+        <script type="text/javascript">
             var Viewer = OpenSeadragon({
                 id: "openseadragon1",
                 prefixUrl: "/static/deepzoom/js/vendor/openseadragon/images/",
@@ -25,6 +31,7 @@
                 buildPyramid: false
             });
         </script>
+    </div>
 {% endblock content %}
 {% block logout %}
 {% endblock logout %}
