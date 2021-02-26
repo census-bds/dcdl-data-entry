@@ -54,8 +54,7 @@ BIRTH_QUARTER_CHOICES = [
     ('Oct-Dec', 'Jan-Mar'),
 ]
 
-BIRTH_YEAR_CHOICES = [(str(x), str(x)) for x in list(range(1,10))]
-
+SINGLE_DIGIT_CHOICES = [(str(x), str(x)) for x in list(range(1,10))]
 
 BIRTH_DECADE_CHOICES = [
     ('1850', '185-'),
@@ -70,6 +69,15 @@ BIRTH_DECADE_CHOICES = [
     ('1940', '194-'),
     ('1950', '195-'),
     ('1960', '196-')
+]
+
+BIRTH_CENTURY_CHOICES = [
+    ('8', '8'),
+    ('9', '9'),
+]
+
+BIRTH_MILLENIUM_CHOICES = [
+    ('1', '1')
 ]
 
 MARITAL_STATUS_CHOICES = [

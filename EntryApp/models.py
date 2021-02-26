@@ -248,6 +248,7 @@ class Record(models.Model):
             verbose_name="Line number"
         ) 
     serial_no = models.IntegerField(null=True, verbose_name="Serial number")
+    do_id = models.IntegerField(null=True, verbose_name="DO ID")
     block = models.CharField(max_length=50, null=True)
     sample_key_gq = models.CharField(
             max_length=50,
@@ -338,9 +339,9 @@ class Record(models.Model):
     birth_year = models.CharField(
             max_length=10,
             blank=False,
-            default=choices.BIRTH_YEAR_CHOICES[0],
+            default=choices.SINGLE_DIGIT_CHOICES[0],
             null=True,
-            choices=choices.BIRTH_YEAR_CHOICES,
+            choices=choices.SINGLE_DIGIT_CHOICES,
             verbose_name="Specific year of birth"
         )
     birth_quarter = models.CharField(
@@ -378,12 +379,220 @@ class Record(models.Model):
         null=True,
         verbose_name='Occupation'
         )
+
     total_persons = models.PositiveIntegerField(null=True)
+
+    # bubble fields
+
+
+    age_hundreds = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+    age_tens = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+    age_ones = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+
+    birth_year_thousands = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+    birth_year_hundreds = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+    birth_year_tens = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+    birth_year_ones = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+
+    block_1 = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+    block_2 = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+    block_3 = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+
+
+    serial_no_1 = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+    serial_no_2 = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+    serial_no_2 = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+    serial_no_3 = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+    serial_no_4 = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+    serial_no_5 = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+    serial_no_6 = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+    serial_no_7 = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+    serial_no_8 = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+    serial_no_9 = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+    serial_no_10 = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+    serial_no_11 = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+
+    total_persons_hundreds = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+    total_persons_tens = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
+    total_persons_ones = models.CharField(
+        null=True,
+        blank=False,
+        max_length=1,
+        verbose_name="",
+        choices=choices.SINGLE_DIGIT_CHOICES,
+        default=choices.SINGLE_DIGIT_CHOICES[0]
+    )
 
     # entry info
     timestamp =  models.DateTimeField(null=True)
-    is_illegible = models.BooleanField(blank=True, null=True)
-
 
     def __str__(self):
         return f'Record {self.row_num} {self.jbid} on {self.sheet}: {self.last_name, self.first_name}'
