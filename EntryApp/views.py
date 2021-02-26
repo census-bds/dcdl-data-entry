@@ -95,9 +95,8 @@ class BeginNewImageView(LoginRequiredMixin, FormView):
 
 def seed_current_entry(request):
     '''
-    Helper function for BeginNewImageView
-    Put dummy data into current entry table
-    I think I only need this once for each user... or fixtures make this irrelevant
+    Helper function for BeginNewImageView: Put dummy data into current entry
+     table. It should only be called for the first image for each user. 
     ''' 
     if CurrentEntry.objects.filter(jbid=request.user):
         return 
@@ -111,7 +110,7 @@ def seed_current_entry(request):
                                             img=an_image, \
                                             breaker = a_breaker, \
                                             sheet = None)
-        a_breaker.delete()
+        a_breaker.delete() # delete temp breaker from Breaker model
 
 
 def get_next_image(request):
@@ -233,7 +232,12 @@ class EnterSheetData(LoginRequiredMixin, FormView):
             # first save the data in Sheet 
             current_img = CurrentEntry.objects.get(jbid=request.user).img
 
-            associated_breaker = CurrentEntry.objects.get(jbid=request.user).breaker
+            # 1990 never has breakers, so assign the default dummy
+            if current_img.year == 1990:
+                # this breaker gets created for each user during data loading
+                associated_breaker = Breaker.objects.filter(year=1990).get(jbid=request.user)
+            else:
+                associated_breaker = CurrentEntry.objects.get(jbid=request.user).breaker
 
             logger.info(f"associated breaker: {type(associated_breaker)}")
             sheet, created = Sheet.objects.update_or_create(

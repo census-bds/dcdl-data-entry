@@ -48,6 +48,38 @@ def load_images(path, users, ext = "*.jpg"):
     return
 
 
+def create_1990_dummy_breakers(users):
+    '''
+    Create default breaker for 1990 for each user, plus associated dummy image
+    
+    1990 doesn't have breakers but they are required in the models. This 
+    function creates a dummy image and breaker for each user for 1990 to avoid
+    raising an error when a user enters a sheet without having entered a breaker.
+    Dummy images can be identified using the filename pattern 
+    "dummy_1990_breaker_JBID."
+   
+    Takes:
+    - list of string usernames
+    Returns: none
+    '''
+
+    for u in users:
+
+        img = Image.objects.create(
+            img_path=f'dummy_1990_breaker_{u}',
+            jbid=u,
+            is_complete=True,
+            year=1990,
+            image_type="breaker"
+        )
+
+        breaker = Breaker.objects.create(
+            year=1990,
+            jbid=u,
+            img=img
+        )
+
+
 def delete_model_data():
     '''
     Deletes all rows in specified tables
@@ -126,6 +158,7 @@ def refresh_db():
     delete_model_data()
     load_form_fields(FORM_FIELDS_CSV)
     load_images(IMAGE_DIR, ['jbid123', 'jbid456'])
+    create_1990_dummy_breakers(['jbid123', 'jbid456'])
 
 #================================#
 # AUTHENTICATION 
