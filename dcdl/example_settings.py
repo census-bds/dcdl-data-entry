@@ -62,7 +62,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'crispy_forms',
-    #'deepzoom.apps.DeepZoomAppConfig' #I'd like to get rid of this but it's throwing an error when I do because there is a deepzoom table in an old migration
 ]
 
 MIDDLEWARE = [
@@ -102,8 +101,12 @@ WSGI_APPLICATION = 'dcdl.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'census',
+        'USER': 'murra394',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '5432'
     }
 }
 
