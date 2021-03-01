@@ -7,6 +7,7 @@ import glob
 import json
 import logging
 import os
+import socket
 from pathlib import Path
 
 # from django.contrib.auth import User
@@ -16,8 +17,12 @@ from EntryApp.models import Image, Breaker, Sheet, Record, OtherImage, FormField
 
 logger = logging.getLogger('EntryApp.load_db')
 
-FORM_FIELDS_CSV = "Z:/1950-1980 censuses/cecile_dev/FormFields.csv"
-IMAGE_DIR = "Z:/1950-1980 censuses/cecile_dev/dcdl/images/"
+if socket.gethostname() == 'erd-web008-dev.compute.csp1.census.gov':
+    FORM_FIELDS_CSV = "/data/data/git/dcdl_data_entry/FormFields.csv"
+    IMAGE_DIR = '/data/data/git/dcdl_data_entry/images/'
+else: 
+    FORM_FIELDS_CSV = "Z:/1950-1980 censuses/cecile_dev/FormFields.csv"
+    IMAGE_DIR = "Z:/1950-1980 censuses/cecile_dev/dcdl/images/"
 
 
 def load_images(path, users, ext = "*.jpg"):
