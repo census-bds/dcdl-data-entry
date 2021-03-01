@@ -478,12 +478,12 @@ class TestImageView(LoginRequiredMixin, TemplateView):
 from EntryApp.forms import CrispyFormSetHelper 
 import django.forms as forms
 
-def test_crispy_formset_view(request):
+def test_crispy_formset_view(request, year):
     '''
     View for testing django crispy formsets
     '''
 
-    field_q = FormField.objects.filter(year=1970).filter(form_type='long')
+    field_q = FormField.objects.filter(year=year).filter(form_type='long')
     fields = [f.field_name for f in list(field_q)]
     logger.info(f'crispy formset fields are {fields}')
     TestCrispyFormset = modelformset_factory(
@@ -532,7 +532,7 @@ def test_crispy_formset_view(request):
         }
     )
     formset = TestCrispyFormset() 
-    helper = CrispyFormSetHelper(year=1970, form='long')
+    helper = CrispyFormSetHelper(year=year, form='long')
     context = {
         'formset': formset,
         'helper': helper

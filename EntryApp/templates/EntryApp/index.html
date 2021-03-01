@@ -21,9 +21,25 @@
     </form>
 {% endblock content %}
 {% block problem %}
+    <p>Click the buttons below to view sample record entry pages for each year.</p>
     <br>
-    <form action={% url 'EntryApp:test_crispy_formset' %}>
+    <form action={% url 'EntryApp:test_crispy_formset' 1960 %}>
         {% csrf_token %}
-        <input type="submit" value="crispy formset">
+        <input type="submit" value="View 1960">
+    </form>
+    <br>
+    <form action={% url 'EntryApp:test_crispy_formset' 1970 %}>
+        {% csrf_token %}
+        <input type="submit" value="View 1970">
+    </form>
+    <br>
+    <form action={% url 'EntryApp:test_crispy_formset' 1980 %}>
+        {% csrf_token %}
+        <input type="submit" value="View 1980">
+    </form>
+    <br>
+    <form action={% url 'EntryApp:test_crispy_formset' 1990 %}>
+        {% csrf_token %}
+        <input type="submit" value="View 1990">
     </form>
 {% endblock problem %}
