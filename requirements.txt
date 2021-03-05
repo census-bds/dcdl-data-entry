@@ -15,7 +15,6 @@ backports.os==0.1.1
 backports.shutil-get-terminal-size==1.0.0
 backports.tempfile==1.0
 backports.weakref==1.0.post1
-beautifulsoup4==4.7.1
 bitarray==0.9.3
 bkcharts==0.2
 bleach==3.1.0
@@ -45,7 +44,6 @@ defusedxml==0.6.0
 distributed==2.1.0
 Django==3.1.1
 django-crispy-forms==1.11.0
-django-deepzoom==3.0.3
 django-queryset-csv==1.1.0
 docutils==0.14
 entrypoints==0.3
