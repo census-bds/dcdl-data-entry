@@ -9,11 +9,11 @@ import datetime
 import logging
 import re
 
-from django.http import HttpResponse, Http404
+from django.http import HttpResponse, Http404, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse 
 from django.views.generic import View, FormView, TemplateView, CreateView
-from django.forms import modelformset_factory
+from django.forms import formset_factory, modelformset_factory, RadioSelect
 from django.contrib.auth.models import Permission, User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -22,7 +22,7 @@ from django.template import RequestContext, loader
 from djqscsv import render_to_csv_response
 
 from EntryApp.models import Image, Breaker, OtherImage, Sheet, Record, CurrentEntry, FormField
-from EntryApp.forms import ImageForm, SheetForm, BreakerForm, BaseRecordFormSet, BaseBreakerFormSet, ExportForm, ProblemForm
+from EntryApp.forms import ImageForm, SheetForm, BreakerForm, RecordForm, BaseRecordFormSet, BaseBreakerFormSet, ExportForm, ProblemForm
 
 logger = logging.getLogger('EntryApp.views')
 
@@ -95,9 +95,8 @@ class BeginNewImageView(LoginRequiredMixin, FormView):
 
 def seed_current_entry(request):
     '''
-    Helper function for BeginNewImageView
-    Put dummy data into current entry table
-    I think I only need this once for each user... or fixtures make this irrelevant
+    Helper function for BeginNewImageView: Put dummy data into current entry
+     table. It should only be called for the first image for each user. 
     ''' 
     if CurrentEntry.objects.filter(jbid=request.user):
         return 
@@ -111,7 +110,7 @@ def seed_current_entry(request):
                                             img=an_image, \
                                             breaker = a_breaker, \
                                             sheet = None)
-        a_breaker.delete()
+        a_breaker.delete() # delete temp breaker from Breaker model
 
 
 def get_next_image(request):
@@ -233,7 +232,12 @@ class EnterSheetData(LoginRequiredMixin, FormView):
             # first save the data in Sheet 
             current_img = CurrentEntry.objects.get(jbid=request.user).img
 
-            associated_breaker = CurrentEntry.objects.get(jbid=request.user).breaker
+            # 1990 never has breakers, so assign the default dummy
+            if current_img.year == 1990:
+                # this breaker gets created for each user during data loading
+                associated_breaker = Breaker.objects.filter(year=1990).get(jbid=request.user)
+            else:
+                associated_breaker = CurrentEntry.objects.get(jbid=request.user).breaker
 
             logger.info(f"associated breaker: {type(associated_breaker)}")
             sheet, created = Sheet.objects.update_or_create(
@@ -282,12 +286,29 @@ def enter_records(request):
     record_fields = [f.field_name for f in list(field_query)]
     logger.info(f'form records fields are {record_fields}')
 
-    RecordFormSet = modelformset_factory(Record, fields=record_fields, extra=num_records, formset=BaseRecordFormSet)
-    
+
+    RecordFormSet = modelformset_factory(
+        Record,
+        form=RecordForm,
+        fields=record_fields,
+        extra=num_records,
+        formset=BaseRecordFormSet,
+        # widgets={
+        #     'relp': RadioSelect,
+        #     'sex': RadioSelect
+        # }
+    )
+    helper = CrispyFormSetHelper(
+        year=current.img.year,
+        form=current.sheet.form_type
+    )
 
     if request.method == 'POST':
-        formset = RecordFormSet(request.POST, request.FILES)
         
+        logger.info(f'enter_record view POST request')
+        formset = RecordFormSet(request.POST, request.FILES)
+        logger.info(f'{formset.is_valid()}')
+
         if formset.is_valid():
             for r in formset.cleaned_data:
                 r['sheet'] = current.sheet
@@ -308,6 +329,7 @@ def enter_records(request):
     
     context = {
         'formset': formset,
+        'helper': helper,
         'slug': current.img.img_path 
     }
     return render(request, 'EntryApp/enter-records.html', context)
@@ -441,7 +463,7 @@ def report_problem(request):
         )
 
 #================================#
-# DUMMY VIEW
+# DUMMY VIEWS
 #================================#
 
 class TestImageView(LoginRequiredMixin, TemplateView):
@@ -452,3 +474,67 @@ class TestImageView(LoginRequiredMixin, TemplateView):
     def get(self, request):
         context = {'slug': 'tester_tiff_autumn.tif'}
         return render(request, 'test_dummy_image.html', context)
+
+from EntryApp.forms import CrispyFormSetHelper 
+import django.forms as forms
+
+def test_crispy_formset_view(request, year):
+    '''
+    View for testing django crispy formsets
+    '''
+
+    field_q = FormField.objects.filter(year=year).filter(form_type='long')
+    fields = [f.field_name for f in list(field_q)]
+    logger.info(f'crispy formset fields are {fields}')
+    TestCrispyFormset = modelformset_factory(
+        Record,
+        fields=fields,
+        extra=2,
+        formset=BaseRecordFormSet,
+        widgets = {
+            'relp_1960': forms.RadioSelect,
+            'relp_1970': forms.RadioSelect,
+            'relp_1980': forms.RadioSelect,
+            'relp_1990': forms.RadioSelect,
+            'sex': forms.RadioSelect,
+            'race_1960': forms.RadioSelect,
+            'race_1970': forms.RadioSelect,
+            'race_1980': forms.RadioSelect,
+            'race_1990': forms.RadioSelect,
+            'birth_quarter': forms.RadioSelect,
+            'birth_decade': forms.RadioSelect,
+            'birth_year': forms.RadioSelect,
+            'marital_status': forms.RadioSelect,
+            'age_hundreds': forms.RadioSelect,
+            'age_tens': forms.RadioSelect,
+            'age_ones': forms.RadioSelect,
+            'birth_year_thousands': forms.RadioSelect,
+            'birth_year_hundreds': forms.RadioSelect,
+            'birth_year_tens': forms.RadioSelect,
+            'birth_year_ones': forms.RadioSelect,
+            'block_1': forms.RadioSelect,
+            'block_2': forms.RadioSelect,
+            'block_3': forms.RadioSelect,
+            'serial_no_1':forms.RadioSelect,
+            'serial_no_2':forms.RadioSelect,
+            'serial_no_3':forms.RadioSelect,
+            'serial_no_4':forms.RadioSelect,
+            'serial_no_5':forms.RadioSelect,
+            'serial_no_6':forms.RadioSelect,
+            'serial_no_7':forms.RadioSelect,
+            'serial_no_8':forms.RadioSelect,
+            'serial_no_9':forms.RadioSelect,
+            'serial_no_10':forms.RadioSelect,
+            'serial_no_11':forms.RadioSelect,
+            'total_persons_hundreds': forms.RadioSelect,
+            'total_persons_tens': forms.RadioSelect,
+            'total_persons_ones': forms.RadioSelect,
+        }
+    )
+    formset = TestCrispyFormset() 
+    helper = CrispyFormSetHelper(year=year, form='long')
+    context = {
+        'formset': formset,
+        'helper': helper
+    }
+    return render(request, 'EntryApp/test-crispy-formset.html', context)

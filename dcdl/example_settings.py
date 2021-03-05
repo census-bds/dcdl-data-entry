@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'k(s+j_igqpx6tvpvs0$ke1^#%qrds))13skh_es^$ul0ut0j08'
+SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -61,7 +61,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'deepzoom.apps.DeepZoomAppConfig' #I'd like to get rid of this but it's throwing an error when I do because there is a deepzoom table in an old migration
+    'crispy_forms',
 ]
 
 MIDDLEWARE = [
@@ -101,8 +101,12 @@ WSGI_APPLICATION = 'dcdl.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'census',
+        'USER': 'murra394',
+        'PASSWORD': '',
+        'HOST': 'localhost',
+        'PORT': '5432'
     }
 }
 

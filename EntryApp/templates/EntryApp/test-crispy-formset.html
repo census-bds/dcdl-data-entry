@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+<style>
+    textinput {
+        max-width: 100%;
+    }
+    .flex-container {
+        display:inline-flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+        justify-content: flex-start;
+    }
+    .flex-container:after {
+        display:block;
+    }
+</style>
+
+{% block header %}
+<h2>Crispy form test page</h2>
+{% endblock header %}
+
+{% block content %}
+
+{% load crispy_forms_tags %}
+<div class='flex-container'>
+    <div id="openseadragon1" style="width: 20%; height: 800px;"></div>
+        <script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
+       <script type="text/javascript">
+            var Viewer = OpenSeadragon({
+                id: "openseadragon1",
+                prefixUrl: "/static/deepzoom/js/vendor/openseadragon/images/",
+                tileSources: {
+                    type: 'image',
+                    url: "/images/fake_IMG_0.jpg"
+                },
+                buildPyramid: false
+            });
+        </script>
+        </div>
+            
+        <div class='flex-container'>
+            <div id='the_crispy_formset' class='container-fluid'>
+                This is the crispy formset.
+            </div>
+            {% crispy formset helper %}
+        </div>
+    
+    
+    {% endblock content %}
+
+
+
+{% block problem %}
+{% endblock problem %}
