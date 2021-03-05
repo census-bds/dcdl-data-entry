@@ -1,3 +1,6 @@
+# django setttings for DCDL
+dcdl/settings.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
