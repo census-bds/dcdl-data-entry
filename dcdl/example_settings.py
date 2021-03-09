@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ''
+SECRET_KEY = '' 
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -60,7 +60,6 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     'crispy_forms',
 ]
 
@@ -102,11 +101,11 @@ WSGI_APPLICATION = 'dcdl.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'census',
-        'USER': 'murra394',
-        'PASSWORD': '',
-        'HOST': 'localhost',
-        'PORT': '5432'
+        'NAME': 'dev', 
+        'USER': 'django_user',                      # Not used with sqlite3.
+        'PASSWORD':'dcdl', # Not used with sqlite3.
+        'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
+        'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
 
@@ -149,11 +148,9 @@ LOGIN_REDIRECT_URL = '/EntryApp/'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
-STATIC_URL = '/static/'
-STATIC_ROOT = 'Z:/1950-1980 censuses/cecile_dev/dcdl/static'
 
 MEDIA_URL = '/images/' # this is the thing to change
-MEDIA_ROOT = 'Z:/1950-1980 censuses/cecile_dev/dcdl/images'
+MEDIA_ROOT = '/data/data/images'
 
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'boot'), 
