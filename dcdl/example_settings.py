@@ -103,7 +103,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'dev', 
         'USER': 'django_user',                      # Not used with sqlite3.
-        'PASSWORD':'dcdl', # Not used with sqlite3.
+        'PASSWORD':'', # ADD PASSWORD HERE Not used with sqlite3.
         'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
     }
