@@ -10,7 +10,6 @@ import os
 import socket
 from pathlib import Path
 
-# from django.contrib.auth import User
 from django.db import connection
 
 from EntryApp.models import Image, Breaker, Sheet, Record, OtherImage, FormField, CurrentEntry
