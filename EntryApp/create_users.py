@@ -7,7 +7,7 @@ import pathlib
 import pandas as pd
 
 from django.contrib.auth.models import User, Group, Permission
-from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.hashers import make_password
 from EntryApp.models import Image
 
 # expects the csv with user data to be in root of project (git repo level)
@@ -63,19 +63,19 @@ def create_entry_users(jbids=['jbid123', 'jbid456'], pws=['dcdl1980', 'dcdl1980'
         raise ValueError
 
     while jbids:
-        user = User(
-            # TO DO: id field here?
+        user, _ = User.objects.get_or_create(
             username=jbids.pop(),
-            password=pws.pop()
+            password=make_password(pws.pop())
         )
-        user.groups.add('data_entry')
+        group_id = Group.objects.get(name='data_entry').id
+        user.groups.add(group_id)
         user.save()
 
 
 def add_entry_user(jbid, pw):
     '''
     Add a new user to the data entry group
-    Populate Image model with blank records for that user
+    Option to populate Image model with blank records for that user
 
     Takes:
     - string username (jbid)
@@ -84,13 +84,13 @@ def add_entry_user(jbid, pw):
     - None
     '''
 
-    user = User(
-        # TO DO: id field here? create method?
+    user, _ = User.objects.get_or_create(
         username=jbid,
-        password=pw
+        password=make_password(pw)
     )
-    user.groups.add('data_entry')
-    user.save()
+    group_id = Group.objects.get(name='data_entry').id
+    user.groups.add(group_id)
+    user.save()        
 
 
 def bulk_load_entry_users(path=USER_INFO):
@@ -105,4 +105,7 @@ def bulk_load_entry_users(path=USER_INFO):
 
     df = pd.read_csv(path)
     df.apply(lambda x: add_entry_user(x.jbid, x.password), axis=1)
+
+
+# import EntryApp.create_users as users
 

@@ -18,7 +18,7 @@ from EntryApp.models import Image, Breaker, Sheet, Record, OtherImage, FormField
 logger = logging.getLogger('EntryApp.load_db')
 
 if socket.gethostname() == 'erd-web008-dev.compute.csp1.census.gov':
-    FORM_FIELDS_CSV = os.path.join(Path(__file__).parent.absolute(), 'FormFields.csv')
+    FORM_FIELDS_CSV = os.path.join(Path(__file__).parent.parent.absolute(), 'form_fields.csv')
     IMAGE_DIR = '/data/data/git/images/'
 else: 
     FORM_FIELDS_CSV = "Z:/1950-1980 censuses/cecile_dev/FormFields.csv"
