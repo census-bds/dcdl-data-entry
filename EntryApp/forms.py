@@ -188,7 +188,7 @@ class CrispyFormSetHelper(FormHelper):
     def __init__(self, year, form, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.form_method='POST'
-        self.form_class='form-inline'
+        self.form_class='form-inline col-8'
         self.label_class = 'sr-only'
         self.layout = layouts.FORM_DICT[year][form]
         self.render_required_fields=True

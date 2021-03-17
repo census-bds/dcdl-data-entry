@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '' 
+SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -60,6 +60,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.staticfiles',
     'crispy_forms',
 ]
 
@@ -103,7 +104,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'dcdl_dev', 
         'USER': 'django_user',                      # Not used with sqlite3.
-        'PASSWORD':'', # ADD PASSWORD HERE Not used with sqlite3.
+        'PASSWORD':'', # ADD PASSWORD HERE
         'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
     }
@@ -148,11 +149,14 @@ LOGIN_REDIRECT_URL = '/EntryApp/'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+
 
 MEDIA_URL = '/images/' # this is the thing to change
-MEDIA_ROOT = '/data/data/images'
+MEDIA_ROOT = '/data/data/git/images'
 
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'boot'), 
-    os.path.join(BASE_DIR, 'static'), 
+    # os.path.join(BASE_DIR, 'boot'), 
+    '/data/data/git/openseadragon/images/',
 )
