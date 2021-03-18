@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = ''
+SECRET_KEY = '' 
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -60,7 +60,6 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-    'django.contrib.staticfiles',
     'crispy_forms',
 ]
 
@@ -102,9 +101,9 @@ WSGI_APPLICATION = 'dcdl.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dcdl_dev', 
+        'NAME': 'dcdl_prod', 
         'USER': 'django_user',                      # Not used with sqlite3.
-        'PASSWORD':'', # ADD PASSWORD HERE
+        'PASSWORD':'', # ADD PASSWORD HERE Not used with sqlite3.
         'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
     }
@@ -151,7 +150,6 @@ LOGIN_REDIRECT_URL = '/EntryApp/'
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-
 
 MEDIA_URL = '/images/' # this is the thing to change
 MEDIA_ROOT = '/data/data/git/images'
