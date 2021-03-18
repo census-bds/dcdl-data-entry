@@ -101,7 +101,7 @@ WSGI_APPLICATION = 'dcdl.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dcdl_prod', 
+        'NAME': 'dcdl_test', 
         'USER': 'django_user',                      # Not used with sqlite3.
         'PASSWORD':'', # ADD PASSWORD HERE Not used with sqlite3.
         'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
