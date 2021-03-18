@@ -10,34 +10,38 @@ import os
 import socket
 from pathlib import Path
 
-# from django.contrib.auth import User
 from django.db import connection
+from django.contrib.auth.models import Group
 
 from EntryApp.models import Image, Breaker, Sheet, Record, OtherImage, FormField, CurrentEntry
 
 logger = logging.getLogger('EntryApp.load_db')
 
 if socket.gethostname() == 'erd-web008-dev.compute.csp1.census.gov':
-    FORM_FIELDS_CSV = "/data/data/git/dcdl_data_entry/FormFields.csv"
-    IMAGE_DIR = '/data/data/git/dcdl_data_entry/images/'
+    FORM_FIELDS_CSV = os.path.join(Path(__file__).parent.parent.absolute(), 'form_fields.csv')
+    IMAGE_DIR = '/data/data/git/images/'
 else: 
     FORM_FIELDS_CSV = "Z:/1950-1980 censuses/cecile_dev/FormFields.csv"
     IMAGE_DIR = "Z:/1950-1980 censuses/cecile_dev/dcdl/images/"
 
 
-def load_images(path, users, ext = "*.jpg"):
+def load_images(path, users=[], ext = "*.jpg"):
     '''
-    Loads images into the DB, 1 row per image-user
+    Loads images into the DB, 1 row per entry-user
 
     Takes: 
     - string filepath
-    - list of username strings
+    - list of username strings (default all in data_entry group)
     - file extension (default .jpg)
     Returns: none
     '''
 
     files = glob.glob(path + ext)
     print(files)
+
+    if not users:
+        g = Group.objects.get(name='data_entry')
+        users = [u.username for u in g.user_set.all()]
 
     for f in files:
         for u in users:
@@ -67,6 +71,10 @@ def create_1990_dummy_breakers(users):
     - list of string usernames
     Returns: none
     '''
+
+    if not users:
+        g = Group.objects.get(name='data_entry')
+        users = [u.username for u in g.user_set.all()]
 
     for u in users:
 
@@ -159,34 +167,19 @@ def load_form_fields(field_tbl_path, reload=True):
 def refresh_db():
     '''
     Convenience function to wipe existing rows and reload Images
+    INTENDED FOR DEV ONLY
     '''
     delete_model_data()
     load_form_fields(FORM_FIELDS_CSV)
     load_images(IMAGE_DIR, ['jbid123', 'jbid456'])
     create_1990_dummy_breakers(['jbid123', 'jbid456'])
 
-#================================#
-# AUTHENTICATION 
-#================================#
 
-def create_entry_group():
+def bulk_load_db():
     '''
-    Creates the entry group with relevant permissions
+    Function to load form fields, images, and dummy 1990 breakers
+    FOR PRODUCTION
     '''
-    pass
-
-
-def create_users(usernames, pws, emails=[]):
-    '''
-    Create entry accounts for the data entry users
-
-    Takes:
-    - list of string usernames
-    - list of string passwords
-    - optional list of string emails
-    '''
-
-    if emails and len(usernames) != len(emails):
-        raise IndexError('List of users is not the same length as list of emails.')
-
-    pass
+    load_form_fields(FORM_FIELDS_CSV)
+    load_images(IMAGE_DIR, [])
+    create_1990_dummy_breakers([])

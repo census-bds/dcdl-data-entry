@@ -101,7 +101,7 @@ class Breaker(models.Model):
         Image,
         on_delete=models.CASCADE
     )
-    jbid = models.CharField(max_length=7)
+    jbid = models.CharField(max_length=7, default='jbid000')
     timestamp =  models.DateTimeField(null=True)
     problem = models.BooleanField(default=False)
 
@@ -164,7 +164,7 @@ class Sheet(models.Model):
         Breaker,
         on_delete=models.CASCADE
     )
-    jbid = models.CharField(max_length=7) 
+    jbid = models.CharField(max_length=7, default='jbid000') 
 
     # auto-filled, not required
     timestamp =  models.DateTimeField(null=True)
@@ -194,11 +194,14 @@ class OtherImage(models.Model):
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields = ['img', 'jbid'], name='unique_other_entry')
+            models.UniqueConstraint(
+                fields = ['img', 'jbid'],
+                name='unique_other_entry'
+            )
         ]
 
     img = models.ForeignKey(Image, on_delete=models.CASCADE)
-    jbid = models.CharField(max_length=7)
+    jbid = models.CharField(max_length=7, default='jbid000')
     year = models.PositiveIntegerField(choices=choices.YEAR_CHOICES)
     description = models.TextField(max_length=500)
     timestamp =  models.DateTimeField(null=True)
@@ -226,7 +229,7 @@ class Record(models.Model):
             verbose_name='Column number',
             null=True
         )
-    jbid = models.CharField(max_length=7) 
+    jbid = models.CharField(max_length=7, default='jbid000') 
 
     # fields common among all year-forms
     first_name = models.CharField(max_length=50, null=True)
@@ -388,7 +391,7 @@ class Record(models.Model):
     age_hundreds = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=10,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -396,7 +399,7 @@ class Record(models.Model):
     age_tens = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=10,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -404,7 +407,7 @@ class Record(models.Model):
     age_ones = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=10,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -413,7 +416,7 @@ class Record(models.Model):
     birth_year_thousands = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=10,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -421,7 +424,7 @@ class Record(models.Model):
     birth_year_hundreds = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=10,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -429,7 +432,7 @@ class Record(models.Model):
     birth_year_tens = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=10,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -437,7 +440,7 @@ class Record(models.Model):
     birth_year_ones = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=10,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -446,7 +449,7 @@ class Record(models.Model):
     block_1 = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=2,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -454,7 +457,7 @@ class Record(models.Model):
     block_2 = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=2,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -462,7 +465,7 @@ class Record(models.Model):
     block_3 = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=2,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -472,7 +475,7 @@ class Record(models.Model):
     serial_no_1 = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=2,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -480,7 +483,7 @@ class Record(models.Model):
     serial_no_2 = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=2,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -488,7 +491,7 @@ class Record(models.Model):
     serial_no_2 = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=2,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -496,7 +499,7 @@ class Record(models.Model):
     serial_no_3 = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=2,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -504,7 +507,7 @@ class Record(models.Model):
     serial_no_4 = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=2,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -512,7 +515,7 @@ class Record(models.Model):
     serial_no_5 = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=2,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -520,7 +523,7 @@ class Record(models.Model):
     serial_no_6 = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=2,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -528,7 +531,7 @@ class Record(models.Model):
     serial_no_7 = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=2,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -536,7 +539,7 @@ class Record(models.Model):
     serial_no_8 = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=2,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -544,7 +547,7 @@ class Record(models.Model):
     serial_no_9 = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=2,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -552,7 +555,7 @@ class Record(models.Model):
     serial_no_10 = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=2,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -560,7 +563,7 @@ class Record(models.Model):
     serial_no_11 = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=2,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -569,7 +572,7 @@ class Record(models.Model):
     total_persons_hundreds = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=2,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -577,7 +580,7 @@ class Record(models.Model):
     total_persons_tens = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=2,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -585,7 +588,7 @@ class Record(models.Model):
     total_persons_ones = models.CharField(
         null=True,
         blank=False,
-        max_length=1,
+        max_length=2,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]

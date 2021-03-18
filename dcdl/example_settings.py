@@ -148,11 +148,13 @@ LOGIN_REDIRECT_URL = '/EntryApp/'
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/images/' # this is the thing to change
-MEDIA_ROOT = '/data/data/images'
+MEDIA_ROOT = '/data/data/git/images'
 
 STATICFILES_DIRS = (
-    os.path.join(BASE_DIR, 'boot'), 
-    os.path.join(BASE_DIR, 'static'), 
+    # os.path.join(BASE_DIR, 'boot'), 
+    '/data/data/git/openseadragon/images/',
 )

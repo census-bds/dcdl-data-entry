@@ -4,15 +4,10 @@
     textinput {
         max-width: 100%;
     }
-    .flex-container {
-        display:inline-flex;
-        flex-wrap: wrap;
-        flex-direction: row;
-        justify-content: flex-start;
+    .row {
+        display:flex;
     }
-    .flex-container:after {
-        display:block;
-    }
+   
 </style>
 
 {% block header %}
@@ -23,27 +18,31 @@
 
 {% load crispy_forms_tags %}
 <div class='flex-container'>
-    <div id="openseadragon1" style="width: 20%; height: 800px;"></div>
+<div class='row' >
+    <div class='col-lg-3'>
+        <div id="openseadragon1" style="width: 95%; height: 800px;"></div>
         <script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
-       <script type="text/javascript">
-            var Viewer = OpenSeadragon({
-                id: "openseadragon1",
-                prefixUrl: "/static/deepzoom/js/vendor/openseadragon/images/",
-                tileSources: {
-                    type: 'image',
-                    url: "/images/fake_IMG_0.jpg"
-                },
-                buildPyramid: false
-            });
-        </script>
+        <script type="text/javascript">
+                var Viewer = OpenSeadragon({
+                    id: "openseadragon1",
+                    prefixUrl: "/static/images/",
+                    tileSources: {
+                        type: 'image',
+                        url: "/images/fake_IMG_0.jpg"
+                    },
+                    buildPyramid: false
+                });
+            </script>    
+    </div>
+    
+    <div class='col-lg-8'>
+        <div id='the_crispy_formset' class='container-fluid col-8'>
+            This is the crispy formset.
         </div>
-            
-        <div class='flex-container'>
-            <div id='the_crispy_formset' class='container-fluid'>
-                This is the crispy formset.
-            </div>
-            {% crispy formset helper %}
-        </div>
+        {% crispy formset helper %}
+    </div>
+</div>
+</div>
     
     
     {% endblock content %}
