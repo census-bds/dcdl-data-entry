@@ -15,11 +15,11 @@ USER_INFO = os.path.join(pathlib.Path(__file__).parent.parent.absolute(), 'user_
 
 DATA_MODELS = [
         'breaker',
-        # 'current entry',
+        'currententry',
         'image',
         'sheet',
         'record',
-        # 'other image'
+        'otherimage'
     ]
 
 
@@ -39,7 +39,7 @@ def create_entry_group(data_models=DATA_MODELS):
     
     for d in data_models:
         for p in ['add', 'change', 'view']:
-            print(f'can_{p}_{d}')
+            print(f'Can {p} {d}')
             perm = Permission.objects.get(
                 codename=f'can_{p}_{d}'
             )
