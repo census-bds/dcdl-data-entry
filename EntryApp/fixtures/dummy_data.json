@@ -1,0 +1,3064 @@
+[
+{
+  "model": "EntryApp.image",
+  "pk": 41,
+  "fields": {
+    "img_path": "fake_IMG_0",
+    "jbid": "jbid123",
+    "year": 1960,
+    "image_type": "breaker",
+    "is_complete": true,
+    "date_complete": null,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.image",
+  "pk": 42,
+  "fields": {
+    "img_path": "fake_IMG_1",
+    "jbid": "jbid123",
+    "year": 1960,
+    "image_type": "sheet",
+    "is_complete": true,
+    "date_complete": null,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.image",
+  "pk": 43,
+  "fields": {
+    "img_path": "fake_IMG_2",
+    "jbid": "jbid123",
+    "year": 1970,
+    "image_type": "breaker",
+    "is_complete": true,
+    "date_complete": null,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.image",
+  "pk": 44,
+  "fields": {
+    "img_path": "fake_IMG_3",
+    "jbid": "jbid123",
+    "year": 1970,
+    "image_type": "sheet",
+    "is_complete": false,
+    "date_complete": null,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.image",
+  "pk": 45,
+  "fields": {
+    "img_path": "fake_IMG_4",
+    "jbid": "jbid123",
+    "year": null,
+    "image_type": null,
+    "is_complete": false,
+    "date_complete": null,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.image",
+  "pk": 46,
+  "fields": {
+    "img_path": "fake_IMG_5",
+    "jbid": "jbid123",
+    "year": null,
+    "image_type": null,
+    "is_complete": false,
+    "date_complete": null,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.image",
+  "pk": 47,
+  "fields": {
+    "img_path": "fake_IMG_6",
+    "jbid": "jbid123",
+    "year": null,
+    "image_type": null,
+    "is_complete": false,
+    "date_complete": null,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.image",
+  "pk": 48,
+  "fields": {
+    "img_path": "fake_IMG_7",
+    "jbid": "jbid123",
+    "year": null,
+    "image_type": null,
+    "is_complete": false,
+    "date_complete": null,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.image",
+  "pk": 49,
+  "fields": {
+    "img_path": "fake_IMG_8",
+    "jbid": "jbid123",
+    "year": null,
+    "image_type": null,
+    "is_complete": false,
+    "date_complete": null,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.image",
+  "pk": 50,
+  "fields": {
+    "img_path": "fake_IMG_9",
+    "jbid": "jbid123",
+    "year": null,
+    "image_type": null,
+    "is_complete": false,
+    "date_complete": null,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.image",
+  "pk": 51,
+  "fields": {
+    "img_path": "fake_IMG_0",
+    "jbid": "jbid456",
+    "year": 1970,
+    "image_type": "breaker",
+    "is_complete": true,
+    "date_complete": null,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.image",
+  "pk": 52,
+  "fields": {
+    "img_path": "fake_IMG_1",
+    "jbid": "jbid456",
+    "year": 1970,
+    "image_type": "sheet",
+    "is_complete": true,
+    "date_complete": null,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.image",
+  "pk": 53,
+  "fields": {
+    "img_path": "fake_IMG_2",
+    "jbid": "jbid456",
+    "year": null,
+    "image_type": null,
+    "is_complete": false,
+    "date_complete": null,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.image",
+  "pk": 54,
+  "fields": {
+    "img_path": "fake_IMG_3",
+    "jbid": "jbid456",
+    "year": null,
+    "image_type": null,
+    "is_complete": false,
+    "date_complete": null,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.image",
+  "pk": 55,
+  "fields": {
+    "img_path": "fake_IMG_4",
+    "jbid": "jbid456",
+    "year": null,
+    "image_type": null,
+    "is_complete": false,
+    "date_complete": null,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.image",
+  "pk": 56,
+  "fields": {
+    "img_path": "fake_IMG_5",
+    "jbid": "jbid456",
+    "year": null,
+    "image_type": null,
+    "is_complete": false,
+    "date_complete": null,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.image",
+  "pk": 57,
+  "fields": {
+    "img_path": "fake_IMG_6",
+    "jbid": "jbid456",
+    "year": null,
+    "image_type": null,
+    "is_complete": false,
+    "date_complete": null,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.image",
+  "pk": 58,
+  "fields": {
+    "img_path": "fake_IMG_7",
+    "jbid": "jbid456",
+    "year": null,
+    "image_type": null,
+    "is_complete": false,
+    "date_complete": null,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.image",
+  "pk": 59,
+  "fields": {
+    "img_path": "fake_IMG_8",
+    "jbid": "jbid456",
+    "year": null,
+    "image_type": null,
+    "is_complete": false,
+    "date_complete": null,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.image",
+  "pk": 60,
+  "fields": {
+    "img_path": "fake_IMG_9",
+    "jbid": "jbid456",
+    "year": null,
+    "image_type": null,
+    "is_complete": false,
+    "date_complete": null,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.breaker",
+  "pk": 12,
+  "fields": {
+    "img": 41,
+    "jbid": "jbid123",
+    "year": null,
+    "state": null,
+    "county": null,
+    "enum_dist": null,
+    "mcd": null,
+    "tract": null,
+    "place": null,
+    "smsa": null
+  }
+},
+{
+  "model": "EntryApp.breaker",
+  "pk": 13,
+  "fields": {
+    "img": 51,
+    "jbid": "jbid456",
+    "year": 1970,
+    "state": "OH",
+    "county": "Cuyahoga",
+    "enum_dist": null,
+    "mcd": null,
+    "tract": null,
+    "place": null,
+    "smsa": null
+  }
+},
+{
+  "model": "EntryApp.sheet",
+  "pk": 1,
+  "fields": {
+    "img": 52,
+    "breaker": 13,
+    "jbid": "jbid456",
+    "year": 1970,
+    "form_type": "short",
+    "num_records": 2,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.sheet",
+  "pk": 2,
+  "fields": {
+    "img": 42,
+    "breaker": 12,
+    "jbid": "jbid123",
+    "year": 1960,
+    "form_type": "long",
+    "num_records": 2,
+    "problem": false
+  }
+},
+{
+  "model": "EntryApp.record",
+  "pk": 24,
+  "fields": {
+    "sheet": 1,
+    "page_num": null,
+    "row_num": null,
+    "col_num": null,
+    "jbid": "jbid456",
+    "first_name": "Cecile",
+    "middle_init": "M",
+    "last_name": "Murray",
+    "age": 34,
+    "sex": true,
+    "race": null,
+    "page_no": null,
+    "line_no": null,
+    "serial_no": null,
+    "block": null,
+    "sample_key_gq": null,
+    "relp": null,
+    "ind": null,
+    "occp": null,
+    "hhincome": null,
+    "educ": null,
+    "citizenship": null,
+    "ancestry": null,
+    "birth_year": null,
+    "birth_month": "January",
+    "birth_quarter": null,
+    "total_persons": null,
+    "entry_time": "2020-12-01T01:55:10.426Z",
+    "is_illegible": null
+  }
+},
+{
+  "model": "EntryApp.record",
+  "pk": 25,
+  "fields": {
+    "sheet": 1,
+    "page_num": null,
+    "row_num": null,
+    "col_num": null,
+    "jbid": "jbid456",
+    "first_name": "Jane",
+    "middle_init": "W",
+    "last_name": "Smith",
+    "age": 18,
+    "sex": true,
+    "race": null,
+    "page_no": null,
+    "line_no": null,
+    "serial_no": null,
+    "block": null,
+    "sample_key_gq": null,
+    "relp": null,
+    "ind": null,
+    "occp": null,
+    "hhincome": null,
+    "educ": null,
+    "citizenship": null,
+    "ancestry": null,
+    "birth_year": null,
+    "birth_month": "July",
+    "birth_quarter": null,
+    "total_persons": null,
+    "entry_time": "2020-12-01T01:55:10.891Z",
+    "is_illegible": null
+  }
+},
+{
+  "model": "EntryApp.record",
+  "pk": 26,
+  "fields": {
+    "sheet": 2,
+    "page_num": 1,
+    "row_num": 1,
+    "col_num": null,
+    "jbid": "jbid123",
+    "first_name": "John",
+    "middle_init": null,
+    "last_name": "Williams",
+    "age": null,
+    "sex": false,
+    "race": "white",
+    "page_no": null,
+    "line_no": null,
+    "serial_no": null,
+    "block": null,
+    "sample_key_gq": null,
+    "relp": "self",
+    "ind": null,
+    "occp": null,
+    "hhincome": null,
+    "educ": null,
+    "citizenship": null,
+    "ancestry": null,
+    "birth_year": null,
+    "birth_month": null,
+    "birth_quarter": null,
+    "total_persons": null,
+    "entry_time": "2020-12-17T20:56:12.255Z",
+    "is_illegible": null
+  }
+},
+{
+  "model": "EntryApp.record",
+  "pk": 27,
+  "fields": {
+    "sheet": 2,
+    "page_num": 1,
+    "row_num": 2,
+    "col_num": null,
+    "jbid": "jbid123",
+    "first_name": "Jane",
+    "middle_init": null,
+    "last_name": "Williams",
+    "age": null,
+    "sex": true,
+    "race": "white",
+    "page_no": null,
+    "line_no": null,
+    "serial_no": null,
+    "block": null,
+    "sample_key_gq": null,
+    "relp": "spouse",
+    "ind": null,
+    "occp": null,
+    "hhincome": null,
+    "educ": null,
+    "citizenship": null,
+    "ancestry": null,
+    "birth_year": null,
+    "birth_month": null,
+    "birth_quarter": null,
+    "total_persons": null,
+    "entry_time": "2020-12-17T20:56:12.799Z",
+    "is_illegible": null
+  }
+},
+{
+  "model": "EntryApp.currententry",
+  "pk": 5,
+  "fields": {
+    "img": 52,
+    "jbid": "jbid456",
+    "breaker": 13,
+    "sheet": 1
+  }
+},
+{
+  "model": "EntryApp.currententry",
+  "pk": 6,
+  "fields": {
+    "img": 44,
+    "jbid": "jbid123",
+    "breaker": 12,
+    "sheet": 2
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 291,
+  "fields": {
+    "year": 1960.0,
+    "form_type": "long",
+    "field_name": "first_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 292,
+  "fields": {
+    "year": 1960.0,
+    "form_type": "long",
+    "field_name": "last_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 293,
+  "fields": {
+    "year": 1960.0,
+    "form_type": "long",
+    "field_name": "page_num"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 294,
+  "fields": {
+    "year": 1960.0,
+    "form_type": "long",
+    "field_name": "row_num"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 295,
+  "fields": {
+    "year": 1960.0,
+    "form_type": "long",
+    "field_name": "relp"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 296,
+  "fields": {
+    "year": 1960.0,
+    "form_type": "long",
+    "field_name": "race"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 297,
+  "fields": {
+    "year": 1960.0,
+    "form_type": "long",
+    "field_name": "sex"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 298,
+  "fields": {
+    "year": 1960.0,
+    "form_type": "breaker",
+    "field_name": "state"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 299,
+  "fields": {
+    "year": 1960.0,
+    "form_type": "breaker",
+    "field_name": "enumeration_district"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 300,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "short",
+    "field_name": "first_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 301,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "short",
+    "field_name": "middle_init"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 302,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "short",
+    "field_name": "last_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 303,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "short",
+    "field_name": "age"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 304,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "short",
+    "field_name": "sex"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 305,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "short",
+    "field_name": "birth_month"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 306,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "long",
+    "field_name": "first_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 307,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "long",
+    "field_name": "middle_init"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 308,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "long",
+    "field_name": "last_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 309,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "long",
+    "field_name": "age"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 310,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "long",
+    "field_name": "sex"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 311,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "long",
+    "field_name": "birth_month"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 312,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "long",
+    "field_name": "age"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 313,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "long",
+    "field_name": "serial_no"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 314,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "long",
+    "field_name": "block"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 315,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "breaker",
+    "field_name": "state"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 316,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "breaker",
+    "field_name": "county"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 317,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "breaker",
+    "field_name": "enumeration_district"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 318,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "short",
+    "field_name": "first_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 319,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "short",
+    "field_name": "middle_init"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 320,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "short",
+    "field_name": "last_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 321,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "short",
+    "field_name": "birth_month"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 322,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "short",
+    "field_name": "birth_quarter"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 323,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "short",
+    "field_name": "birth_year"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 324,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "short",
+    "field_name": "age"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 325,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "first_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 326,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "middle_init"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 327,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "last_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 328,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "birth_month"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 329,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "birth_quarter"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 330,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "birth_year"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 331,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "age"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 332,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "income"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 333,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "hhincome"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 334,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "educ"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 335,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "citizenship"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 336,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "ancestry"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 337,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "breaker",
+    "field_name": "state"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 338,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "breaker",
+    "field_name": "county"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 339,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "breaker",
+    "field_name": "MCD"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 340,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "breaker",
+    "field_name": "tract"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 341,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "breaker",
+    "field_name": "place"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 342,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "breaker",
+    "field_name": "SMSA"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 343,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "breaker",
+    "field_name": "enumeration_district"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 344,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "first_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 345,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "middle_init"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 346,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "last_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 347,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "age"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 348,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "year"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 349,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "month"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 350,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "sex"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 351,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "serial_no"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 352,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "block"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 353,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "total_persons"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 354,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "col_num"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 355,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "short",
+    "field_name": "first_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 356,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "short",
+    "field_name": "middle_init"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 357,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "short",
+    "field_name": "last_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 358,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "short",
+    "field_name": "serial_no"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 359,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "short",
+    "field_name": "age"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 360,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "short",
+    "field_name": "birth_year"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 361,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "short",
+    "field_name": "sex"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 362,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "short",
+    "field_name": "total_persons"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 363,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "first_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 364,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "middle_init"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 365,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "last_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 366,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "serial_no"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 367,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "age"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 368,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "birth_year"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 369,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "sex"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 370,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "total_persons"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 371,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "ind"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 372,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "occp"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 373,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "col_num"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 374,
+  "fields": {
+    "year": 1960.0,
+    "form_type": "long",
+    "field_name": "first_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 375,
+  "fields": {
+    "year": 1960.0,
+    "form_type": "long",
+    "field_name": "last_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 376,
+  "fields": {
+    "year": 1960.0,
+    "form_type": "long",
+    "field_name": "page_num"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 377,
+  "fields": {
+    "year": 1960.0,
+    "form_type": "long",
+    "field_name": "row_num"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 378,
+  "fields": {
+    "year": 1960.0,
+    "form_type": "long",
+    "field_name": "relp"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 379,
+  "fields": {
+    "year": 1960.0,
+    "form_type": "long",
+    "field_name": "race"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 380,
+  "fields": {
+    "year": 1960.0,
+    "form_type": "long",
+    "field_name": "sex"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 381,
+  "fields": {
+    "year": 1960.0,
+    "form_type": "breaker",
+    "field_name": "state"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 382,
+  "fields": {
+    "year": 1960.0,
+    "form_type": "breaker",
+    "field_name": "enumeration_district"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 383,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "short",
+    "field_name": "first_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 384,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "short",
+    "field_name": "middle_init"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 385,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "short",
+    "field_name": "last_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 386,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "short",
+    "field_name": "age"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 387,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "short",
+    "field_name": "sex"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 388,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "short",
+    "field_name": "birth_month"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 389,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "long",
+    "field_name": "first_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 390,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "long",
+    "field_name": "middle_init"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 391,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "long",
+    "field_name": "last_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 392,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "long",
+    "field_name": "age"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 393,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "long",
+    "field_name": "sex"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 394,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "long",
+    "field_name": "birth_month"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 395,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "long",
+    "field_name": "age"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 396,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "long",
+    "field_name": "serial_no"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 397,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "long",
+    "field_name": "block"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 398,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "breaker",
+    "field_name": "state"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 399,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "breaker",
+    "field_name": "county"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 400,
+  "fields": {
+    "year": 1970.0,
+    "form_type": "breaker",
+    "field_name": "enumeration_district"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 401,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "short",
+    "field_name": "first_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 402,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "short",
+    "field_name": "middle_init"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 403,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "short",
+    "field_name": "last_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 404,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "short",
+    "field_name": "birth_month"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 405,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "short",
+    "field_name": "birth_quarter"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 406,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "short",
+    "field_name": "birth_year"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 407,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "short",
+    "field_name": "age"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 408,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "first_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 409,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "middle_init"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 410,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "last_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 411,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "birth_month"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 412,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "birth_quarter"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 413,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "birth_year"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 414,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "age"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 415,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "income"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 416,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "hhincome"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 417,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "educ"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 418,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "citizenship"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 419,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "ancestry"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 420,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "breaker",
+    "field_name": "state"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 421,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "breaker",
+    "field_name": "county"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 422,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "breaker",
+    "field_name": "MCD"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 423,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "breaker",
+    "field_name": "tract"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 424,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "breaker",
+    "field_name": "place"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 425,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "breaker",
+    "field_name": "SMSA"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 426,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "breaker",
+    "field_name": "enumeration_district"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 427,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "first_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 428,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "middle_init"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 429,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "last_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 430,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "age"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 431,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "year"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 432,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "month"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 433,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "sex"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 434,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "serial_no"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 435,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "block"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 436,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "total_persons"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 437,
+  "fields": {
+    "year": 1980.0,
+    "form_type": "long",
+    "field_name": "col_num"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 438,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "short",
+    "field_name": "first_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 439,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "short",
+    "field_name": "middle_init"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 440,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "short",
+    "field_name": "last_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 441,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "short",
+    "field_name": "serial_no"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 442,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "short",
+    "field_name": "age"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 443,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "short",
+    "field_name": "birth_year"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 444,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "short",
+    "field_name": "sex"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 445,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "short",
+    "field_name": "total_persons"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 446,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "first_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 447,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "middle_init"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 448,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "last_name"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 449,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "serial_no"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 450,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "age"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 451,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "birth_year"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 452,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "sex"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 453,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "total_persons"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 454,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "ind"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 455,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "occp"
+  }
+},
+{
+  "model": "EntryApp.formfield",
+  "pk": 456,
+  "fields": {
+    "year": 1990.0,
+    "form_type": "long",
+    "field_name": "col_num"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 1,
+  "fields": {
+    "action_time": "2020-11-18T20:42:31.455Z",
+    "user": 1,
+    "content_type": 12,
+    "object_id": "2",
+    "object_repr": "jbid123",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 2,
+  "fields": {
+    "action_time": "2020-11-18T20:42:56.714Z",
+    "user": 1,
+    "content_type": 12,
+    "object_id": "3",
+    "object_repr": "jbid456",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 3,
+  "fields": {
+    "action_time": "2020-11-18T20:43:49.834Z",
+    "user": 1,
+    "content_type": 11,
+    "object_id": "1",
+    "object_repr": "data_entry",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 4,
+  "fields": {
+    "action_time": "2020-11-18T20:44:15.492Z",
+    "user": 1,
+    "content_type": 12,
+    "object_id": "2",
+    "object_repr": "jbid123",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 5,
+  "fields": {
+    "action_time": "2020-11-18T20:44:27.637Z",
+    "user": 1,
+    "content_type": 12,
+    "object_id": "3",
+    "object_repr": "jbid456",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Groups\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 6,
+  "fields": {
+    "action_time": "2020-12-03T22:24:06.925Z",
+    "user": 1,
+    "content_type": 16,
+    "object_id": "1",
+    "object_repr": "IMG_0524",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 7,
+  "fields": {
+    "action_time": "2020-12-04T14:40:12.093Z",
+    "user": 1,
+    "content_type": 16,
+    "object_id": "1",
+    "object_repr": "IMG_0524",
+    "action_flag": 2,
+    "change_message": "[{\"changed\": {\"fields\": [\"Create deepzoom\"]}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 8,
+  "fields": {
+    "action_time": "2020-12-04T16:33:17.827Z",
+    "user": 1,
+    "content_type": 16,
+    "object_id": "2",
+    "object_repr": "IMG_0525",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 9,
+  "fields": {
+    "action_time": "2020-12-04T21:53:27.934Z",
+    "user": 1,
+    "content_type": 16,
+    "object_id": "1",
+    "object_repr": "IMG_0524",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 10,
+  "fields": {
+    "action_time": "2020-12-04T21:53:28.250Z",
+    "user": 1,
+    "content_type": 16,
+    "object_id": "2",
+    "object_repr": "IMG_0525",
+    "action_flag": 3,
+    "change_message": ""
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 11,
+  "fields": {
+    "action_time": "2020-12-04T21:54:38.443Z",
+    "user": 1,
+    "content_type": 16,
+    "object_id": "3",
+    "object_repr": "IMG_0524",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 12,
+  "fields": {
+    "action_time": "2020-12-04T22:08:08.567Z",
+    "user": 1,
+    "content_type": 16,
+    "object_id": "4",
+    "object_repr": "IMG_0524",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "admin.logentry",
+  "pk": 13,
+  "fields": {
+    "action_time": "2020-12-15T21:16:50.988Z",
+    "user": 1,
+    "content_type": 16,
+    "object_id": "5",
+    "object_repr": "landscape",
+    "action_flag": 1,
+    "change_message": "[{\"added\": {}}]"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 1,
+  "fields": {
+    "name": "Can add breaker",
+    "content_type": 1,
+    "codename": "add_breaker"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 2,
+  "fields": {
+    "name": "Can change breaker",
+    "content_type": 1,
+    "codename": "change_breaker"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 3,
+  "fields": {
+    "name": "Can delete breaker",
+    "content_type": 1,
+    "codename": "delete_breaker"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 4,
+  "fields": {
+    "name": "Can view breaker",
+    "content_type": 1,
+    "codename": "view_breaker"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 5,
+  "fields": {
+    "name": "Can add form field",
+    "content_type": 2,
+    "codename": "add_formfield"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 6,
+  "fields": {
+    "name": "Can change form field",
+    "content_type": 2,
+    "codename": "change_formfield"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 7,
+  "fields": {
+    "name": "Can delete form field",
+    "content_type": 2,
+    "codename": "delete_formfield"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 8,
+  "fields": {
+    "name": "Can view form field",
+    "content_type": 2,
+    "codename": "view_formfield"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 9,
+  "fields": {
+    "name": "Can add image",
+    "content_type": 3,
+    "codename": "add_image"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 10,
+  "fields": {
+    "name": "Can change image",
+    "content_type": 3,
+    "codename": "change_image"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 11,
+  "fields": {
+    "name": "Can delete image",
+    "content_type": 3,
+    "codename": "delete_image"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 12,
+  "fields": {
+    "name": "Can view image",
+    "content_type": 3,
+    "codename": "view_image"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 13,
+  "fields": {
+    "name": "Can add sheet",
+    "content_type": 4,
+    "codename": "add_sheet"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 14,
+  "fields": {
+    "name": "Can change sheet",
+    "content_type": 4,
+    "codename": "change_sheet"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 15,
+  "fields": {
+    "name": "Can delete sheet",
+    "content_type": 4,
+    "codename": "delete_sheet"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 16,
+  "fields": {
+    "name": "Can view sheet",
+    "content_type": 4,
+    "codename": "view_sheet"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 17,
+  "fields": {
+    "name": "Can add record",
+    "content_type": 5,
+    "codename": "add_record"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 18,
+  "fields": {
+    "name": "Can change record",
+    "content_type": 5,
+    "codename": "change_record"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 19,
+  "fields": {
+    "name": "Can delete record",
+    "content_type": 5,
+    "codename": "delete_record"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 20,
+  "fields": {
+    "name": "Can view record",
+    "content_type": 5,
+    "codename": "view_record"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 21,
+  "fields": {
+    "name": "Can add entry",
+    "content_type": 6,
+    "codename": "add_entry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 22,
+  "fields": {
+    "name": "Can change entry",
+    "content_type": 6,
+    "codename": "change_entry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 23,
+  "fields": {
+    "name": "Can delete entry",
+    "content_type": 6,
+    "codename": "delete_entry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 24,
+  "fields": {
+    "name": "Can view entry",
+    "content_type": 6,
+    "codename": "view_entry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 25,
+  "fields": {
+    "name": "Can add current entry",
+    "content_type": 7,
+    "codename": "add_currententry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 26,
+  "fields": {
+    "name": "Can change current entry",
+    "content_type": 7,
+    "codename": "change_currententry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 27,
+  "fields": {
+    "name": "Can delete current entry",
+    "content_type": 7,
+    "codename": "delete_currententry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 28,
+  "fields": {
+    "name": "Can view current entry",
+    "content_type": 7,
+    "codename": "view_currententry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 29,
+  "fields": {
+    "name": "Can add conflict",
+    "content_type": 8,
+    "codename": "add_conflict"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 30,
+  "fields": {
+    "name": "Can change conflict",
+    "content_type": 8,
+    "codename": "change_conflict"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 31,
+  "fields": {
+    "name": "Can delete conflict",
+    "content_type": 8,
+    "codename": "delete_conflict"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 32,
+  "fields": {
+    "name": "Can view conflict",
+    "content_type": 8,
+    "codename": "view_conflict"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 33,
+  "fields": {
+    "name": "Can add log entry",
+    "content_type": 9,
+    "codename": "add_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 34,
+  "fields": {
+    "name": "Can change log entry",
+    "content_type": 9,
+    "codename": "change_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 35,
+  "fields": {
+    "name": "Can delete log entry",
+    "content_type": 9,
+    "codename": "delete_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 36,
+  "fields": {
+    "name": "Can view log entry",
+    "content_type": 9,
+    "codename": "view_logentry"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 37,
+  "fields": {
+    "name": "Can add permission",
+    "content_type": 10,
+    "codename": "add_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 38,
+  "fields": {
+    "name": "Can change permission",
+    "content_type": 10,
+    "codename": "change_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 39,
+  "fields": {
+    "name": "Can delete permission",
+    "content_type": 10,
+    "codename": "delete_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 40,
+  "fields": {
+    "name": "Can view permission",
+    "content_type": 10,
+    "codename": "view_permission"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 41,
+  "fields": {
+    "name": "Can add group",
+    "content_type": 11,
+    "codename": "add_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 42,
+  "fields": {
+    "name": "Can change group",
+    "content_type": 11,
+    "codename": "change_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 43,
+  "fields": {
+    "name": "Can delete group",
+    "content_type": 11,
+    "codename": "delete_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 44,
+  "fields": {
+    "name": "Can view group",
+    "content_type": 11,
+    "codename": "view_group"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 45,
+  "fields": {
+    "name": "Can add user",
+    "content_type": 12,
+    "codename": "add_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 46,
+  "fields": {
+    "name": "Can change user",
+    "content_type": 12,
+    "codename": "change_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 47,
+  "fields": {
+    "name": "Can delete user",
+    "content_type": 12,
+    "codename": "delete_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 48,
+  "fields": {
+    "name": "Can view user",
+    "content_type": 12,
+    "codename": "view_user"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 49,
+  "fields": {
+    "name": "Can add content type",
+    "content_type": 13,
+    "codename": "add_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 50,
+  "fields": {
+    "name": "Can change content type",
+    "content_type": 13,
+    "codename": "change_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 51,
+  "fields": {
+    "name": "Can delete content type",
+    "content_type": 13,
+    "codename": "delete_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 52,
+  "fields": {
+    "name": "Can view content type",
+    "content_type": 13,
+    "codename": "view_contenttype"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 53,
+  "fields": {
+    "name": "Can add session",
+    "content_type": 14,
+    "codename": "add_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 54,
+  "fields": {
+    "name": "Can change session",
+    "content_type": 14,
+    "codename": "change_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 55,
+  "fields": {
+    "name": "Can delete session",
+    "content_type": 14,
+    "codename": "delete_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 56,
+  "fields": {
+    "name": "Can view session",
+    "content_type": 14,
+    "codename": "view_session"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 57,
+  "fields": {
+    "name": "Can add other image",
+    "content_type": 15,
+    "codename": "add_otherimage"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 58,
+  "fields": {
+    "name": "Can change other image",
+    "content_type": 15,
+    "codename": "change_otherimage"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 59,
+  "fields": {
+    "name": "Can delete other image",
+    "content_type": 15,
+    "codename": "delete_otherimage"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 60,
+  "fields": {
+    "name": "Can view other image",
+    "content_type": 15,
+    "codename": "view_otherimage"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 61,
+  "fields": {
+    "name": "Can add image scan",
+    "content_type": 16,
+    "codename": "add_imagescan"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 62,
+  "fields": {
+    "name": "Can change image scan",
+    "content_type": 16,
+    "codename": "change_imagescan"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 63,
+  "fields": {
+    "name": "Can delete image scan",
+    "content_type": 16,
+    "codename": "delete_imagescan"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 64,
+  "fields": {
+    "name": "Can view image scan",
+    "content_type": 16,
+    "codename": "view_imagescan"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 65,
+  "fields": {
+    "name": "Can add deep zoom image",
+    "content_type": 17,
+    "codename": "add_deepzoom"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 66,
+  "fields": {
+    "name": "Can change deep zoom image",
+    "content_type": 17,
+    "codename": "change_deepzoom"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 67,
+  "fields": {
+    "name": "Can delete deep zoom image",
+    "content_type": 17,
+    "codename": "delete_deepzoom"
+  }
+},
+{
+  "model": "auth.permission",
+  "pk": 68,
+  "fields": {
+    "name": "Can view deep zoom image",
+    "content_type": 17,
+    "codename": "view_deepzoom"
+  }
+},
+{
+  "model": "auth.group",
+  "pk": 1,
+  "fields": {
+    "name": "data_entry",
+    "permissions": [
+      1,
+      2,
+      3,
+      4,
+      29,
+      30,
+      31,
+      32,
+      25,
+      26,
+      27,
+      28,
+      21,
+      22,
+      23,
+      24,
+      9,
+      10,
+      11,
+      12,
+      17,
+      18,
+      19,
+      20,
+      13,
+      14,
+      15,
+      16
+    ]
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 1,
+  "fields": {
+    "password": "pbkdf2_sha256$216000$agLLxXWukRN1$nUj0QO+dp2z2VJysSVnZk62KUJBzmWnI5niQk92jTSE=",
+    "last_login": "2020-12-15T21:15:04.836Z",
+    "is_superuser": true,
+    "username": "admin",
+    "first_name": "",
+    "last_name": "",
+    "email": "cecile.m.murray@census.gov",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2020-11-18T20:41:20.014Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 2,
+  "fields": {
+    "password": "pbkdf2_sha256$216000$hO6DLUkImIIC$kmFMneGR6OKTWylQHwAgC/oGov+DVDMNGim0l5DEcCA=",
+    "last_login": "2020-12-16T16:47:22.490Z",
+    "is_superuser": false,
+    "username": "jbid123",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2020-11-18T20:42:31Z",
+    "groups": [
+      1
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 3,
+  "fields": {
+    "password": "pbkdf2_sha256$216000$WJ20o24McqPY$s5C6+D/rli9wxgld8+UCuI+TXgDC4YIFr1fmcohdtQo=",
+    "last_login": "2020-11-23T20:50:25.196Z",
+    "is_superuser": false,
+    "username": "jbid456",
+    "first_name": "",
+    "last_name": "",
+    "email": "",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2020-11-18T20:42:56Z",
+    "groups": [
+      1
+    ],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 4,
+  "fields": {
+    "password": "!M2q8gIcmzikiYJCzKyejbvyVLPIt7d7Kyd9ehUbH",
+    "last_login": null,
+    "is_superuser": true,
+    "username": "admin2",
+    "first_name": "",
+    "last_name": "",
+    "email": "cecile.m.murray@census.gov",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2020-11-19T14:26:41.528Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "auth.user",
+  "pk": 5,
+  "fields": {
+    "password": "pbkdf2_sha256$216000$jHJ1Athezgj4$P+rw7UPxIiFNaiOprf5rxUNCV9gXUXnns/4PRdr+4rQ=",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "temp111",
+    "first_name": "",
+    "last_name": "",
+    "email": "temp@temp.com",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2020-12-18T15:59:32.536Z",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "id": 1,
+  "fields": {
+    "app_label": "EntryApp",
+    "model": "breaker"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "id": 2,
+  "fields": {
+    "app_label": "EntryApp",
+    "model": "formfield"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "id": 3,
+  "fields": {
+    "app_label": "EntryApp",
+    "model": "image"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "id": 4,
+  "fields": {
+    "app_label": "EntryApp",
+    "model": "sheet"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "id": 5,
+  "fields": {
+    "app_label": "EntryApp",
+    "model": "record"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "id": 6,
+  "fields": {
+    "app_label": "EntryApp",
+    "model": "entry"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "id": 7,
+  "fields": {
+    "app_label": "EntryApp",
+    "model": "currententry"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "id": 8,
+  "fields": {
+    "app_label": "EntryApp",
+    "model": "conflict"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "id": 9,
+  "fields": {
+    "app_label": "admin",
+    "model": "logentry"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "id": 10,
+  "fields": {
+    "app_label": "auth",
+    "model": "permission"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "id": 11,
+  "fields": {
+    "app_label": "auth",
+    "model": "group"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "id": 12,
+  "fields": {
+    "app_label": "auth",
+    "model": "user"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "id": 13,
+  "fields": {
+    "app_label": "contenttypes",
+    "model": "contenttype"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "id": 14,
+  "fields": {
+    "app_label": "sessions",
+    "model": "session"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "id": 15,
+  "fields": {
+    "app_label": "EntryApp",
+    "model": "otherimage"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "id": 16,
+  "fields": {
+    "app_label": "EntryApp",
+    "model": "imagescan"
+  }
+},
+{
+  "model": "contenttypes.contenttype",
+  "id": 17,
+  "fields": {
+    "app_label": "deepzoom",
+    "model": "deepzoom"
+  }
+},
+{
+  "model": "sessions.session",
+  "id": "948x0yudtxtpbldbkese2w40jg5jdkr4",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2pABLGVcuvcMZGBGqRpISrsy3l2bdKHb_977LxVpXUpcu8xxYnVSVh1-t0T5IXUDfKd6azq3usxT0puid9r1pbE8z7v7d1Col29tyAb0OITRACIH4KO9JhAng2ACT84bdCEbE8YEhA6TQ8sZhYURWL0_uTM3WQ:1kpZxS:xfTPWx4R-iFE9ChE_MATW8p3Q3sMkJWWOhZAzc5ayyY",
+    "expire_date": "2020-12-30T16:47:22.927Z"
+  }
+},
+{
+  "model": "sessions.session",
+  "id": "z0tn0d4cyk1jje2khxer5yqqp0387cpm",
+  "fields": {
+    "session_data": ".eJxVjEEOwiAQRe_C2hBogQGX7j0DmWFAqoYmpV0Z765NutDtf-_9l4i4rTVuPS9xYnEWWpx-N8L0yG0HfMd2m2Wa27pMJHdFHrTL68z5eTncv4OKvX5rglQKQFDBGxosoyLw2pFy2RhvsXAqziOEkaxLmkEXgqwwIA_g7CjeH-0GOBY:1kkwiH:r48Nf2Rjfxw0NG5ouC72JMQXmAcnXMZqeo0e4WFtm4c",
+    "expire_date": "2020-12-17T22:04:33.975Z"
+  }
+},
+{
+  "model": "deepzoom.deepzoom",
+  "pk": 5,
+  "fields": {
+    "name": "IMG_0524",
+    "slug": "img_0524",
+    "associated_image": "uploaded_images/img_0524.jpg",
+    "deepzoom_image": "deepzoom_images\\img_0524\\img_0524.dzi",
+    "deepzoom_path": "deepzoom_images\\img_0524",
+    "created": "2020-12-04T22:07:28.043Z",
+    "updated": "2020-12-04T22:07:28.043Z"
+  }
+},
+{
+  "model": "deepzoom.deepzoom",
+  "pk": 6,
+  "fields": {
+    "name": "landscape",
+    "slug": "landscape",
+    "associated_image": "uploaded_images/landscape.jpg",
+    "deepzoom_image": "deepzoom_images\\landscape\\landscape.dzi",
+    "deepzoom_path": "deepzoom_images\\landscape",
+    "created": "2020-12-15T21:16:46.833Z",
+    "updated": "2020-12-15T21:16:46.833Z"
+  }
+}
+]
