@@ -4,7 +4,6 @@ VIEWS FOR DCDL DATA ENTRY
 TO DO:
 -integrate openseadragon info into views
 """
-import csv
 import datetime
 import logging
 import re
@@ -19,10 +18,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.template import RequestContext, loader
 
-from djqscsv import render_to_csv_response
-
 from EntryApp.models import Image, Breaker, OtherImage, Sheet, Record, CurrentEntry, FormField
-from EntryApp.forms import ImageForm, SheetForm, BreakerForm, RecordForm, BaseRecordFormSet, BaseBreakerFormSet, ExportForm, ProblemForm
+from EntryApp.forms import ImageForm, SheetForm, BreakerForm, RecordForm, BaseRecordFormSet, BaseBreakerFormSet, ProblemForm
 
 logger = logging.getLogger('EntryApp.views')
 
@@ -333,42 +330,6 @@ def enter_records(request):
         'slug': current.img.img_path 
     }
     return render(request, 'EntryApp/enter-records.html', context)
-
-
-#================================#
-# EXPORT RECORDS VIEW
-#================================#
-
-class SelectExportFormView(LoginRequiredMixin, FormView):
-    
-    form_class = ExportForm
-    template_name = 'EntryApp/select-record-export.html'
-
-    def get(self, request):
-
-        logger.info(f'ExportForm get request')
-        context = {
-            'form': self.form_class()
-        }
-        return render(request, self.template_name, context)
-
-@login_required
-def export_records(request):
-    '''
-    View that looks up selected model and gathers records for csv export
-    '''
-
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachement; filename="records.csv"'
-    writer = csv.writer(response)
-
-    form = request.POST
-    logger.info("export_records POST request")
-    
-    chosen_model = ExportForm.tables[int(form['table_choice'])]['model']
-    
-    records = chosen_model.objects.filter(jbid=request.user).values()
-    return render_to_csv_response(records)
 
 #================================#
 # PROBLEM VIEW
