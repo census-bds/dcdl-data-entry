@@ -41,7 +41,7 @@ def create_entry_group(data_models=DATA_MODELS):
         for p in ['add', 'change', 'view']:
             print(f'Can {p} {d}')
             perm = Permission.objects.get(
-                codename=f'can_{p}_{d}'
+                codename=f'{p}_{d}'
             )
             group.permissions.add(perm)
     group.save()
