@@ -14,11 +14,6 @@
           <input type="submit" value="New image">
       </form>
     <br>
-    <p>Click here to download a spreadsheet containing the data entered so far.</p>
-    <form action={% url 'EntryApp:select_records' %}>
-            {% csrf_token %}
-    <input type="submit" value="Export records">
-    </form>
 {% endblock content %}
 {% block problem %}
     <p>Click the buttons below to view sample record entry pages for each year.</p>
