@@ -112,8 +112,11 @@ class Breaker(models.Model):
     ) 
     # ^ remove 1990 as option because that census did not include breakers
     state = models.CharField(
-        max_length=2,
-        null=True
+        max_length=25,
+        null=True,
+        blank=False,
+        choices=choices.STATE_CHOICES,
+        default=choices.STATE_CHOICES[0]
     )
     county = models.CharField(
         max_length=30,
@@ -135,7 +138,10 @@ class Breaker(models.Model):
         max_length=30,
         null=True
     )
-    smsa = models.CharField(max_length=30, null=True)
+    smsa = models.CharField(
+        max_length=30,
+        null=True
+    )
     
 
     def __str__(self):
@@ -229,16 +235,20 @@ class Record(models.Model):
             verbose_name='Column number',
             null=True
         )
-    jbid = models.CharField(max_length=20, default='jbid000') 
+    jbid = models.CharField(max_length=255, default='jbid000') 
 
     # fields common among all year-forms
-    first_name = models.CharField(max_length=50, null=True)
-    middle_init = models.CharField(max_length=50, null=True, blank=True)
-    last_name = models.CharField(max_length=50, null=True)
+    first_name = models.CharField(max_length=255, null=True)
+    middle_init = models.CharField(
+                max_length=255,
+                null=True,
+                blank=True
+            )
+    last_name = models.CharField(max_length=255, null=True)
     age = models.PositiveIntegerField(null=True)
     sex = models.CharField(
             choices=choices.SEX_CHOICES,
-            max_length=50,
+            max_length=255,
             blank=False,
             default=choices.SEX_CHOICES[0],
             null=True
@@ -250,24 +260,44 @@ class Record(models.Model):
             null=True,
             verbose_name="Line number"
         ) 
-    serial_no = models.IntegerField(null=True, verbose_name="Serial number")
+    serial_no = models.PositiveIntegerField(
+                null=True,
+                verbose_name="Serial number"
+            )
     do_id = models.IntegerField(null=True, verbose_name="DO ID")
-    block = models.CharField(max_length=50, null=True)
+    block = models.CharField(
+                max_length=255,
+                null=True
+            )
     sample_key_gq = models.CharField(
-            max_length=50,
+            max_length=255,
             blank=False,
             default=choices.SAMPLE_GQ_CHOICES[0],
             null=True,
             choices=choices.SAMPLE_GQ_CHOICES,
             verbose_name="Sample key"
         )
-    street_name = models.CharField(max_length=50, null=True)
-    house_no = models.IntegerField(null=True, verbose_name="House number")
-    apt_no = models.IntegerField(null=True, verbose_name="Apartment number")
+    street_name = models.CharField(
+            max_length=255,
+            null=True,
+            blank=True
+        )
+    house_no = models.CharField(
+            max_length=255,
+            null=True,
+            verbose_name="House number",
+            blank=True
+        )
+    apt_no = models.CharField(
+            max_length=255,
+            null=True,
+            verbose_name="Apartment number",
+            blank=True
+        )
 
     # relp options vary by year     
     relp_1960 = models.CharField(
-            max_length=50,
+            max_length=255,
             blank=False,
             default=choices.RELP_CHOICES_1960[0],
             null=True,
@@ -275,7 +305,7 @@ class Record(models.Model):
             verbose_name="Relationship to household head"        
         )
     relp_1970 = models.CharField(
-            max_length=50,
+            max_length=255,
             blank=False,
                     default=choices.RELP_CHOICES_1970[0],
             null=True,
@@ -283,7 +313,7 @@ class Record(models.Model):
             verbose_name="Relationship to household head"        
         )
     relp_1980 = models.CharField(
-            max_length=50,
+            max_length=255,
             blank=False,
             default=choices.RELP_CHOICES_1980[0],
             null=True,
@@ -291,7 +321,7 @@ class Record(models.Model):
             verbose_name="Relationship to household head"        
         )
     relp_1990 = models.CharField(
-            max_length=50,
+            max_length=255,
             blank=False,
             default=choices.RELP_CHOICES_1990[0],
             null=True,
@@ -299,7 +329,7 @@ class Record(models.Model):
             verbose_name="Relationship to household head"        
         )
     race_1960 = models.CharField(
-            max_length=50,
+            max_length=255,
             blank=False,
             default=choices.RACE_CHOICES_1960[0],
             null=True,
@@ -307,7 +337,7 @@ class Record(models.Model):
             verbose_name="Race"
         ) 
     race_1970 = models.CharField(
-            max_length=50,
+            max_length=255,
             blank=False,
             default=choices.RACE_CHOICES_1970[0],
             null=True,
@@ -315,7 +345,7 @@ class Record(models.Model):
             verbose_name="Race"
         ) 
     race_1980 = models.CharField(
-            max_length=50,
+            max_length=255,
             blank=False,
             default=choices.RACE_CHOICES_1980[0],
             null=True,
@@ -323,7 +353,7 @@ class Record(models.Model):
             verbose_name="Race"
         ) 
     race_1990 = models.CharField(
-            max_length=50,
+            max_length=255,
             blank=False,
             default=choices.RACE_CHOICES_1990[0],
             null=True,
@@ -335,12 +365,12 @@ class Record(models.Model):
         verbose_name='Year of birth'
         )
     exact_birth_month = models.CharField(
-        max_length=15,
+        max_length=255,
         null=True,
         verbose_name='Month of birth'
         )
     birth_year = models.CharField(
-            max_length=10,
+            max_length=255,
             blank=False,
             default=choices.SINGLE_DIGIT_CHOICES[0],
             null=True,
@@ -348,7 +378,7 @@ class Record(models.Model):
             verbose_name="Specific year of birth"
         )
     birth_quarter = models.CharField(
-            max_length=15,
+            max_length=255,
             blank=False,
             default=choices.BIRTH_QUARTER_CHOICES[0],
             null=True,
@@ -356,7 +386,7 @@ class Record(models.Model):
             verbose_name="Month of birth"
         )
     birth_decade = models.CharField(
-            max_length=10,
+            max_length=255,
             blank=False,
             default=choices.BIRTH_DECADE_CHOICES[0],
             null=True,
@@ -365,7 +395,7 @@ class Record(models.Model):
         )
 
     marital_status = models.CharField(
-            max_length=50,
+            max_length=255,
             blank=False,
             default=choices.MARITAL_STATUS_CHOICES[0],
             null=False,
@@ -373,12 +403,12 @@ class Record(models.Model):
         )
 
     ind = models.CharField(
-        max_length=50,
+        max_length=255,
         null=True,
         verbose_name='Industry'
         )
     occp = models.CharField(
-        max_length=50,
+        max_length=255,
         null=True,
         verbose_name='Occupation'
         )
@@ -387,11 +417,10 @@ class Record(models.Model):
 
     # bubble fields
 
-
     age_hundreds = models.CharField(
         null=True,
         blank=False,
-        max_length=10,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -399,7 +428,7 @@ class Record(models.Model):
     age_tens = models.CharField(
         null=True,
         blank=False,
-        max_length=10,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -407,7 +436,7 @@ class Record(models.Model):
     age_ones = models.CharField(
         null=True,
         blank=False,
-        max_length=10,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -416,7 +445,7 @@ class Record(models.Model):
     birth_year_thousands = models.CharField(
         null=True,
         blank=False,
-        max_length=10,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -424,7 +453,7 @@ class Record(models.Model):
     birth_year_hundreds = models.CharField(
         null=True,
         blank=False,
-        max_length=10,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -432,7 +461,7 @@ class Record(models.Model):
     birth_year_tens = models.CharField(
         null=True,
         blank=False,
-        max_length=10,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -440,7 +469,7 @@ class Record(models.Model):
     birth_year_ones = models.CharField(
         null=True,
         blank=False,
-        max_length=10,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -449,7 +478,7 @@ class Record(models.Model):
     block_1 = models.CharField(
         null=True,
         blank=False,
-        max_length=2,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -457,7 +486,7 @@ class Record(models.Model):
     block_2 = models.CharField(
         null=True,
         blank=False,
-        max_length=2,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -465,7 +494,7 @@ class Record(models.Model):
     block_3 = models.CharField(
         null=True,
         blank=False,
-        max_length=2,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -475,7 +504,7 @@ class Record(models.Model):
     serial_no_1 = models.CharField(
         null=True,
         blank=False,
-        max_length=2,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -483,7 +512,7 @@ class Record(models.Model):
     serial_no_2 = models.CharField(
         null=True,
         blank=False,
-        max_length=2,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -491,7 +520,7 @@ class Record(models.Model):
     serial_no_2 = models.CharField(
         null=True,
         blank=False,
-        max_length=2,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -499,7 +528,7 @@ class Record(models.Model):
     serial_no_3 = models.CharField(
         null=True,
         blank=False,
-        max_length=2,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -507,7 +536,7 @@ class Record(models.Model):
     serial_no_4 = models.CharField(
         null=True,
         blank=False,
-        max_length=2,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -515,7 +544,7 @@ class Record(models.Model):
     serial_no_5 = models.CharField(
         null=True,
         blank=False,
-        max_length=2,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -523,7 +552,7 @@ class Record(models.Model):
     serial_no_6 = models.CharField(
         null=True,
         blank=False,
-        max_length=2,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -531,7 +560,7 @@ class Record(models.Model):
     serial_no_7 = models.CharField(
         null=True,
         blank=False,
-        max_length=2,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -539,7 +568,7 @@ class Record(models.Model):
     serial_no_8 = models.CharField(
         null=True,
         blank=False,
-        max_length=2,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -547,7 +576,7 @@ class Record(models.Model):
     serial_no_9 = models.CharField(
         null=True,
         blank=False,
-        max_length=2,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -555,7 +584,7 @@ class Record(models.Model):
     serial_no_10 = models.CharField(
         null=True,
         blank=False,
-        max_length=2,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -563,7 +592,7 @@ class Record(models.Model):
     serial_no_11 = models.CharField(
         null=True,
         blank=False,
-        max_length=2,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -572,7 +601,7 @@ class Record(models.Model):
     total_persons_hundreds = models.CharField(
         null=True,
         blank=False,
-        max_length=2,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -580,7 +609,7 @@ class Record(models.Model):
     total_persons_tens = models.CharField(
         null=True,
         blank=False,
-        max_length=2,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -588,7 +617,7 @@ class Record(models.Model):
     total_persons_ones = models.CharField(
         null=True,
         blank=False,
-        max_length=2,
+        max_length=255,
         verbose_name="",
         choices=choices.SINGLE_DIGIT_CHOICES,
         default=choices.SINGLE_DIGIT_CHOICES[0]
@@ -607,7 +636,7 @@ class Record(models.Model):
 class CurrentEntry(models.Model):
 
     img = models.ForeignKey(Image, on_delete=models.CASCADE)
-    jbid = models.CharField(max_length=20, default='jbid000')
+    jbid = models.CharField(max_length=255, default='jbid000')
     breaker = models.ForeignKey(Breaker, on_delete=models.SET_NULL, null=True)
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, null=True)
 
@@ -627,8 +656,11 @@ class FormField(models.Model):
     """
 
     year = models.FloatField()
-    form_type = models.CharField(max_length=200, choices=FORM_CHOICES)     
-    field_name = models.CharField(max_length=50)
+    form_type = models.CharField(
+            max_length=255,
+            choices=FORM_CHOICES
+        )     
+    field_name = models.CharField(max_length=255)
 
     def __str__(self):
         return f'FormField {self.year} {self.form_type}: {self.field_name}'

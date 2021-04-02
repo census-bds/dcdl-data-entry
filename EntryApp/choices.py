@@ -29,6 +29,7 @@ STATE_LIST = [
                 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', \
                 'TX', 'UT',	'VT', 'VA',	'WA', 'WV',	'WI', 'WY',
             ]
+STATE_CHOICES = [(x, x,) for x in STATE_LIST]
 
 #================================#
 # FIELD-LEVEL CHOICES
@@ -54,7 +55,7 @@ BIRTH_QUARTER_CHOICES = [
     ('Oct-Dec', 'Jan-Mar'),
 ]
 
-SINGLE_DIGIT_CHOICES = [(str(x), str(x)) for x in list(range(1,10))]
+SINGLE_DIGIT_CHOICES = [(str(x), str(x)) for x in list(range(0,10))]
 
 BIRTH_DECADE_CHOICES = [
     ('1850', '185-'),
