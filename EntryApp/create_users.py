@@ -75,7 +75,6 @@ def create_entry_users(jbids=['jbid123', 'jbid456'], pws=['dcdl1980', 'dcdl1980'
 def add_entry_user(jbid, pw):
     '''
     Add a new user to the data entry group
-    Option to populate Image model with blank records for that user
 
     Takes:
     - string username (jbid)

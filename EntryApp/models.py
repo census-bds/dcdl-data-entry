@@ -101,7 +101,7 @@ class Breaker(models.Model):
         Image,
         on_delete=models.CASCADE
     )
-    jbid = models.CharField(max_length=7, default='jbid000')
+    jbid = models.CharField(max_length=20, default='jbid000')
     timestamp =  models.DateTimeField(null=True)
     problem = models.BooleanField(default=False)
 
@@ -164,7 +164,7 @@ class Sheet(models.Model):
         Breaker,
         on_delete=models.CASCADE
     )
-    jbid = models.CharField(max_length=7, default='jbid000') 
+    jbid = models.CharField(max_length=20, default='jbid000') 
 
     # auto-filled, not required
     timestamp =  models.DateTimeField(null=True)
@@ -201,7 +201,7 @@ class OtherImage(models.Model):
         ]
 
     img = models.ForeignKey(Image, on_delete=models.CASCADE)
-    jbid = models.CharField(max_length=7, default='jbid000')
+    jbid = models.CharField(max_length=20, default='jbid000')
     year = models.PositiveIntegerField(choices=choices.YEAR_CHOICES)
     description = models.TextField(max_length=500)
     timestamp =  models.DateTimeField(null=True)
@@ -229,7 +229,7 @@ class Record(models.Model):
             verbose_name='Column number',
             null=True
         )
-    jbid = models.CharField(max_length=7, default='jbid000') 
+    jbid = models.CharField(max_length=20, default='jbid000') 
 
     # fields common among all year-forms
     first_name = models.CharField(max_length=50, null=True)
