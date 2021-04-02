@@ -17,7 +17,7 @@ then
     conda remove -p /apps/user/${USER}/conda_envs/dcdl2 --all
 fi 
 
-conda create -p /apps/user/${USER}/conda_envs/dcdl python=3.8.5
+conda create -p /apps/user/${USER}/conda_envs/dcdl python=3.9.0
 conda activate /apps/user/${USER}/conda_envs/dcdl
 
 # install required packages: better to do this from requirements.txt
