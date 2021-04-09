@@ -11,7 +11,7 @@ import re
 from django.http import HttpResponse, Http404, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse 
-from django.views.generic import View, FormView, TemplateView, CreateView
+from django.views.generic import View, FormView, TemplateView, CreateView, ListView
 from django.forms import formset_factory, modelformset_factory, RadioSelect
 from django.contrib.auth.models import Permission, User
 from django.contrib.auth.decorators import login_required
@@ -422,6 +422,25 @@ def report_problem(request):
                     'form': ProblemForm()
                 }
         )
+
+#================================#
+# VIEW RECENT IMAGES
+#================================#
+
+class ListRecentView(LoginRequiredMixin, ListView):
+    '''
+    View to list 5 most recent entries in case editing is needed 
+    '''
+    model = Image
+    template_name = 'EntryApp/list-recent.html'
+
+    def get_queryset(self):
+        jbid = self.request.user
+        return Image.objects.filter(jbid=jbid) \
+                            .filter(is_complete=True) \
+                            .order_by('-timestamp')[:5]
+
+
 
 #================================#
 # DUMMY VIEWS

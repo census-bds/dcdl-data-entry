@@ -33,7 +33,7 @@ LOGGING = {
         'file': {
             'level': 'DEBUG',
             'class': 'logging.FileHandler',
-            'filename': '/data/data/user/django_user/test/logs/debug.log'
+            'filename': '/data/data/user/django_user/dev/logs/debug.log'
         },
     },
     # 'root': {
@@ -104,7 +104,7 @@ WSGI_APPLICATION = 'dcdl.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dcdl_test', 
+        'NAME': 'dcdl_dev', 
         'USER': 'django_user',                      # Not used with sqlite3.
         'PASSWORD':'', # ADD PASSWORD HERE Not used with sqlite3.
         'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
