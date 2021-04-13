@@ -290,10 +290,6 @@ def enter_records(request):
         fields=record_fields,
         extra=num_records,
         formset=BaseRecordFormSet,
-        # widgets={
-        #     'relp': RadioSelect,
-        #     'sex': RadioSelect
-        # }
     )
     helper = CrispyFormSetHelper(
         year=current.img.year,
@@ -330,6 +326,39 @@ def enter_records(request):
         'slug': current.img.img_path 
     }
     return render(request, 'EntryApp/enter-records.html', context)
+
+#================================#
+# VIEW RECENT IMAGES
+#================================#
+
+class ListRecentView(LoginRequiredMixin, ListView):
+    '''
+    View to list 5 most recent entries in case editing is needed 
+    '''
+    model = Image
+    template_name = 'EntryApp/list-recent.html'
+
+    def get_queryset(self):
+        jbid = self.request.user
+        return Image.objects.filter(jbid=jbid) \
+                            .filter(is_complete=True) \
+                            .order_by('-timestamp')[1:5] # FIX THIS LATER
+
+
+#================================#
+# EDIT VIEW
+#================================#
+
+@login_required
+def edit_entry(request):
+    '''
+    Edit details that have already been entered
+
+    IMPLEMENTATION TBD
+    '''
+    pass
+
+
 
 #================================#
 # PROBLEM VIEW
@@ -424,36 +453,8 @@ def report_problem(request):
         )
 
 #================================#
-# VIEW RECENT IMAGES
-#================================#
-
-class ListRecentView(LoginRequiredMixin, ListView):
-    '''
-    View to list 5 most recent entries in case editing is needed 
-    '''
-    model = Image
-    template_name = 'EntryApp/list-recent.html'
-
-    def get_queryset(self):
-        jbid = self.request.user
-        return Image.objects.filter(jbid=jbid) \
-                            .filter(is_complete=True) \
-                            .order_by('-timestamp')[:5]
-
-
-
-#================================#
 # DUMMY VIEWS
 #================================#
-
-class TestImageView(LoginRequiredMixin, TemplateView):
-    '''
-    View for testing image types separately from rest of app
-    '''
-
-    def get(self, request):
-        context = {'slug': 'tester_tiff_autumn.tif'}
-        return render(request, 'test_dummy_image.html', context)
 
 from EntryApp.forms import CrispyFormSetHelper 
 import django.forms as forms

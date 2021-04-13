@@ -29,21 +29,24 @@ DEBUG = True
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        }
+    },
     'handlers': {
         'file': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': '/data/data/user/django_user/dev/logs/debug.log'
+            'filename': '/data/data/user/django_user/dev/logs/info.log',
+            'formatter': 'verbose'
         },
     },
-    # 'root': {
-    #     'handlers': ['file'],
-    #     'level': 'INFO',
-    # },
     'loggers': {
         'django': {
             'handlers': ['file'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': True,
         },
     }
