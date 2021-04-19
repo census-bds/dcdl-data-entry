@@ -8,14 +8,14 @@ def generate_n_Images(n, users, fake_suffix = ''):
     """
     Generate n fake image paths and insert them into DB
 
-    Takes: 
+    Takes:
         - int # of paths to generate
         - list of user jbids who will enter data
         - optional string suffix to append to fake path names
     Returns: None
     """
 
-    fake_paths = ['fake_IMG_' + str(n) + fake_suffix for n in range(0, n)] 
+    fake_paths = ['fake_IMG_' + str(n) + fake_suffix for n in range(0, n)]
 
     first = True
     for u in users:
@@ -34,7 +34,7 @@ def generate_n_Images(n, users, fake_suffix = ''):
                 img = Image(img_path=f, \
                                     jbid=u, \
                                     is_complete=False, \
-                                    year=None, 
+                                    year=None,
                                     image_type=None, \
                                     date_complete=None)
             img.save()
@@ -44,7 +44,7 @@ def delete_data(model):
     """
     Delete data from a model
 
-    Takes: 
+    Takes:
     - model object
     Returns:
     - None
@@ -78,5 +78,4 @@ def refresh_db():
         for r in rows:
             r.delete()
 
-    populate_models() 
-
+    populate_models()

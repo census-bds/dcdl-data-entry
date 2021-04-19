@@ -13,14 +13,14 @@ from pathlib import Path
 from django.db import connection
 from django.contrib.auth.models import Group
 
-from EntryApp.models import Image, Breaker, Sheet, Record, OtherImage, FormField, CurrentEntry
+from EntryApp.models import ImageFile, Image, Breaker, Sheet, Record, OtherImage, FormField, CurrentEntry
 
 logger = logging.getLogger('EntryApp.load_db')
 
 if socket.gethostname() == 'erd-web008-dev.compute.csp1.census.gov':
     FORM_FIELDS_CSV = os.path.join(Path(__file__).parent.parent.absolute(), 'form_fields.csv')
     IMAGE_DIR = '/data/data/git/images/'
-else: 
+else:
     FORM_FIELDS_CSV = "Z:/1950-1980 censuses/cecile_dev/FormFields.csv"
     IMAGE_DIR = "Z:/1950-1980 censuses/cecile_dev/dcdl/images/"
 
@@ -29,7 +29,7 @@ def load_images(path, users=[], ext = "*.jpg"):
     '''
     Loads images into the DB, 1 row per entry-user
 
-    Takes: 
+    Takes:
     - string filepath
     - list of username strings (default all in data_entry group)
     - file extension (default .jpg)
@@ -49,24 +49,24 @@ def load_images(path, users=[], ext = "*.jpg"):
             img = Image(img_path=os.path.split(f)[-1], \
                     jbid=u, \
                     is_complete=False, \
-                    year=None, 
+                    year=None,
                     image_type=None, \
                     problem=False)
             img.save()
-    
+
     return
 
 
 def create_1990_dummy_breakers(users):
     '''
     Create default breaker for 1990 for each user, plus associated dummy image
-    
-    1990 doesn't have breakers but they are required in the models. This 
+
+    1990 doesn't have breakers but they are required in the models. This
     function creates a dummy image and breaker for each user for 1990 to avoid
     raising an error when a user enters a sheet without having entered a breaker.
-    Dummy images can be identified using the filename pattern 
+    Dummy images can be identified using the filename pattern
     "dummy_1990_breaker_JBID."
-   
+
     Takes:
     - list of string usernames
     Returns: none
@@ -105,10 +105,10 @@ def create_image_fixture(path, users, out, ext="*.jpg"):
     '''
     Creates a JSON fixture to load for the image table
 
-    Takes: 
+    Takes:
     - string filepath to images
     - list of username strings
-    - path to store output JSON 
+    - path to store output JSON
     - file extension (default .jpg)
     Returns: none
     '''
@@ -126,12 +126,12 @@ def create_image_fixture(path, users, out, ext="*.jpg"):
                 {
                     'model': 'EntryApp.image',
                     'pk': i,
-                    'fields': {    
-                        'img_path': f.split(os.sep)[-1], 
-                        'jbid': u, 
-                        'is_complete': False, 
-                        'year': None, 
-                        'image_type': None, 
+                    'fields': {
+                        'img_path': f.split(os.sep)[-1],
+                        'jbid': u,
+                        'is_complete': False,
+                        'year': None,
+                        'image_type': None,
                         'timestamp': None
                     }
                 })
@@ -157,7 +157,7 @@ def load_form_fields(field_tbl_path, reload=True):
     with open(field_tbl_path) as f:
         csvreader = csv.reader(f)
         next(csvreader) # skip header row
-         
+
         for row in csvreader:
             logger.info(row)
             field = FormField(year = row[0], form_type=row[1], field_name=row[2])
