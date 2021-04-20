@@ -25,7 +25,7 @@ else:
     IMAGE_DIR = "Z:/1950-1980 censuses/cecile_dev/dcdl/images/"
 
 
-def load_images(path, users=[], ext = "*.jpg"):
+def load_images(path, users=[], ext = "*.jpg", reel_IN = None ):
     '''
     Loads images into the DB, 1 row per entry-user
 
@@ -36,6 +36,14 @@ def load_images(path, users=[], ext = "*.jpg"):
     Returns: none
     '''
 
+    # declare variables
+    file_reel = None
+    file_counter = None
+    full_file_path = None
+    image_file_qs = None
+    image_file_count = None
+    image_file = None
+
     files = glob.glob(path + ext)
     print(files)
 
@@ -43,18 +51,63 @@ def load_images(path, users=[], ext = "*.jpg"):
         g = Group.objects.get(name='data_entry')
         users = [u.username for u in g.user_set.all()]
 
-    for f in files:
+    # init reel string
+    file_reel = reel_IN
+    if ( ( file_reel is None ) or ( file_reel == "" ) ):
+
+        # no reel string passed in, use path.
+        file_reel = path
+
+    #-- END check to see if we have a reel string passed in --#
+
+    # loop over files in current path.
+    file_counter = 0
+    for full_file_path in files:
+
+        # create ImageFile?
+        image_file_qs = ImageFile.objects.filter( img_path = full_file_path )
+        image_file_count = image_file_qs.count()
+        if ( image_file_count == 0 ):
+
+            # make new.
+            image_file_instance = ImageFile()
+            image_file_instance.set_image_path( full_file_path )
+            image_file_instance.img_reel = file_reel
+            image_file_instance.img_position = file_counter
+            image_file_instance.save()
+
+        elif ( image_file_count == 1 ):
+
+            # load existing
+            image_file_instance = image_file_qs.get()
+
+        else:
+
+            # more than 1? Oh dear...
+            print( "ERROR - more than one ImageFile for path {image_path} - punting for now.".format( image_path = file_path ) )
+            image_file_instance = None
+
+        #-- END check to see if we already have instance for this file path. --#
+
+        #print( "----> ImageFile: {image_file}".format( image_file = image_file_instance ) )
+
         for u in users:
 
-            img = Image(img_path=os.path.split(f)[-1], \
+            img = Image( image_file=image_file_instance, \
                     jbid=u, \
                     is_complete=False, \
                     year=None,
                     image_type=None, \
-                    problem=False)
+                    problem=False
             img.save()
 
+        #-- END loop over users for a given file --#
+
+    #-- END loop over files in chosen folder --#
+
     return
+
+#-- END function load_images() --#
 
 
 def create_1990_dummy_breakers(users):
@@ -72,14 +125,48 @@ def create_1990_dummy_breakers(users):
     Returns: none
     '''
 
+    # declare variables
+    dummy_breaker_file_name = None
+    image_file_qs = None
+    image_file_count = None
+    image_file = None
+
     if not users:
         g = Group.objects.get(name='data_entry')
         users = [u.username for u in g.user_set.all()]
 
+    # get ImageFile for breaker.
+    dummy_breaker_file_name = "dummy_1990_breaker"
+    image_file_qs = ImageFile.objects.filter( img_path = dummy_breaker_file_name )
+    image_file_count = image_file_qs.count()
+    if ( image_file_count == 0 ):
+
+        # make new.
+        image_file_instance = ImageFile()
+        image_file_instance.set_image_path( dummy_breaker_file_name )
+        image_file_instance.img_reel = dummy_breaker_file_name
+        image_file_instance.img_position = 1
+        image_file_instance.save()
+
+    elif ( image_file_count == 1 ):
+
+        # load existing
+        image_file_instance = image_file_qs.get()
+
+    else:
+
+        # more than 1? Oh dear...
+        print( "ERROR - more than one ImageFile for path {dummy_breaker_file_name} - punting for now.".format( image_path = file_path ) )
+        image_file_instance = None
+
+    #-- END check to see if we already have instance for this file path. --#
+
+    #print( "----> ImageFile: {image_file}".format( image_file = image_file_instance ) )
+
     for u in users:
 
         img = Image.objects.create(
-            img_path=f'dummy_1990_breaker_{u}',
+            image_file = image_file_instance,
             jbid=u,
             is_complete=True,
             year=1990,
@@ -97,13 +184,21 @@ def delete_model_data():
     '''
     Deletes all rows in specified tables
     '''
-    for m in [Image, Breaker, Sheet, Record, CurrentEntry, FormField, OtherImage]:
+    for m in [ImageFile, Image, Breaker, Sheet, Record, CurrentEntry, FormField, OtherImage]:
         m.objects.all().delete()
 
 
 def create_image_fixture(path, users, out, ext="*.jpg"):
+
     '''
     Creates a JSON fixture to load for the image table
+
+    Should be able to do this with:
+    python manage.py dumpdata EntryApp
+    OR
+    python manage.py dumpdata EntryApp.ImageFile EntryApp.Image
+
+    Also, this will break now. Sorry!
 
     Takes:
     - string filepath to images

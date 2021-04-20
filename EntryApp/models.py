@@ -65,7 +65,7 @@ class ImageFile(models.Model):
     """
 
     # we will bulk load DB with all images to enter
-    img_path = models.CharField( max_length = 255 )
+    img_path = models.CharField( max_length = 255, unique = True )
     img_file_name = models.CharField( max_length = 255 )
     img_folder_path = models.CharField( max_length = 255, blank = True, null = True )
     img_reel = models.CharField( max_length = 255 )
@@ -198,7 +198,7 @@ class Image(models.Model):
     # seeing how broken everything is if I remove this - ideally, just want
     #     image path in one place, so you can change it there and not have to
     #     update all Image instances that reference it.
-    img_path = models.CharField(max_length=200)
+    #img_path = models.CharField(max_length=200)
 
     jbid = models.CharField(
         max_length=20,
@@ -227,13 +227,13 @@ class Image(models.Model):
     create_date = models.DateTimeField( auto_now_add = True )
     last_modified = models.DateTimeField( auto_now = True )
 
-    #class Meta:
-    #    constraints = [
-    #        models.UniqueConstraint(
-    #            fields = ['image_file', 'jbid',],
-    #            name='unique_img_entry'
-    #        )
-    #    ]
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields = ['image_file', 'jbid',],
+                name='unique_img_entry'
+            )
+        ]
 
     def __str__(self):
 

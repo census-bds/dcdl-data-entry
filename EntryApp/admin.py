@@ -5,7 +5,7 @@ from django.http import HttpResponse
 
 from djqscsv import render_to_csv_response
 
-from .models import Breaker, Image, OtherImage, Record, Sheet
+from .models import Breaker, Image, ImageFile, OtherImage, Record, Sheet
 
 
 def export_to_csv(modeladmin, request, queryset):
@@ -22,9 +22,145 @@ export_to_csv.short_description = "Export selected to csv"
 
 
 admin.site.register(Breaker)
-admin.site.register(Image)
+#admin.site.register(Image)
+#admin.site.register( ImageFile )
 admin.site.register(OtherImage)
 admin.site.register(Record)
 admin.site.register(Sheet)
 
 admin.site.add_action(export_to_csv, 'export_to_csv')
+
+# Image ImageFile inline
+class Image_ImageFileInline( admin.TabularInline ):
+
+    model = Image
+    extra = 1
+    fk_name = 'image_file'
+
+    fieldsets = [
+        (
+            None,
+            {
+                'fields' : [
+                    'jbid',
+                    'year',
+                    'image_type',
+                    'is_complete',
+                    'timestamp',
+                    'problem',
+                    'prob_description',
+                    'flagged_view'
+                ]
+            }
+        )
+    ]
+
+#-- END class Image_ImageFileInline --#
+
+class ImageFileAdmin( admin.ModelAdmin ):
+
+    fieldsets = [
+        ( "File info",
+            {
+                'fields' : [
+                    'img_path',
+                    'img_file_name',
+                    'img_folder_path',
+                    'img_reel',
+                    'img_position'
+                ]
+            }
+        ),
+        ( "Preserved from Image",
+            {
+                'fields' : [
+                    'year',
+                    'image_type',
+                    'is_complete',
+                    'timestamp',
+                    'problem',
+                    'prob_description',
+                    'flagged_view'
+                ],
+                "classes" : ( "collapse", )
+            }
+        ),
+    ]
+
+    inlines = [
+        Image_ImageFileInline
+    ]
+
+    list_display = ( 'id', 'img_reel', 'img_position', 'img_path' )
+    list_display_links = ( 'id', 'img_path', )
+    list_filter = [ 'img_reel' ]
+    search_fields = [
+        'img_path',
+        'img_file_name',
+        'img_folder_path',
+        'img_reel',
+        'img_position',
+        'id'
+    ]
+    # date_hierarchy = 'status_date'
+    ordering = [ 'img_reel', 'img_position' ]
+
+#-- END ImageFileAdmin admin class --#
+
+admin.site.register( ImageFile, ImageFileAdmin )
+
+class ImageAdmin( admin.ModelAdmin ):
+
+    # ajax-based autocomplete
+    autocomplete_fields = [ 'image_file' ]
+
+    fieldsets = [
+        ( "Coding",
+            {
+                'fields' : [
+                    'image_file',
+                    'jbid',
+                    'year',
+                    'image_type',
+                    'is_complete',
+                    'timestamp',
+                    'problem'
+                ]
+            }
+        ),
+        ( "Problem Details",
+            {
+                'fields' : [
+                    'prob_description',
+                    'flagged_view'
+                ],
+                "classes" : ( "collapse", )
+            }
+        ),
+    ]
+
+    list_display = (
+        'id',
+        'jbid',
+        'image_file',
+        'year',
+        'image_type',
+        'is_complete',
+        'problem',
+        'last_modified'
+    )
+    list_display_links = ( 'id', 'image_file' )
+    list_filter = [ 'is_complete', 'problem', 'image_type' ]
+    search_fields = [
+        'jbid',
+        'image_file.img_path',
+        'year',
+        'prob_description',
+        'id'
+    ]
+    # date_hierarchy = 'status_date'
+    ordering = [ 'last_modified' ]
+
+#-- END ImageAdmin admin class --#
+
+admin.site.register( Image, ImageAdmin )
