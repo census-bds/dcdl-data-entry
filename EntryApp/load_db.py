@@ -25,7 +25,7 @@ else:
     IMAGE_DIR = "Z:/1950-1980 censuses/cecile_dev/dcdl/images/"
 
 
-def load_images(path, users=[], ext = "*.jpg", reel_IN = None ):
+def load_images(path, users=[], ext = "*.jpg", reel_label_IN = None, reel_index_IN = None ):
     '''
     Loads images into the DB, 1 row per entry-user
 
@@ -37,7 +37,8 @@ def load_images(path, users=[], ext = "*.jpg", reel_IN = None ):
     '''
 
     # declare variables
-    file_reel = None
+    file_reel_label = None
+    file_reel_index = None
     file_counter = None
     full_file_path = None
     image_file_qs = None
@@ -51,12 +52,20 @@ def load_images(path, users=[], ext = "*.jpg", reel_IN = None ):
         g = Group.objects.get(name='data_entry')
         users = [u.username for u in g.user_set.all()]
 
-    # init reel string
-    file_reel = reel_IN
-    if ( ( file_reel is None ) or ( file_reel == "" ) ):
+    # init reel label and inde
+    file_reel_label = reel_label_IN
+    if ( ( file_reel_label is None ) or ( file_reel_label == "" ) ):
 
         # no reel string passed in, use path.
-        file_reel = path
+        file_reel_label = path
+
+    #-- END check to see if we have a reel string passed in --#
+
+    file_reel_index = reel_index_IN
+    if ( file_reel_index is None ):
+
+        # no reel string passed in, use path.
+        file_reel_index = 0
 
     #-- END check to see if we have a reel string passed in --#
 
@@ -72,7 +81,8 @@ def load_images(path, users=[], ext = "*.jpg", reel_IN = None ):
             # make new.
             image_file_instance = ImageFile()
             image_file_instance.set_image_path( full_file_path )
-            image_file_instance.img_reel = file_reel
+            image_file_instance.img_reel_label = file_reel_label
+            image_file_instance.img_reel_index = file_reel_index
             image_file_instance.img_position = file_counter
             image_file_instance.save()
 
@@ -144,7 +154,8 @@ def create_1990_dummy_breakers(users):
         # make new.
         image_file_instance = ImageFile()
         image_file_instance.set_image_path( dummy_breaker_file_name )
-        image_file_instance.img_reel = dummy_breaker_file_name
+        image_file_instance.img_reel_label = dummy_breaker_file_name
+        image_file_instance.img_reel_index = 0
         image_file_instance.img_position = 1
         image_file_instance.save()
 

@@ -10,22 +10,117 @@ import re
 
 from django.http import HttpResponse, Http404, HttpResponseNotFound
 from django.shortcuts import get_object_or_404, render, redirect
-from django.urls import reverse 
+from django.urls import reverse
 from django.views.generic import View, FormView, TemplateView, CreateView, ListView
 from django.forms import formset_factory, modelformset_factory, RadioSelect
 from django.contrib.auth.models import Permission, User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.template import RequestContext, loader
+from django.template.context_processors import csrf
 
 from EntryApp.models import Image, Breaker, OtherImage, Sheet, Record, CurrentEntry, FormField
 from EntryApp.forms import ImageForm, SheetForm, BreakerForm, RecordForm, BaseRecordFormSet, BaseBreakerFormSet, ProblemForm
 
+#==============================================================================#
+# CONSTANTS-ish
+#==============================================================================#
+
+# standard context names
+CONTEXT_PARAM_NAMES = "param_names"
+
+# input parameter names
+PARAM_NAME_ACTION = "action"
+PARAM_NAME_IMAGE_ID = "image_id"
+PARAM_NAMES = {}
+PARAM_NAMES[ "PARAM_NAME_IMAGE_ID" ] = PARAM_NAME_IMAGE_ID
+PARAM_NAMES[ "PARAM_NAME_ACTION" ] = PARAM_NAME_ACTION
+
+# actions
+ACTION_UPDATE_IMAGE = "update_image"
+ACTION_UPDATE_TYPE = "update_type"
+ACTION_UPDATE_RECORD = "update_record"
+VALID_ACTIONS = []
+VALID_ACTIONS.append( ACTION_UPDATE_IMAGE )
+VALID_ACTIONS.append( ACTION_UPDATE_TYPE )
+VALID_ACTIONS.append( ACTION_UPDATE_RECORD )
+
+#==============================================================================#
+# variables
+#==============================================================================#
+
 logger = logging.getLogger('EntryApp.views')
 
-#=====================================================#
-# INDEX AND HELPER
-#=====================================================#
+#==============================================================================#
+# functions
+#==============================================================================#
+
+def get_request_data( request_IN ):
+
+    '''
+    Accepts django request.  Based on method, grabs the container for incoming
+        parameters and returns it:
+        - for method "POST", returns request_IN.POST
+        - for method "GET", returns request_IN.GET
+    '''
+
+    # return reference
+    request_data_OUT = None
+
+    # do we have input parameters?
+    if ( request_IN.method == 'POST' ):
+
+        request_data_OUT = request_IN.POST
+
+    elif ( request_IN.method == 'GET' ):
+
+        request_data_OUT = request_IN.GET
+
+    #-- END check to see request type so we initialize form correctly. --#
+
+    return request_data_OUT
+
+#-- END function get_request_data() --#
+
+def initialize_context( request_IN, dict_IN = None ):
+
+    '''
+    Accepts request, optional context dictionary. If no dictionary passed in,
+        makes a new one. Does standard initialization, returns initialized
+        dictionary.
+    '''
+
+    # return reference
+    dict_OUT = None
+
+    # set context to what is passed in.
+    dict_OUT = dict_IN
+
+    # got anything?
+    if ( dict_OUT is None ):
+
+        # no. Make new dictionary.
+        dict_OUT = {}
+
+    #-- END check if dictionary passed in. --#
+
+    # CSRF
+    dict_OUT.update( csrf( request_IN ) )
+
+    # param names
+    dict_OUT[ CONTEXT_PARAM_NAMES ] = PARAM_NAMES
+
+    return dict_OUT
+
+#-- END function initialize_context() --#
+
+#==============================================================================#
+# views
+#==============================================================================#
+
+#------------------------------------------------------------------------------#
+# IndexView
+#------------------------------------------------------------------------------#
 
 class IndexView(LoginRequiredMixin, TemplateView):
     """
@@ -34,46 +129,128 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
     def get(self, request):
 
+        # return reference
+        response_OUT = None
+
+        # render response
+        response_OUT = self.process_request( request )
+
+        return response_OUT
+
+    #-- END method get() --#
+
+    def process_request( self, request ):
+
+        # return reference
+        response_OUT = None
+
+        # declare variables
+        current_user = None
+        current_username = None
+        user_image_qs = None
+        total_image_count = None
+        todo_image_qs = None
+        todo_image_count = None
+        recent_image_qs = None
+        recent_image_list = None
+        recent_image_count = None
+        completed_count = None
+        next_image = None
+        context = None
+
+        # init
+        recent_image_count = 5
+        context = initialize_context( request )
+
+        # get current username
         logger.info(f'user info:\n \t {request.user}')
-        latest_image_list = Image.objects.filter(jbid=request.user)
-        user_complete_list = Image.objects.filter(jbid=request.user).filter(is_complete=True)
-        context = {
-            'user': request.user,
-            'num_completed': len(user_complete_list), 
-            'num_images': len(latest_image_list),
-            }
-        return render(request, 'EntryApp/index.html', context)
+        current_user = request.user
+        current_username = current_user.username
+        context[ "user" ] = current_user
 
+        # get user image lists
+        user_image_qs = Image.objects.filter( jbid = current_username )
+        total_image_count = user_image_qs.count()
+        context[ 'num_images' ] = total_image_count
 
-#=====================================================#
-# IMAGE 
-#=====================================================#
+        # todo
+        todo_image_qs = user_image_qs.filter( is_complete = False )
+        todo_image_qs = todo_image_qs.order_by( 'image_file__img_reel_label', 'image_file__img_reel_index', 'image_file__img_position' )
+        todo_image_count = todo_image_qs.count()
+        next_image = todo_image_qs.first()
+        context[ 'num_todo' ] = todo_image_count
+        context[ 'next_image' ] = next_image
 
-class BeginNewImageView(LoginRequiredMixin, FormView):
-    
+        # done
+        recent_image_qs = user_image_qs.filter( is_complete = True )
+        recent_image_qs = recent_image_qs.order_by( '-last_modified' )
+        completed_count = recent_image_qs.count()
+        context[ 'num_completed' ] = completed_count
+
+        # limit to recent_image_count, and add QS to context.
+        recent_image_qs = recent_image_qs[ : recent_image_count ]
+        recent_image_list = list(  )
+        context[ 'recent_image_list' ] = recent_image_list
+
+        # render response
+        response_OUT = render( request, 'EntryApp/index.html', context )
+
+        return response_OUT
+
+    #-- END method process_request() --#
+
+#-- END view class IndexView
+
+#------------------------------------------------------------------------------#
+# CodeImage
+#------------------------------------------------------------------------------#
+
+class CodeImage( LoginRequiredMixin, FormView ):
+
+    '''
+    # Processing:
+
+    - action = view, image, type, record
+
+        - if action = view, populate forms, no changes.
+        - if action = image, retrieve information from image form, use it to update image.
+
+            - if image already has breaker or sheet, don't allow type to be updated.
+
+        - if action = type, retrieve type, then based on type, retrieve information from type form and update breaker or sheet.
+
+    # Template cells:
+
+    - display image.
+    - image info
+
+        - if image_id, load data, pre-populate form from
+        - if image already has breaker or sheet, don't allow type to be updated.
+
+    - edit based on type
+
+        - if no type, do not output cell.
+        - if image_type, try to retrieve record for type appropriate for image.
+        - if found, prepopulate form.
+        - render form
+
+    - if sheet, then, edit records
+
+        - if type is not sheet, do not output.
+        - if record ID, load into edit form, if not, empty form.
+        - output list of records, sorted by index. Beside each, output edit form.
+    '''
+
     form_class = ImageForm
-    template_name = 'EntryApp/begin-new-image.html'
+    template_name = 'EntryApp/code-image.html'
 
-    def get(self, request):
-
-        seed_current_entry(request) # this ensures there's a value in CurrentEntry
-        get_next_image(request) # this loads the next image into CurrentEntry
-
-        img = CurrentEntry.objects.get(jbid=request.user).img
-        context = {
-            'image': img,
-            'form': self.form_class(),
-            'slug': img.img_path 
-        }
-        return render(request, self.template_name, context)
-
-    def post(self, request):    
+    def old_post( self, request ):
         try:
             form = request.POST
             logger.info(f'BeginNewImage post() form is {form}')
             current = CurrentEntry.objects.get(jbid=request.user)
             image, created = Image.objects.update_or_create(
-                img_path = current.img.img_path, 
+                img_path = current.img.img_path,
                 jbid = request.user,
                 defaults = {'year': form['year'],
                 'image_type': form['image_type'].lower(),
@@ -87,22 +264,146 @@ class BeginNewImageView(LoginRequiredMixin, FormView):
 
         except KeyError:
             logger.info("KeyError in post() for BeginNewImage")
-            return render(request, 'EntryApp/begin-new-image.html')  
+            return render(request, 'EntryApp/begin-new-image.html')
+
+    #-- END method old_post --#
+
+    def get( self, request ):
+
+        # return reference
+        response_OUT = None
+
+        # render response
+        response_OUT = self.process_request( request )
+
+        return response_OUT
+
+    #-- END method get() --#
+
+    def post( self, request ):
+
+        # return reference
+        response_OUT = None
+
+        # render response
+        response_OUT = self.process_request( request )
+
+        return response_OUT
+
+    #-- END method post() --#
+
+    def process_request( self, request ):
+
+        # return reference
+        response_OUT = None
+
+        # declare variables
+        me = "CodeImage.process_request"
+        request_inputs = None
+        current_user = None
+        current_username = None
+        request_inputs = None
+        current_image_id = None
+        current_action = None
+        image_qs = None
+        current_image = None
+        context = None
+
+        # init
+        context = initialize_context( request )
+
+        # get request inputs (get or post)
+        request_inputs = get_request_data( request )
+
+        # get current user info
+        logger.info(f'user info:\n \t {request.user}')
+        current_user = request.user
+        current_username = current_user.username
+        context[ "user" ] = current_user
+
+        # get ID of image to process.
+        current_image_id = request_inputs.get( PARAM_NAME_IMAGE_ID, None )
+
+        # do we have an image ID?
+        if ( ( current_image_id is not None ) and ( current_image_id != "" ) ):
+
+            # retrieve image
+            image_qs = Image.objects.filter( pk = current_image_id )
+            current_image = image_qs.get()
+
+            context[ "img" ] = current_image
+            context[ "form" ] = self.form_class()
+            context[ "slug" ] = current_image.image_file.img_path
+
+            response_OUT = render( request, self.template_name, context )
+
+        #-- END check to see if image ID passed in. --#
+
+        return response_OUT
+
+    #-- END method process_request() --#
+
+#-- END class CodeImage --#
+
+
+#=====================================================#
+# IMAGE
+#=====================================================#
+
+class BeginNewImageView(LoginRequiredMixin, FormView):
+
+    form_class = ImageForm
+    template_name = 'EntryApp/begin-new-image.html'
+
+    def get(self, request):
+
+        seed_current_entry(request) # this ensures there's a value in CurrentEntry
+        get_next_image(request) # this loads the next image into CurrentEntry
+
+        img = CurrentEntry.objects.get(jbid=request.user).img
+        context = {
+            'image': img,
+            'form': self.form_class(),
+            'slug': img.img_path
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request):
+        try:
+            form = request.POST
+            logger.info(f'BeginNewImage post() form is {form}')
+            current = CurrentEntry.objects.get(jbid=request.user)
+            image, created = Image.objects.update_or_create(
+                img_path = current.img.img_path,
+                jbid = request.user,
+                defaults = {'year': form['year'],
+                'image_type': form['image_type'].lower(),
+                'is_complete': True,
+                'timestamp': datetime.datetime.now()
+                }
+            )
+            logger.info(f'BeginNewImage post() current image is {image}')
+
+            return redirect(reverse(f'EntryApp:enter_{image.image_type}_data'))
+
+        except KeyError:
+            logger.info("KeyError in post() for BeginNewImage")
+            return render(request, 'EntryApp/begin-new-image.html')
 
 
 def seed_current_entry(request):
     '''
     Helper function for BeginNewImageView: Put dummy data into current entry
-     table. It should only be called for the first image for each user. 
-    ''' 
+     table. It should only be called for the first image for each user.
+    '''
     if CurrentEntry.objects.filter(jbid=request.user):
-        return 
-    
+        return
+
     else:
         # these will be overwritten, I think, so values don't matter
         logger.info(f'seed_current_entry inserting into CurrentEntry')
         an_image = Image.objects.all()[0]
-        a_breaker = Breaker.objects.create(jbid=request.user, img=an_image) 
+        a_breaker = Breaker.objects.create(jbid=request.user, img=an_image)
         current = CurrentEntry.objects.create(jbid=request.user, \
                                             img=an_image, \
                                             breaker = a_breaker, \
@@ -117,7 +418,7 @@ def get_next_image(request):
     '''
 
     # refine this, probably
-    try: 
+    try:
         new_image = Image.objects.filter(is_complete=False).filter(jbid=request.user)[0]
         logger.info(f'get_new_image got {new_image.img_path}')
 
@@ -125,7 +426,7 @@ def get_next_image(request):
             current = CurrentEntry.objects.get(jbid=request.user)
             current.img = new_image
             current.save()
-            
+
     except Exception as e:
         print(e)
         raise Http404("get_next_image might not have found images to enter.")
@@ -138,14 +439,14 @@ def get_next_image(request):
 class EnterBreakerData(LoginRequiredMixin, FormView):
 
     template_name = 'EntryApp/enter-breaker-data.html'
-    
+
     def get(self, request):
         logger.info(f'breaker request is {request}')
 
         current = CurrentEntry.objects.get(jbid=request.user)
 
         field_query = FormField.objects.filter(year=current.img.year).filter(form_type="breaker")
-        logger.info(f'FormField query length was {len(field_query)}') 
+        logger.info(f'FormField query length was {len(field_query)}')
         breaker_fields = [f.field_name for f in list(field_query)]
 
         BreakerFormSet = modelformset_factory(Breaker, fields=breaker_fields,formset=BaseBreakerFormSet)
@@ -154,7 +455,7 @@ class EnterBreakerData(LoginRequiredMixin, FormView):
         context = {
             'breaker_img_path': current.img.img_path,
             'formset': formset,
-        }    
+        }
         return render(request, self.template_name, context)
 
     def post(self, request):
@@ -165,7 +466,7 @@ class EnterBreakerData(LoginRequiredMixin, FormView):
 
         # define fields based on which year it is
         field_query = FormField.objects.filter(year=current.img.year).filter(form_type="breaker")
-        logger.info(f'FormField query length was {len(field_query)}') 
+        logger.info(f'FormField query length was {len(field_query)}')
         breaker_fields = [f.field_name for f in list(field_query)]
 
         BreakerFormSet = modelformset_factory(Breaker, fields=breaker_fields, formset=BaseBreakerFormSet)
@@ -199,7 +500,7 @@ class EnterBreakerData(LoginRequiredMixin, FormView):
 #=====================================================#
 
 class EnterSheetData(LoginRequiredMixin, FormView):
-    
+
     form_class = SheetForm
     template_name = 'EntryApp/enter-sheet-data.html'
 
@@ -221,12 +522,12 @@ class EnterSheetData(LoginRequiredMixin, FormView):
         '''
         Handle POST request with populated form; save form data to DB
         '''
-        
-        form = request.POST 
+
+        form = request.POST
         logger.info(f'EnterSheet POST request form: {form}')
 
         try:
-            # first save the data in Sheet 
+            # first save the data in Sheet
             current_img = CurrentEntry.objects.get(jbid=request.user).img
 
             # 1990 never has breakers, so assign the default dummy
@@ -260,10 +561,10 @@ class EnterSheetData(LoginRequiredMixin, FormView):
         except KeyError:
             logger.warn("KeyError in submit_sheet post()")
             return render(request, reverse(self.template_name))
-    
+
 
 #=====================================================#
-# RECORD 
+# RECORD
 #=====================================================#
 
 @login_required
@@ -279,7 +580,7 @@ def enter_records(request):
     # this query would fail if sheet is None but that shouldn't happen
     logger.info(f'FormField: year of current entry is {current.img.year}')
     field_query = FormField.objects.filter(year=current.img.year).filter(form_type=current.sheet.form_type)
-    logger.info(f'FormField query length was {len(field_query)}') 
+    logger.info(f'FormField query length was {len(field_query)}')
     record_fields = [f.field_name for f in list(field_query)]
     logger.info(f'form records fields are {record_fields}')
 
@@ -297,7 +598,7 @@ def enter_records(request):
     )
 
     if request.method == 'POST':
-        
+
         logger.info(f'enter_record view POST request')
         formset = RecordFormSet(request.POST, request.FILES)
         logger.info(f'{formset.is_valid()}')
@@ -307,23 +608,23 @@ def enter_records(request):
                 r['sheet'] = current.sheet
                 r['timestamp'] = datetime.datetime.now()
                 r['jbid'] = request.user
-                logger.info(f'record value is {r}') 
+                logger.info(f'record value is {r}')
                 record, created = Record.objects.get_or_create(**r)
 
                 if created:
                     logger.info(f'{record} created.')
                 else:
                     logger.info(f'{record} updated.')
-                    
+
             return redirect(reverse('EntryApp:index'))
-        
+
     else:
         formset = RecordFormSet(queryset=Record.objects.none)
-    
+
     context = {
         'formset': formset,
         'helper': helper,
-        'slug': current.img.img_path 
+        'slug': current.img.img_path
     }
     return render(request, 'EntryApp/enter-records.html', context)
 
@@ -333,7 +634,7 @@ def enter_records(request):
 
 class ListRecentView(LoginRequiredMixin, ListView):
     '''
-    View to list 5 most recent entries in case editing is needed 
+    View to list 5 most recent entries in case editing is needed
     '''
     model = Image
     template_name = 'EntryApp/list-recent.html'
@@ -368,13 +669,13 @@ def parse_http_referral(url):
     '''
     Helper function for report_problem view
     Parses referring url from HTTP request to extract site of problem
-    
-    Takes: string from the HTTP request referring url 
+
+    Takes: string from the HTTP request referring url
     Returns: string name of model affected
     '''
     if url:
         page_name = re.search('(?<=EntryApp/).+/', url).group(0)[:-1]
-        logger.info(f"parse_http_referral: {page_name}") 
+        logger.info(f"parse_http_referral: {page_name}")
         return page_name
     else:
         logger.info(f'parse_http_referral did not get a url, returning empty string.')
@@ -387,7 +688,7 @@ def report_problem(request):
     View to render problem form so user can record an issue
     '''
 
-    current = CurrentEntry.objects.get(jbid=request.user) 
+    current = CurrentEntry.objects.get(jbid=request.user)
     flagged_view = None
 
     if request.method == "GET":
@@ -403,7 +704,7 @@ def report_problem(request):
                     'form': ProblemForm()
                 }
         )
-    
+
     elif request.method == "POST":
 
         form = request.POST
@@ -416,7 +717,7 @@ def report_problem(request):
 
             # flag the problem at the image level
             is_problem = True if 'problem' in form.keys() else False
-            
+
             if problem_image.is_complete:
                 defaults = {
                     'problem': is_problem,
@@ -431,11 +732,11 @@ def report_problem(request):
                     'prob_description': form['description'],
                     'flagged_view': flagged_view
                 }
-            
+
             problem_image, updated = Image.objects.update_or_create(
                 jbid = request.user,
                 pk = problem_image.pk,
-                defaults = defaults 
+                defaults = defaults
             )
 
             return redirect(reverse('EntryApp:index'))
@@ -456,7 +757,7 @@ def report_problem(request):
 # DUMMY VIEWS
 #================================#
 
-from EntryApp.forms import CrispyFormSetHelper 
+from EntryApp.forms import CrispyFormSetHelper
 import django.forms as forms
 
 def test_crispy_formset_view(request, year):
@@ -512,7 +813,7 @@ def test_crispy_formset_view(request, year):
             'total_persons_ones': forms.RadioSelect,
         }
     )
-    formset = TestCrispyFormset() 
+    formset = TestCrispyFormset()
     helper = CrispyFormSetHelper(year=year, form='long')
     context = {
         'formset': formset,

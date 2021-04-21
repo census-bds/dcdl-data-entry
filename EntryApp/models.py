@@ -68,7 +68,8 @@ class ImageFile(models.Model):
     img_path = models.CharField( max_length = 255, unique = True )
     img_file_name = models.CharField( max_length = 255 )
     img_folder_path = models.CharField( max_length = 255, blank = True, null = True )
-    img_reel = models.CharField( max_length = 255 )
+    img_reel_label = models.CharField( max_length = 255 )
+    img_reel_index = models.IntegerField( blank = True, null = True )
     img_position = models.IntegerField()
 
     # automatic create and update time stamps.
@@ -76,22 +77,24 @@ class ImageFile(models.Model):
     last_modified = models.DateTimeField( auto_now = True )
 
     # could keep these... these values will be populated as entry proceeds
-    year = models.IntegerField(null=True)
+    year = models.IntegerField( blank = True, null = True )
     image_type = models.CharField(
         max_length=8,
-        null=True,
+        blank = True,
+        null = True,
         choices = choices.IMAGE_TYPE_CHOICES
     )
 
     # metadata
     is_complete = models.BooleanField(null=True) # need a validation constraint here
-    timestamp = models.DateTimeField(null=True)
-    problem = models.BooleanField(default=False)
+    timestamp = models.DateTimeField( blank = True, null = True )
+    problem = models.BooleanField( default = False )
     prob_description = models.TextField(
-        verbose_name="Please describe the problem.",
-        null=True
+        verbose_name = "Please describe the problem.",
+        blank = True,
+        null = True
     )
-    flagged_view = models.CharField(max_length=255, null=True)
+    flagged_view = models.CharField( max_length = 255, blank = True, null = True )
 
     #class Meta:
     #    constraints = [
@@ -124,7 +127,7 @@ class ImageFile(models.Model):
         string_list.append( "path: {}".format( self.img_path ) )
 
         # reel
-        string_list.append( "reel: {}".format( self.img_reel ) )
+        string_list.append( "reel: {reel_label} ( {reel_index} )".format( reel_label = self.img_reel_label, reel_index = self.img_reel_index ) )
 
         # position
         string_list.append( "position: {}".format( self.img_position ) )
@@ -206,22 +209,24 @@ class Image(models.Model):
     )
 
     # these values will be populated as entry proceeds
-    year = models.IntegerField(null=True)
+    year = models.IntegerField( blank = True, null = True )
     image_type = models.CharField(
         max_length=8,
+        blank = True,
         null=True,
         choices = choices.IMAGE_TYPE_CHOICES
     )
 
     # metadata
-    is_complete = models.BooleanField(null=True) # need a validation constraint here
-    timestamp = models.DateTimeField(null=True)
-    problem = models.BooleanField(default=False)
+    is_complete = models.BooleanField( blank = True, null = True ) # need a validation constraint here
+    timestamp = models.DateTimeField( blank = True, null = True )
+    problem = models.BooleanField( default = False )
     prob_description = models.TextField(
         verbose_name="Please describe the problem.",
+        blank = True,
         null=True
     )
-    flagged_view = models.CharField(max_length=255, null=True)
+    flagged_view = models.CharField(max_length=255, blank = True, null = True )
 
     # automatic create and update time stamps.
     create_date = models.DateTimeField( auto_now_add = True )

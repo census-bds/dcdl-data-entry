@@ -66,7 +66,8 @@ class ImageFileAdmin( admin.ModelAdmin ):
                     'img_path',
                     'img_file_name',
                     'img_folder_path',
-                    'img_reel',
+                    'img_reel_label',
+                    'img_reel_index',
                     'img_position'
                 ]
             }
@@ -91,19 +92,20 @@ class ImageFileAdmin( admin.ModelAdmin ):
         Image_ImageFileInline
     ]
 
-    list_display = ( 'id', 'img_reel', 'img_position', 'img_path' )
+    list_display = ( 'id', 'img_path', 'img_reel_label', 'img_reel_index', 'img_position' )
     list_display_links = ( 'id', 'img_path', )
-    list_filter = [ 'img_reel' ]
+    list_filter = [ 'img_reel_label' ]
     search_fields = [
         'img_path',
         'img_file_name',
         'img_folder_path',
-        'img_reel',
+        'img_reel_label',
+        'img_reel_index',
         'img_position',
         'id'
     ]
     # date_hierarchy = 'status_date'
-    ordering = [ 'img_reel', 'img_position' ]
+    ordering = [ 'img_reel_label', 'img_reel_index', 'img_position' ]
 
 #-- END ImageFileAdmin admin class --#
 

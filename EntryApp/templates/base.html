@@ -19,12 +19,14 @@
                 display:block;
             } */
         </style>
+        {% block end_of_head_tag %}
+        {% endblock end_of_head_tag %}
     </head>
-    <div id="header">
-        {% block header %}
-        {% endblock header %}
-    </div>
     <body>
+        <div id="header">
+            {% block header %}
+            {% endblock header %}
+        </div>
         <div id="content">
             {% block content %}{% endblock content %}
         </div>

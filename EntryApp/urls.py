@@ -13,5 +13,6 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('test-crispy-formset/<int:year>', views.test_crispy_formset_view, name='test_crispy_formset'),
     path('list-recent/', views.ListRecentView.as_view(), name='list_recent'),
-    path('edit-entry/', views.edit_entry, name='edit_entry')
-] 
+    path('edit-entry/', views.edit_entry, name='edit_entry'),
+    path( 'code-image/', views.CodeImage.as_view(), name="code_image" )
+]
