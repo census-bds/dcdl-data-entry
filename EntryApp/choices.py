@@ -9,10 +9,13 @@ YEAR_CHOICES = [
     (1990, 1990),
 ]
 
+IMAGE_TYPE_BREAKER = "breaker"
+IMAGE_TYPE_SHEET = "sheet"
+IMAGE_TYPE_OTHER = "other"
 IMAGE_TYPE_CHOICES = [
-    ("breaker", "Breaker"),
-    ("sheet", "Sheet"),
-    ("other", "Other"),
+    ( IMAGE_TYPE_BREAKER, "Breaker" ),
+    ( IMAGE_TYPE_SHEET, "Sheet" ),
+    ( IMAGE_TYPE_OTHER, "Other"),
 ]
 
 # TO DO: get names to match actual taxonomy - check w/Katie

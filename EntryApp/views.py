@@ -4,22 +4,36 @@ VIEWS FOR DCDL DATA ENTRY
 TO DO:
 -integrate openseadragon info into views
 """
+
+# python imports
 import datetime
 import logging
 import re
 
-from django.http import HttpResponse, Http404, HttpResponseNotFound
-from django.shortcuts import get_object_or_404, render, redirect
-from django.urls import reverse
-from django.views.generic import View, FormView, TemplateView, CreateView, ListView
-from django.forms import formset_factory, modelformset_factory, RadioSelect
-from django.contrib.auth.models import Permission
-from django.contrib.auth.models import User
+# django imports
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.models import Permission
+from django.contrib.auth.models import User
+from django.db.models import Q
+from django.forms import formset_factory
+from django.forms import modelformset_factory
+from django.forms import RadioSelect
+from django.http import Http404
+from django.http import HttpResponse
+from django.http import HttpResponseNotFound
+from django.shortcuts import get_object_or_404
+from django.shortcuts import redirect
+from django.shortcuts import render
 from django.template import loader
 from django.template import RequestContext
 from django.template.context_processors import csrf
+from django.urls import reverse
+from django.views.generic import CreateView
+from django.views.generic import FormView
+from django.views.generic import ListView
+from django.views.generic import TemplateView
+from django.views.generic import View
 
 # EntryApp models
 from EntryApp.models import Breaker
@@ -41,6 +55,9 @@ from EntryApp.forms import ProblemForm
 from EntryApp.forms import RecordForm
 from EntryApp.forms import SheetForm
 
+# EntryApp choices
+import EntryApp.choices as choices
+
 
 #==============================================================================#
 # CONSTANTS-ish
@@ -48,26 +65,31 @@ from EntryApp.forms import SheetForm
 
 # standard context names
 CONTEXT_PARAM_NAMES = "param_names"
-CONTEXT_ERROR_LIST = "error_list"
+CONTEXT_PAGE_STATUS_MESSAGE_LIST = "page_status_message_list"
+CONTEXT_BREAKER_INSTANCE = "breaker_instance"
 
 # input parameter names
 PARAM_NAME_ACTION = "action"
+PARAM_NAME_BREAKER_ID = "breaker_id"
 PARAM_NAME_IMAGE_ID = "image_id"
-PARAM_NAME_YEAR = "year"
 PARAM_NAME_IMAGE_TYPE = "image_type"
+PARAM_NAME_YEAR = "year"
 PARAM_NAMES = {}
-PARAM_NAMES[ "PARAM_NAME_IMAGE_ID" ] = PARAM_NAME_IMAGE_ID
 PARAM_NAMES[ "PARAM_NAME_ACTION" ] = PARAM_NAME_ACTION
-PARAM_NAMES[ "PARAM_NAME_YEAR" ] = PARAM_NAME_YEAR
+PARAM_NAMES[ "PARAM_NAME_BREAKER_ID" ] = PARAM_NAME_BREAKER_ID
+PARAM_NAMES[ "PARAM_NAME_IMAGE_ID" ] = PARAM_NAME_IMAGE_ID
 PARAM_NAMES[ "PARAM_NAME_IMAGE_TYPE" ] = PARAM_NAME_IMAGE_TYPE
+PARAM_NAMES[ "PARAM_NAME_YEAR" ] = PARAM_NAME_YEAR
 
 # actions
 ACTION_UPDATE_IMAGE = "update_image"
-ACTION_UPDATE_TYPE = "update_type"
+ACTION_UPDATE_BREAKER_TYPE = "update_breaker_type"
+ACTION_UPDATE_SHEET_TYPE = "update_sheet_type"
 ACTION_UPDATE_RECORD = "update_record"
 VALID_ACTIONS = []
 VALID_ACTIONS.append( ACTION_UPDATE_IMAGE )
-VALID_ACTIONS.append( ACTION_UPDATE_TYPE )
+VALID_ACTIONS.append( ACTION_UPDATE_BREAKER_TYPE )
+VALID_ACTIONS.append( ACTION_UPDATE_SHEET_TYPE )
 VALID_ACTIONS.append( ACTION_UPDATE_RECORD )
 
 #==============================================================================#
@@ -216,6 +238,10 @@ class IndexView(LoginRequiredMixin, TemplateView):
         # return reference
         response_OUT = None
 
+        # declare variables - config
+        me = "IndexView.process_request"
+        recent_image_limit = None
+
         # declare variables
         current_user = None
         current_username = None
@@ -226,12 +252,13 @@ class IndexView(LoginRequiredMixin, TemplateView):
         recent_image_qs = None
         recent_image_list = None
         recent_image_count = None
+        completed_image_qs = None
         completed_count = None
         next_image = None
         context = None
 
         # init
-        recent_image_count = 5
+        recent_image_limit = 5
         context = initialize_context( request )
 
         # get current username
@@ -253,15 +280,21 @@ class IndexView(LoginRequiredMixin, TemplateView):
         context[ 'num_todo' ] = todo_image_count
         context[ 'next_image' ] = next_image
 
-        # done
-        recent_image_qs = user_image_qs.filter( is_complete = True )
-        recent_image_qs = recent_image_qs.order_by( '-last_modified' )
-        completed_count = recent_image_qs.count()
+        # completed work
+        completed_image_qs = user_image_qs.filter( is_complete = True )
+        completed_image_qs = completed_image_qs.order_by( '-last_modified' )
+        completed_count = completed_image_qs.count()
         context[ 'num_completed' ] = completed_count
 
-        # limit to recent_image_count, and add QS to context.
-        recent_image_qs = recent_image_qs[ : recent_image_count ]
-        recent_image_list = list(  )
+        # recent work
+        recent_image_qs = user_image_qs.filter( Q( year__isnull = False ) | Q( image_type__isnull = False ) )
+        recent_image_qs = recent_image_qs.order_by( '-last_modified' )
+        recent_image_count = recent_image_qs.count()
+        context[ 'num_in_progress' ] = recent_image_count
+
+        # limit to recent_image_limit, and add list to context.
+        recent_image_qs = recent_image_qs[ : recent_image_limit ]
+        recent_image_list = list( recent_image_qs )
         context[ 'recent_image_list' ] = recent_image_list
 
         # render response
@@ -344,7 +377,106 @@ class CodeImage( LoginRequiredMixin, FormView ):
     #-- END method old_post --#
 
 
-    def action_update_image( self, inputs_IN ):
+    def action_update_breaker( self, request_IN, context_IN ):
+
+        '''
+        Accepts form inputs. Updates breaker from inputs.
+        '''
+
+        # return reference
+        error_list_OUT = None
+
+        # declare variables
+        me = "CodeImage.action_update_breaker"
+        error_message = None
+        error_list = None
+        inputs_IN = None
+        image_id = None
+        image_instance = None
+        image_has_related_objects = None
+        form = None
+        field_query = None
+        breaker_id = None
+        breaker_qs = None
+        breaker_count = None
+        breaker_instance = None
+        breaker_data = None
+        is_changed = None
+
+        # init
+        error_list_OUT = list()
+
+        # got request?
+        if ( request_IN is not None ):
+
+            # get inputs
+            inputs_IN = get_request_data( request_IN )
+
+            # get image for ID (TODO: check for image ID)
+            image_id = inputs_IN.get( PARAM_NAME_IMAGE_ID, None )
+            image_instance = Image.objects.get( pk = image_id )
+            image_has_related_objects = image_instance.has_related_objects()
+
+            form = inputs_IN
+            logger.info(f'Breaker form is{form}')
+
+            # define fields based on which year it is
+            field_query = FormField.objects.filter(year=image_instance.year).filter(form_type="breaker")
+            logger.info(f'FormField query length was {len(field_query)}')
+            breaker_fields = [f.field_name for f in list(field_query)]
+
+            BreakerFormSet = modelformset_factory(Breaker, fields=breaker_fields, formset=BaseBreakerFormSet)
+            formset = BreakerFormSet( inputs_IN, request_IN.FILES )
+
+            logger.info(f'Breaker formset clean data should have length 1: {formset.cleaned_data}')
+
+            # prepare data to use to create/update Breaker.
+            breaker_data = formset.cleaned_data[0]
+            breaker_data['img'] = image_instance
+            breaker_data['year'] = image_instance.year
+            breaker_data['jbid'] = request_IN.user
+            breaker_data['timestamp'] = datetime.datetime.now()
+
+            # do we have a breaker ID?
+            breaker_id = form.get( PARAM_NAME_BREAKER_ID, None )
+            if ( ( breaker_id is not None ) and ( breaker_id != "" ) ):
+
+                # try to get breaker, to update.
+                breaker_qs = Breaker.objects.filter( pk = breaker_id )
+
+                # update
+                breaker_qs.update( **breaker_data )
+
+                # get instance
+                breaker_instance = breaker_qs.get()
+
+            else:
+
+                # no ID. New breaker.
+                breaker_instance = Breaker.objects.create( **breaker_data )
+
+            #-- END check to see if new or existing --#
+
+            # return the breaker instance in context?
+            context_IN[ CONTEXT_BREAKER_INSTANCE ] = breaker_instance
+
+            # TODO: is it time to set Image to complete?
+            # TODO: do we want to keep using the Current thing?
+
+        else:
+
+            # no inputs?
+            error_message = "In {method}(): No inputs passed in. What is going on?".format( method = me )
+            error_list_OUT.append( error_message )
+
+        #-- END check if inputs. --#
+
+        return error_list_OUT
+
+    #-- END method action_update_breaker() --#
+
+
+    def action_update_image( self, request_IN, context_IN ):
 
         '''
         Accepts form inputs. Looks for image form inputs. If found, checks to
@@ -359,8 +491,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
         me = "CodeImage.action_update_image"
         error_message = None
         error_list = None
+        inputs_IN = None
         image_id = None
         image_instance = None
+        image_has_related_objects = None
         year_value = None
         image_type_value = None
         is_changed = None
@@ -368,65 +502,165 @@ class CodeImage( LoginRequiredMixin, FormView ):
         # init
         error_list_OUT = list()
 
-        # got inputs?
-        if ( ( inputs_IN is not None ) and ( len( inputs_IN ) > 0 ) ):
+        # got request?
+        if ( request_IN is not None ):
+
+            # get inputs.
+            inputs_IN = get_request_data( request_IN )
 
             # get image for ID (TODO: check for image ID)
             image_id = inputs_IN.get( PARAM_NAME_IMAGE_ID, None )
             image_instance = Image.objects.get( pk = image_id )
+            image_has_related_objects = image_instance.has_related_objects()
 
-            # get image info from form inputs.
+            # Only allow updates if image doesn't already have related.
+            if ( image_has_related_objects == False ):
 
-            # year
-            year_value = inputs_IN.get( PARAM_NAME_YEAR, None )
+                # get image info from form inputs.
 
-            # got a value?
-            if ( ( year_value is not None ) and ( year_value != "" ) ):
+                # year
+                year_value = inputs_IN.get( PARAM_NAME_YEAR, None )
 
-                # different?
-                year_value = int( year_value )
-                if ( year_value != image_instance.year ):
+                # got a value?
+                if ( ( year_value is not None ) and ( year_value != "" ) ):
 
-                    # changed value!
+                    # different?
+                    year_value = int( year_value )
+                    if ( year_value != image_instance.year ):
 
-                    # TODO: check if there are any child rows. If so, reject change.
+                        # changed value!
 
-                    # update
-                    image_instance.year = year_value
-                    is_changed = True
+                        # TODO: check if there are any child rows. If so, reject change.
 
-                #-- END check to see if changed value --#
+                        # update
+                        image_instance.year = year_value
+                        is_changed = True
 
-            #-- END check if year passed in. --#
+                    #-- END check to see if changed value --#
 
-            # type
-            image_type_value = inputs_IN.get( PARAM_NAME_IMAGE_TYPE, None )
+                #-- END check if year passed in. --#
 
-            # got a value?
-            if ( ( image_type_value is not None ) and ( image_type_value != "" ) ):
+                # type
+                image_type_value = inputs_IN.get( PARAM_NAME_IMAGE_TYPE, None )
 
-                # different?
-                if ( image_type_value != image_instance.image_type ):
+                # got a value?
+                if ( ( image_type_value is not None ) and ( image_type_value != "" ) ):
 
-                    # changed value!
+                    # different?
+                    if ( image_type_value != image_instance.image_type ):
 
-                    # TODO: check if there are any child rows. If so, reject change.
+                        # changed value!
 
-                    # update
-                    image_instance.image_type = image_type_value
-                    is_changed = True
+                        # TODO: check if there are any child rows. If so, reject change.
 
-                #-- END check to see if changed value --#
+                        # update
+                        image_instance.image_type = image_type_value
+                        is_changed = True
 
-            #-- END check if year passed in. --#
+                    #-- END check to see if changed value --#
 
-            # any changes?
-            if ( is_changed == True ):
+                #-- END check if year passed in. --#
 
-                # yes - save.
-                image_instance.save()
+                # any changes?
+                if ( is_changed == True ):
 
-            #-- END check to see if changes. --#
+                    # yes - save.
+                    image_instance.save()
+
+                #-- END check to see if changes. --#
+
+            else:
+
+                # image has related instances - can't update, need to ask for help.
+                error_message = "In {method}(): Image {me} has related breaker or sheet, so can't update this way. Please ask for help updating this image.".format(
+                    method = me,
+                    me = self
+                )
+                error_list_OUT.append( error_message )
+
+            #-- END check to see if image has related instances. --#
+
+        else:
+
+            # no inputs?
+            error_message = "In {method}(): No request passed in. What is going on?".format( method = me )
+            error_list_OUT.append( error_message )
+
+        #-- END check if inputs. --#
+
+        return error_list_OUT
+
+    #-- END method action_update_image() --#
+
+
+    def action_update_sheet( self, request_IN, context_IN ):
+
+        '''
+        Accepts form inputs. Updates sheet from inputs.
+        '''
+
+        # return reference
+        error_list_OUT = None
+
+        # declare variables
+        me = "CodeImage.action_update_breaker"
+        error_message = None
+        error_list = None
+        inputs_IN = None
+        image_id = None
+        image_instance = None
+        image_has_related_objects = None
+        associated_breaker = None
+        form = None
+        field_query = None
+        breaker_id = None
+        breaker_qs = None
+        breaker_count = None
+        breaker_instance = None
+        breaker_data = None
+        is_changed = None
+
+        # init
+        error_list_OUT = list()
+
+        # got request?
+        if ( request_IN is not None ):
+
+            # get inputs
+            inputs_IN = get_request_data( request_IN )
+
+            # get image for ID (TODO: check for image ID)
+            image_id = inputs_IN.get( PARAM_NAME_IMAGE_ID, None )
+            image_instance = Image.objects.get( pk = image_id )
+            image_has_related_objects = image_instance.has_related_objects()
+
+            form = inputs_IN
+
+            # 1990 never has breakers, so assign the default dummy
+            if image_instance.year == 1990:
+                # this breaker gets created for each user during data loading
+                associated_breaker = Breaker.objects.filter(year=1990).get(jbid=request.user)
+            else:
+                associated_breaker = CurrentEntry.objects.get(jbid=request.user).breaker
+
+            logger.info(f"associated breaker: {type(associated_breaker)}")
+            sheet, created = Sheet.objects.update_or_create(
+                img = current_img,
+                jbid = request.user,
+                year = current_img.year,
+            defaults = {
+                    'form_type': form['form_type'],
+                    'breaker': associated_breaker,
+                    'num_records': form['num_records'],
+                    'timestamp': datetime.datetime.now()
+                    }
+            )
+            logger.info(f'EnterSheetDataView update_or_create() returned {created}')
+
+            # next update CurrentEntry
+            current = CurrentEntry.objects.get(jbid=request.user)
+            current.sheet = sheet
+            current.save()
 
         else:
 
@@ -438,7 +672,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
         return error_list_OUT
 
-    #-- END method action_update_image() --#
+    #-- END method action_update_sheet() --#
 
 
     def get( self, request ):
@@ -466,7 +700,103 @@ class CodeImage( LoginRequiredMixin, FormView ):
     #-- END method post() --#
 
 
-    def process_action( self, request_IN ):
+    def prepare_breaker_context( self, image_IN, context_IN ):
+
+        # return reference
+        context_OUT = None
+
+        # declare variables
+        breaker_qs = None
+        breaker_count = None
+        my_breaker = None
+        field_qs = None
+        breaker_fields = None
+        BreakerFormSet = None
+
+        # add on to context passed in.
+        context_OUT = context_IN
+
+        # if breaker:
+        # - look up breaker instance for this image (could be None).
+        # - render breaker form, populated if there is already a breaker
+        #     instance for this image.
+        # - pull in images, link to edit each, OR link to edit next image.
+
+        # is there an existing Breaker instance?
+        breaker_qs = image_IN.breaker_set.all()
+        breaker_count = breaker_qs.count()
+        if ( breaker_count == 1 ):
+            my_breaker = breaker_qs.get()
+        elif ( breaker_count > 1 ):
+            logger.error( "Multiple breakers for image {image}. Not good.".format( image = image_IN ) )
+        #-- END check if single breaker. --#
+
+        context_OUT[ CONTEXT_BREAKER_INSTANCE ] = my_breaker
+
+        # set up form.
+        field_qs = FormField.objects.filter( year = image_IN.year )
+        field_qs = field_qs.filter( form_type = "breaker" )
+        logger.info( f'FormField query length was {len(field_qs)}' )
+        breaker_fields = [f.field_name for f in list(field_qs)]
+
+        BreakerFormSet = modelformset_factory(Breaker, fields=breaker_fields,formset=BaseBreakerFormSet)
+        formset = BreakerFormSet( queryset = breaker_qs )
+
+        context_OUT[ "breaker_formset" ] = formset
+
+        return context_OUT
+
+    #-- END method prepare_breaker_context() --#
+
+
+    def prepare_image_context( self, image_IN, context_IN ):
+
+        # return reference
+        context_OUT = None
+
+        # declare variables
+        image_has_related_objects = None
+        image_form_values = None
+        image_form = None
+
+        # add on to context passed in.
+        context_OUT = context_IN
+
+        # send image info to template.
+        context_OUT[ "img" ] = image_IN
+        context_OUT[ "slug" ] = image_IN.image_file.img_path
+
+        # does image have related objects?
+        image_has_related_objects = image_IN.has_related_objects()
+
+        # does image have related objects?
+        if ( image_has_related_objects == False ):
+
+            # no - OK to still make the fields editable...?
+            # populate forms from database for existing rows.
+            image_form_values = dict()
+            image_form_values[ PARAM_NAME_YEAR ] = image_IN.year
+            image_form_values[ PARAM_NAME_IMAGE_TYPE ] = image_IN.image_type
+
+            # create image form(s).
+            image_form = ImageForm( image_form_values )
+
+            # send them to template.
+            context_OUT[ "image_form" ] = image_form
+
+        else:
+
+            # no form
+            context_OUT[ "image_form" ] = None
+
+        #-- END check if image has related objects, only editable if not --#
+
+        return context_OUT
+
+    #-- END method prepare_image_context() --#
+
+
+    def process_action( self, request_IN, context_IN ):
 
         # return reference
         error_list_OUT = None
@@ -514,7 +844,17 @@ class CodeImage( LoginRequiredMixin, FormView ):
                     if ( my_action == ACTION_UPDATE_IMAGE ):
 
                         # update the image
-                        action_error_list = self.action_update_image( request_inputs )
+                        action_error_list = self.action_update_image( request_IN, context_IN )
+
+                    elif ( my_action == ACTION_UPDATE_BREAKER_TYPE ):
+
+                        # update the breaker
+                        action_error_list = self.action_update_breaker( request_IN, context_IN )
+
+                    elif ( my_action == ACTION_UPDATE_SHEET_TYPE ):
+
+                        # update the breaker
+                        action_error_list = self.action_update_sheet( request_IN, context_IN )
 
                     else:
 
@@ -584,6 +924,8 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
         # declare variables
         me = "CodeImage.process_request"
+        error_message = None
+        error_list = None
         request_inputs = None
         current_user = None
         current_username = None
@@ -593,16 +935,18 @@ class CodeImage( LoginRequiredMixin, FormView ):
         image_qs = None
         current_image = None
         context = None
-        error_message = None
-        error_list = None
         my_action = None
         got_action = None
         returned_error_list = None
 
         # declare variables - image forms
+        image_has_related_objects = None
         image_form_values = None
         image_year_form = None
         image_type_form = None
+
+        # declare variables - image type
+        current_image_type = None
 
         # init
         context = initialize_context( request )
@@ -629,56 +973,66 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
                 # process action
                 got_action = True
-                returned_error_list = self.process_action( request )
+                returned_error_list = self.process_action( request, context )
                 if ( ( returned_error_list is not None ) and ( len( returned_error_list ) > 0 ) ):
                     error_list.extend( returned_error_list )
                 #-- END check if process_action errors. --#
 
             #-- END check to see if action. --#
 
+            #------------------------------------------------------------------#
+            # ==> Image
+
             # retrieve image
             image_qs = Image.objects.filter( pk = current_image_id )
             current_image = image_qs.get()
 
-            # TODO: break out creating image forms into form_image() method?
-            # - do not render forms at all if image has a child for its type.
-            # - this means going back to single ImageForm, if you add it to
-            #     context, output form, if not present, just output image
-            #     information and note on problem reporting.
-            # - still want to add this same check to the action method, so you
-            #     don't update if child already exists.
-            # - create method on Image to check for child type, return True if
-            #     one found, false if not.
+            # prepare image context
+            context = self.prepare_image_context( current_image, context )
 
-            # populate forms from database for existing rows.
-            image_form_values = dict()
-            image_form_values[ PARAM_NAME_YEAR ] = current_image.year
-            image_form_values[ PARAM_NAME_IMAGE_TYPE ] = current_image.image_type
+            # what type?
+            current_image_type = current_image.image_type
 
-            # create image form(s).
-            image_year_form = ImageYearForm( image_form_values )
-            image_type_form = ImageTypeForm( image_form_values )
-            context[ "img" ] = current_image
-            context[ "image_year_form" ] = image_year_form
-            context[ "image_type_form" ] = image_type_form
-            context[ "slug" ] = current_image.image_file.img_path
+            # ==> breaker
+            if ( current_image_type == choices.IMAGE_TYPE_BREAKER ):
 
-            # TODO: what type?
+                logger.info(f'breaker request is {request}')
 
-            # TODO: if breaker:
-            # - look up breaker instance for this image (could be None).
-            # - render breaker form, populated if there is already a breaker
-            #     instance for this image.
-            # - pull in images, link to edit each, OR link to edit next image.
+                # prepare breaker context.
+                context = self.prepare_breaker_context( current_image, context )
 
-            # TODO: if sheet:
-            # - look up sheet instance for this image (could be None).
-            # - render sheet form, populated if there is already a breaker
-            #     instance for this image.
-            # - if sheet instance:
-            #     - render record form.
-            #     - pull in records, sorted by row ID, and then output list with
-            #         edit link next to each.
+            # ==> sheet
+            elif ( current_image_type == choices.IMAGE_TYPE_SHEET ):
+
+                # TODO: if sheet:
+                # - look up sheet instance for this image (could be None).
+                # - render sheet form, populated if there is already a sheet
+                #     instance for this image.
+                # - if sheet instance:
+                #     - render record form.
+                #     - pull in records, sorted by row ID, and then output list with
+                #         edit link next to each.
+                pass
+
+            elif ( current_image_type == choices.IMAGE_TYPE_OTHER ):
+
+                # unknown image type. Ummm...
+                error_message = "Image {me} is of type {image_type}. No further editing possible.".format(
+                    image_type = current_image_type,
+                    me = self
+                )
+                error_list.append( error_message )
+
+            else:
+
+                # unknown image type. Ummm...
+                error_message = "Unknown image type {image_type} for image {me}. No further editing possible.".format(
+                    image_type = current_image_type,
+                    me = self
+                )
+                error_list.append( error_message )
+
+            #-- END check to see what type of image we have. --#
 
         else:
 
@@ -691,7 +1045,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         if ( ( error_list is not None ) and ( len( error_list ) > 0 ) ):
 
             # store it.
-            context[ CONTEXT_ERROR_LIST ] = error_list
+            context[ CONTEXT_PAGE_STATUS_MESSAGE_LIST ] = error_list
 
         #-- END check for error list --#
 

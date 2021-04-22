@@ -33,7 +33,7 @@
 
     <h3>Recent images</h3>
     <p>
-        <table>
+        <table class="gridtable">
             <tr>
                 <th>image</th>
                 <th>year</th>
@@ -41,14 +41,7 @@
                 <th>complete?</th>
                 <th>updated</th>
                 <th>problem?</th>
-            </tr>
-            <tr>
-                <td>image</td>
-                <td>year</td>
-                <td>type</td>
-                <td>complete?</td>
-                <td>updated</td>
-                <td>problem?</td>
+                <th>EDIT</th>
             </tr>
     {% for recent_image in recent_image_list %}
             <tr>
@@ -58,6 +51,13 @@
                 <td>{{ recent_image.is_complete }}</td>
                 <td>{{ recent_image.last_modified }}</td>
                 <td>{{ recent_image.problem }}</td>
+                <td>
+                    <form action={% url 'EntryApp:code_image' %} method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="image_id" value="{{ recent_image.id }}" />
+                        <input type="submit" value="Code Image">
+                    </form>
+                </td>
             </tr>
     {% endfor %}
         </table>

@@ -5,6 +5,7 @@ TO DO:
 -Validation (or do in forms?)
 """
 
+import logging
 import os
 
 from django.db import models
@@ -13,22 +14,28 @@ from django.urls import reverse
 import EntryApp.choices as choices
 
 
+#==============================================================================#
+# variables
+#==============================================================================#
+
+logger = logging.getLogger( 'EntryApp.models' )
+
 #=====================================================#
 # CHOICES
 #=====================================================#
 
-YEAR_CHOICES = [
-    (1960, 1960),
-    (1970, 1970),
-    (1980, 1980),
-    (1990, 1990),
-]
+#YEAR_CHOICES = [
+#    (1960, 1960),
+#    (1970, 1970),
+#    (1980, 1980),
+#    (1990, 1990),
+#]
 
-IMAGE_TYPE_CHOICES = [
-    ("breaker", "Breaker"),
-    ("sheet", "Sheet"),
-    ("other", "Other")
-]
+#IMAGE_TYPE_CHOICES = [
+#    ("breaker", "Breaker"),
+#    ("sheet", "Sheet"),
+#    ("other", "Other")
+#]
 
 # TO DO: get names to match actual taxonomy - check w/Katie
 FORM_CHOICES = [
@@ -282,6 +289,58 @@ class Image(models.Model):
         return string_OUT
 
     #-- END overridden built-in __str__() method --#
+
+    def has_related_objects( self ):
+
+        # return reference
+        has_related_OUT = False
+
+        # declare variables
+        me = "Image.has_related_objects"
+        status_message = None
+        my_type = None
+        my_breaker_qs = None
+        my_breaker_count = None
+        my_sheet_qs = None
+        my_sheet_count = None
+
+        # get type
+        my_type = self.image_type
+
+        # look for all children, regardless of type - log a message if child is
+        #     counter to type.
+
+        # breakers
+        my_breaker_qs = self.breaker_set.all()
+        my_breaker_count = my_breaker_qs.count()
+        if ( my_breaker_count > 0 ):
+            has_related_OUT = True
+            if ( my_type != choices.IMAGE_TYPE_BREAKER ):
+                status_message = "WARNING - there are associated breakers for image of type {image_type} ( image: {me} ).".format(
+                    image_type = my_type,
+                    me = self
+                )
+                logger.warning( status_message )
+            #-- END check if type matches what found records. --#
+        #-- END check if related breakers --#
+
+        # sheets
+        my_sheet_qs = self.sheet_set.all()
+        my_sheet_count = my_sheet_qs.count()
+        if ( my_sheet_count > 0 ):
+            has_related_OUT = True
+            if ( my_type != choices.IMAGE_TYPE_SHEET ):
+                status_message = "WARNING - there are associated sheets for image of type {image_type} ( image: {me} ).".format(
+                    image_type = my_type,
+                    me = self
+                )
+                logger.wraning( status_message )
+            #-- END check if type matches what found records. --#
+        #-- END check if related breakers --#
+
+        return has_related_OUT
+
+    #-- END method has_related_objects() --#
 
 #-- END model Image --#
 
