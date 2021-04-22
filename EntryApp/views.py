@@ -642,6 +642,13 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
             # TODO: break out creating image forms into form_image() method?
             # - do not render forms at all if image has a child for its type.
+            # - this means going back to single ImageForm, if you add it to
+            #     context, output form, if not present, just output image
+            #     information and note on problem reporting.
+            # - still want to add this same check to the action method, so you
+            #     don't update if child already exists.
+            # - create method on Image to check for child type, return True if
+            #     one found, false if not.
 
             # populate forms from database for existing rows.
             image_form_values = dict()
