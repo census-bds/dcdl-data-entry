@@ -5,7 +5,7 @@ TO DO:
 -Validation methods
 """
 
-from django import forms 
+from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 
@@ -18,9 +18,45 @@ from EntryApp.models import Breaker, Image, Record, Sheet, FormField, CurrentEnt
 # FORMS FOR DATA ENTRY
 #================================#
 
+class ImageYearForm(forms.Form):
+
+    """
+    Form where user records the year to which an image belongs
+    """
+
+    year = forms.MultipleChoiceField(
+                widget=forms.RadioSelect,
+                choices=choices.YEAR_CHOICES,
+                label='Year'
+            )
+
+    # TO DO
+    def form_valid(self, form):
+        return True
+
+#-- END form ImageYearForm --#
+
+class ImageTypeForm(forms.Form):
+
+    """
+    Form where user records the form type to which an image belongs
+    """
+
+    image_type = forms.MultipleChoiceField(
+                     widget=forms.RadioSelect,
+                     choices=choices.IMAGE_TYPE_CHOICES,
+                     label='Image type'
+                 )
+
+    # TO DO
+    def form_valid(self, form):
+        return True
+
+#-- END form ImageTypeForm --#
+
 class ImageForm(forms.Form):
     """
-    Form where user records the year and form type to which a sheet belongs 
+    Form where user records the year and form type to which a sheet belongs
     """
 
     year = forms.MultipleChoiceField(
@@ -29,7 +65,7 @@ class ImageForm(forms.Form):
             )
     image_type = forms.MultipleChoiceField(widget=forms.RadioSelect, choices=choices.IMAGE_TYPE_CHOICES, label='Image type')
 
-    # TO DO    
+    # TO DO
     def form_valid(self, form):
         return True
 
@@ -45,7 +81,7 @@ class BreakerForm(forms.ModelForm):
 
     def form_valid(self):
         return True
-        
+
 
 class SheetForm(forms.ModelForm):
     """
@@ -55,10 +91,10 @@ class SheetForm(forms.ModelForm):
     """
 
     form_type = forms.ChoiceField(choices=choices.FORM_CHOICES, widget=forms.RadioSelect, label='Form type')
-    
+
     class Meta:
         model = Sheet
-        fields = ['num_records']    
+        fields = ['num_records']
 
 
 #================================#
@@ -119,7 +155,7 @@ class RecordForm(forms.ModelForm):
             'total_persons_tens': forms.RadioSelect,
             'total_persons_ones': forms.RadioSelect,
         }
-    
+
     def form_valid(self, form):
         return True
 
@@ -149,7 +185,7 @@ class BaseRecordFormSet(forms.BaseModelFormSet):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.queryset = Record.objects.none() 
+        self.queryset = Record.objects.none()
 
 
 class BaseBreakerFormSet(forms.BaseModelFormSet):
@@ -178,4 +214,3 @@ class CrispyFormSetHelper(FormHelper):
         self.layout = layouts.FORM_DICT[year][form]
         self.render_required_fields=True
         self.add_input(Submit("submit", "Submit"))
-

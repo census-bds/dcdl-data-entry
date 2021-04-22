@@ -24,11 +24,22 @@
     </head>
     <body>
         <div id="header">
+
+{% if error_list %}
+            <h1>errors</h1>
+            <ul>
+    {% for error_message in error_list %}
+                <li>{{ error_message }}</li>
+    {% endfor %}
+            </ul>
+{% endif %}
+
             {% block header %}
             {% endblock header %}
         </div>
         <div id="content">
-            {% block content %}{% endblock content %}
+            {% block content %}
+            {% endblock content %}
         </div>
         <div id="problem">
             {% block problem %}

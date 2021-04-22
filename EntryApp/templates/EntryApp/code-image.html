@@ -5,28 +5,43 @@
 {% endblock end_of_head_tag %}
 
 {% block header %}
-<h2>Step 1: Image entry</h2>
-<p>Enter the image year and whether it is a breaker or a sheet with records:</p>
+
+<h1>Code Image</h1>
+
 {% endblock header %}
+
 {% block content %}
-    <table><form method="POST" >
-        {% csrf_token %}
-        {{ form.as_p }}
-        <input type="submit" value="Save">
-    </form>
-    <br>
-    <div id="openseadragon1" style="width: 800px; height: 600px;"></div>
-    <script type="text/javascript">
-        var Viewer = OpenSeadragon({
-            id: "openseadragon1",
-            prefixUrl: "/static/deepzoom/js/vendor/openseadragon/images/",
-            tileSources: {
-                type: 'image',
-                url: "/images/{{ slug }}"
-            },
-            buildPyramid: false
-        });
-    </script>
+    <table>
+        <tr>
+            <td>
+                <div id="openseadragon1" style="width: 800px; height: 600px;"></div>
+                <script type="text/javascript">
+                    var Viewer = OpenSeadragon({
+                        id: "openseadragon1",
+                        prefixUrl: "/static/deepzoom/js/vendor/openseadragon/images/",
+                        tileSources: {
+                            type: 'image',
+                            url: "/images/{{ slug }}"
+                        },
+                        buildPyramid: false
+                    });
+                </script>
+            </td>
+            <td valign="top">
+                <p>
+                    <h2>Basic image info</h2>
+                    <form method="POST">
+                        {% csrf_token %}
+                        {{ image_year_form.as_p }}
+                        {{ image_type_form.as_p }}
+                        <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
+                        <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_image" />
+                        <input type="submit" value="Save">
+                    </form>
+                </p>
+            </td>
+        </tr>
+    </table>
 {% endblock content %}
 {% block logout %}
 {% endblock logout %}

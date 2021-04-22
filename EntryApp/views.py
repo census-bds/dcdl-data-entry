@@ -13,14 +13,34 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.views.generic import View, FormView, TemplateView, CreateView, ListView
 from django.forms import formset_factory, modelformset_factory, RadioSelect
-from django.contrib.auth.models import Permission, User
+from django.contrib.auth.models import Permission
+from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.template import RequestContext, loader
+from django.template import loader
+from django.template import RequestContext
 from django.template.context_processors import csrf
 
-from EntryApp.models import Image, Breaker, OtherImage, Sheet, Record, CurrentEntry, FormField
-from EntryApp.forms import ImageForm, SheetForm, BreakerForm, RecordForm, BaseRecordFormSet, BaseBreakerFormSet, ProblemForm
+# EntryApp models
+from EntryApp.models import Breaker
+from EntryApp.models import CurrentEntry
+from EntryApp.models import FormField
+from EntryApp.models import Image
+from EntryApp.models import OtherImage
+from EntryApp.models import Record
+from EntryApp.models import Sheet
+
+# EntryApp forms
+from EntryApp.forms import BaseBreakerFormSet
+from EntryApp.forms import BaseRecordFormSet
+from EntryApp.forms import BreakerForm
+from EntryApp.forms import ImageForm
+from EntryApp.forms import ImageTypeForm
+from EntryApp.forms import ImageYearForm
+from EntryApp.forms import ProblemForm
+from EntryApp.forms import RecordForm
+from EntryApp.forms import SheetForm
+
 
 #==============================================================================#
 # CONSTANTS-ish
@@ -28,13 +48,18 @@ from EntryApp.forms import ImageForm, SheetForm, BreakerForm, RecordForm, BaseRe
 
 # standard context names
 CONTEXT_PARAM_NAMES = "param_names"
+CONTEXT_ERROR_LIST = "error_list"
 
 # input parameter names
 PARAM_NAME_ACTION = "action"
 PARAM_NAME_IMAGE_ID = "image_id"
+PARAM_NAME_YEAR = "year"
+PARAM_NAME_IMAGE_TYPE = "image_type"
 PARAM_NAMES = {}
 PARAM_NAMES[ "PARAM_NAME_IMAGE_ID" ] = PARAM_NAME_IMAGE_ID
 PARAM_NAMES[ "PARAM_NAME_ACTION" ] = PARAM_NAME_ACTION
+PARAM_NAMES[ "PARAM_NAME_YEAR" ] = PARAM_NAME_YEAR
+PARAM_NAMES[ "PARAM_NAME_IMAGE_TYPE" ] = PARAM_NAME_IMAGE_TYPE
 
 # actions
 ACTION_UPDATE_IMAGE = "update_image"
@@ -54,6 +79,29 @@ logger = logging.getLogger('EntryApp.views')
 #==============================================================================#
 # functions
 #==============================================================================#
+
+def get_next_image(request):
+    '''
+    Helper function for BeginNewImageView
+    Look up next image for user to enter and put it in CurrentEntry
+    '''
+
+    # refine this, probably
+    try:
+        new_image = Image.objects.filter(is_complete=False).filter(jbid=request.user)[0]
+        logger.info(f'get_new_image got {new_image.img_path}')
+
+        if new_image:
+            current = CurrentEntry.objects.get(jbid=request.user)
+            current.img = new_image
+            current.save()
+
+    except Exception as e:
+        print(e)
+        raise Http404("get_next_image might not have found images to enter.")
+
+#-- END function get_next_image() --#
+
 
 def get_request_data( request_IN ):
 
@@ -81,6 +129,7 @@ def get_request_data( request_IN ):
     return request_data_OUT
 
 #-- END function get_request_data() --#
+
 
 def initialize_context( request_IN, dict_IN = None ):
 
@@ -113,6 +162,29 @@ def initialize_context( request_IN, dict_IN = None ):
     return dict_OUT
 
 #-- END function initialize_context() --#
+
+
+def seed_current_entry(request):
+    '''
+    Helper function for BeginNewImageView: Put dummy data into current entry
+     table. It should only be called for the first image for each user.
+    '''
+    if CurrentEntry.objects.filter(jbid=request.user):
+        return
+
+    else:
+        # these will be overwritten, I think, so values don't matter
+        logger.info(f'seed_current_entry inserting into CurrentEntry')
+        an_image = Image.objects.all()[0]
+        a_breaker = Breaker.objects.create(jbid=request.user, img=an_image)
+        current = CurrentEntry.objects.create(jbid=request.user, \
+                                            img=an_image, \
+                                            breaker = a_breaker, \
+                                            sheet = None)
+        a_breaker.delete() # delete temp breaker from Breaker model
+
+#-- END function seed_current_entry() --#
+
 
 #==============================================================================#
 # views
@@ -234,6 +306,8 @@ class CodeImage( LoginRequiredMixin, FormView ):
         - if found, prepopulate form.
         - render form
 
+    - if breaker, list out sheets with edit button for each.
+
     - if sheet, then, edit records
 
         - if type is not sheet, do not output.
@@ -241,7 +315,8 @@ class CodeImage( LoginRequiredMixin, FormView ):
         - output list of records, sorted by index. Beside each, output edit form.
     '''
 
-    form_class = ImageForm
+    # form class variables
+    form_image = ImageForm
     template_name = 'EntryApp/code-image.html'
 
     def old_post( self, request ):
@@ -268,6 +343,104 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
     #-- END method old_post --#
 
+
+    def action_update_image( self, inputs_IN ):
+
+        '''
+        Accepts form inputs. Looks for image form inputs. If found, checks to
+            make sure the image can be updated (if it has a related sheet or a
+            related breaker instance, should not be updated?)
+        '''
+
+        # return reference
+        error_list_OUT = None
+
+        # declare variables
+        me = "CodeImage.action_update_image"
+        error_message = None
+        error_list = None
+        image_id = None
+        image_instance = None
+        year_value = None
+        image_type_value = None
+        is_changed = None
+
+        # init
+        error_list_OUT = list()
+
+        # got inputs?
+        if ( ( inputs_IN is not None ) and ( len( inputs_IN ) > 0 ) ):
+
+            # get image for ID (TODO: check for image ID)
+            image_id = inputs_IN.get( PARAM_NAME_IMAGE_ID, None )
+            image_instance = Image.objects.get( pk = image_id )
+
+            # get image info from form inputs.
+
+            # year
+            year_value = inputs_IN.get( PARAM_NAME_YEAR, None )
+
+            # got a value?
+            if ( ( year_value is not None ) and ( year_value != "" ) ):
+
+                # different?
+                year_value = int( year_value )
+                if ( year_value != image_instance.year ):
+
+                    # changed value!
+
+                    # TODO: check if there are any child rows. If so, reject change.
+
+                    # update
+                    image_instance.year = year_value
+                    is_changed = True
+
+                #-- END check to see if changed value --#
+
+            #-- END check if year passed in. --#
+
+            # type
+            image_type_value = inputs_IN.get( PARAM_NAME_IMAGE_TYPE, None )
+
+            # got a value?
+            if ( ( image_type_value is not None ) and ( image_type_value != "" ) ):
+
+                # different?
+                if ( image_type_value != image_instance.image_type ):
+
+                    # changed value!
+
+                    # TODO: check if there are any child rows. If so, reject change.
+
+                    # update
+                    image_instance.image_type = image_type_value
+                    is_changed = True
+
+                #-- END check to see if changed value --#
+
+            #-- END check if year passed in. --#
+
+            # any changes?
+            if ( is_changed == True ):
+
+                # yes - save.
+                image_instance.save()
+
+            #-- END check to see if changes. --#
+
+        else:
+
+            # no inputs?
+            error_message = "In {method}(): No inputs passed in. What is going on?".format( method = me )
+            error_list_OUT.append( error_message )
+
+        #-- END check if inputs. --#
+
+        return error_list_OUT
+
+    #-- END method action_update_image() --#
+
+
     def get( self, request ):
 
         # return reference
@@ -292,6 +465,118 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
     #-- END method post() --#
 
+
+    def process_action( self, request_IN ):
+
+        # return reference
+        error_list_OUT = None
+
+        # declare variables
+        me = "CodeImage.process_action"
+        error_message = None
+        error_list = None
+        request = None
+        request_inputs = None
+        current_user = None
+        current_username = None
+        request_inputs = None
+        current_image_id = None
+        current_action = None
+        image_qs = None
+        current_image = None
+        context = None
+        my_action = None
+        action_error_list = None
+
+        # init
+        context = initialize_context( request )
+        error_list = list()
+        request = request_IN
+
+        # got request?
+        if ( request_IN is not None ):
+
+            # get request inputs (get or post)
+            request_inputs = get_request_data( request )
+
+            # get IDs of image to process.
+            current_image_id = request_inputs.get( PARAM_NAME_IMAGE_ID, None )
+
+            # do we have an image ID?
+            if ( ( current_image_id is not None ) and ( current_image_id != "" ) ):
+
+                # is there an action?
+                my_action = request_inputs.get( PARAM_NAME_ACTION, None )
+                if ( ( my_action is not None ) and ( my_action in VALID_ACTIONS ) ):
+
+                    # what action?
+                    action_error_list = None
+                    if ( my_action == ACTION_UPDATE_IMAGE ):
+
+                        # update the image
+                        action_error_list = self.action_update_image( request_inputs )
+
+                    else:
+
+                        # known but unsupported action. Error?
+                        error_message = "Action {requested_action} is known ( VALID_ACTIONS: {action_list} ) but not implemented.".format(
+                            requested_action = my_action,
+                            action_list = VALID_ACTIONS
+                        )
+                        error_list.append( error_message )
+
+                    #-- END check to see which action --#
+
+                    # action errors?
+                    if ( ( action_error_list is not None ) and ( len( action_error_list ) > 0 ) ):
+
+                        # append action errors to list.
+                        error_list.extend( action_error_list )
+
+                    #-- END check to see if action errors. --#
+
+                else:
+
+                    #-- unknown action - error. --#
+                    error_message = "Action {requested_action} is unknown ( VALID_ACTIONS: {action_list} ). No action processed.".format(
+                        requested_action = my_action,
+                        action_list = VALID_ACTIONS
+                    )
+                    error_list.append( error_message )
+
+                #-- END check to see if known action --#
+
+            else:
+
+                # no image ID. Error. can not proceed.
+                error_message = "No image ID found in request, can't code image."
+                error_list.append( error_message )
+
+            #-- END check to see if image ID passed in. --#
+
+        else:
+
+            # no request?
+            error_message = "In {method}(): No request passed in, can't process.".format(
+                method = me
+            )
+            error_list.append( error_message )
+
+        #-- END check to see if request passed in. --#
+
+        # errors?
+        if ( len( error_list ) > 0 ):
+
+            # store it.
+            error_list_OUT = error_list
+
+        #-- END check for error list --#
+
+        return error_list_OUT
+
+    #-- END method process_action() --#
+
+
     def process_request( self, request ):
 
         # return reference
@@ -308,9 +593,20 @@ class CodeImage( LoginRequiredMixin, FormView ):
         image_qs = None
         current_image = None
         context = None
+        error_message = None
+        error_list = None
+        my_action = None
+        got_action = None
+        returned_error_list = None
+
+        # declare variables - image forms
+        image_form_values = None
+        image_year_form = None
+        image_type_form = None
 
         # init
         context = initialize_context( request )
+        error_list = list()
 
         # get request inputs (get or post)
         request_inputs = get_request_data( request )
@@ -321,23 +617,78 @@ class CodeImage( LoginRequiredMixin, FormView ):
         current_username = current_user.username
         context[ "user" ] = current_user
 
-        # get ID of image to process.
+        # get IDs of image to process.
         current_image_id = request_inputs.get( PARAM_NAME_IMAGE_ID, None )
 
         # do we have an image ID?
         if ( ( current_image_id is not None ) and ( current_image_id != "" ) ):
 
+            # is there an action?
+            my_action = request_inputs.get( PARAM_NAME_ACTION, None )
+            if ( ( my_action is not None ) and ( my_action in VALID_ACTIONS ) ):
+
+                # process action
+                got_action = True
+                returned_error_list = self.process_action( request )
+                if ( ( returned_error_list is not None ) and ( len( returned_error_list ) > 0 ) ):
+                    error_list.extend( returned_error_list )
+                #-- END check if process_action errors. --#
+
+            #-- END check to see if action. --#
+
             # retrieve image
             image_qs = Image.objects.filter( pk = current_image_id )
             current_image = image_qs.get()
 
+            # TODO: break out creating image forms into form_image() method?
+            # - do not render forms at all if image has a child for its type.
+
+            # populate forms from database for existing rows.
+            image_form_values = dict()
+            image_form_values[ PARAM_NAME_YEAR ] = current_image.year
+            image_form_values[ PARAM_NAME_IMAGE_TYPE ] = current_image.image_type
+
+            # create image form(s).
+            image_year_form = ImageYearForm( image_form_values )
+            image_type_form = ImageTypeForm( image_form_values )
             context[ "img" ] = current_image
-            context[ "form" ] = self.form_class()
+            context[ "image_year_form" ] = image_year_form
+            context[ "image_type_form" ] = image_type_form
             context[ "slug" ] = current_image.image_file.img_path
 
-            response_OUT = render( request, self.template_name, context )
+            # TODO: what type?
+
+            # TODO: if breaker:
+            # - look up breaker instance for this image (could be None).
+            # - render breaker form, populated if there is already a breaker
+            #     instance for this image.
+            # - pull in images, link to edit each, OR link to edit next image.
+
+            # TODO: if sheet:
+            # - look up sheet instance for this image (could be None).
+            # - render sheet form, populated if there is already a breaker
+            #     instance for this image.
+            # - if sheet instance:
+            #     - render record form.
+            #     - pull in records, sorted by row ID, and then output list with
+            #         edit link next to each.
+
+        else:
+
+            # no image ID. Error. can not proceed.
+            error_list.append( "No image ID found in request, can't code image." )
 
         #-- END check to see if image ID passed in. --#
+
+        # errors?
+        if ( ( error_list is not None ) and ( len( error_list ) > 0 ) ):
+
+            # store it.
+            context[ CONTEXT_ERROR_LIST ] = error_list
+
+        #-- END check for error list --#
+
+        response_OUT = render( request, self.template_name, context )
 
         return response_OUT
 
@@ -346,9 +697,9 @@ class CodeImage( LoginRequiredMixin, FormView ):
 #-- END class CodeImage --#
 
 
-#=====================================================#
+#------------------------------------------------------------------------------#
 # IMAGE
-#=====================================================#
+#------------------------------------------------------------------------------#
 
 class BeginNewImageView(LoginRequiredMixin, FormView):
 
@@ -391,50 +742,10 @@ class BeginNewImageView(LoginRequiredMixin, FormView):
             return render(request, 'EntryApp/begin-new-image.html')
 
 
-def seed_current_entry(request):
-    '''
-    Helper function for BeginNewImageView: Put dummy data into current entry
-     table. It should only be called for the first image for each user.
-    '''
-    if CurrentEntry.objects.filter(jbid=request.user):
-        return
 
-    else:
-        # these will be overwritten, I think, so values don't matter
-        logger.info(f'seed_current_entry inserting into CurrentEntry')
-        an_image = Image.objects.all()[0]
-        a_breaker = Breaker.objects.create(jbid=request.user, img=an_image)
-        current = CurrentEntry.objects.create(jbid=request.user, \
-                                            img=an_image, \
-                                            breaker = a_breaker, \
-                                            sheet = None)
-        a_breaker.delete() # delete temp breaker from Breaker model
-
-
-def get_next_image(request):
-    '''
-    Helper function for BeginNewImageView
-    Look up next image for user to enter and put it in CurrentEntry
-    '''
-
-    # refine this, probably
-    try:
-        new_image = Image.objects.filter(is_complete=False).filter(jbid=request.user)[0]
-        logger.info(f'get_new_image got {new_image.img_path}')
-
-        if new_image:
-            current = CurrentEntry.objects.get(jbid=request.user)
-            current.img = new_image
-            current.save()
-
-    except Exception as e:
-        print(e)
-        raise Http404("get_next_image might not have found images to enter.")
-
-
-#=====================================================#
+#------------------------------------------------------------------------------#
 # BREAKER
-#=====================================================#
+#------------------------------------------------------------------------------#
 
 class EnterBreakerData(LoginRequiredMixin, FormView):
 
@@ -495,9 +806,9 @@ class EnterBreakerData(LoginRequiredMixin, FormView):
             return render(request, reverse(self.template_name))
 
 
-#=====================================================#
+#------------------------------------------------------------------------------#
 # SHEET
-#=====================================================#
+#------------------------------------------------------------------------------#
 
 class EnterSheetData(LoginRequiredMixin, FormView):
 
@@ -563,9 +874,9 @@ class EnterSheetData(LoginRequiredMixin, FormView):
             return render(request, reverse(self.template_name))
 
 
-#=====================================================#
+#------------------------------------------------------------------------------#
 # RECORD
-#=====================================================#
+#------------------------------------------------------------------------------#
 
 @login_required
 def enter_records(request):
@@ -628,9 +939,9 @@ def enter_records(request):
     }
     return render(request, 'EntryApp/enter-records.html', context)
 
-#================================#
+#------------------------------------------------------------------------------#
 # VIEW RECENT IMAGES
-#================================#
+#------------------------------------------------------------------------------#
 
 class ListRecentView(LoginRequiredMixin, ListView):
     '''
@@ -646,9 +957,9 @@ class ListRecentView(LoginRequiredMixin, ListView):
                             .order_by('-timestamp')[1:5] # FIX THIS LATER
 
 
-#================================#
+#------------------------------------------------------------------------------#
 # EDIT VIEW
-#================================#
+#------------------------------------------------------------------------------#
 
 @login_required
 def edit_entry(request):
@@ -661,9 +972,9 @@ def edit_entry(request):
 
 
 
-#================================#
+#------------------------------------------------------------------------------#
 # PROBLEM VIEW
-#================================#
+#------------------------------------------------------------------------------#
 
 def parse_http_referral(url):
     '''
@@ -753,9 +1064,9 @@ def report_problem(request):
                 }
         )
 
-#================================#
+#------------------------------------------------------------------------------#
 # DUMMY VIEWS
-#================================#
+#------------------------------------------------------------------------------#
 
 from EntryApp.forms import CrispyFormSetHelper
 import django.forms as forms
