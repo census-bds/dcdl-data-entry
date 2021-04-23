@@ -16,7 +16,7 @@
 
         {% if next_image %}
     <p>
-        Next image (out of {{ num_todo }}):
+        Next image ({{ num_todo }} remaining):
         <br />
         <img src = "/images/{{ next_image.image_file.img_path }}" style="width: 200px;" />
         <form action={% url 'EntryApp:code_image' %} method="post">

@@ -5,7 +5,15 @@ from django.http import HttpResponse
 
 from djqscsv import render_to_csv_response
 
-from .models import Breaker, Image, ImageFile, OtherImage, Record, Sheet
+from .models import Breaker
+from .models import CurrentEntry
+from .models import FormField
+from .models import Image
+from .models import ImageFile
+from .models import OtherImage
+from .models import Record
+from .models import Sheet
+
 
 
 def export_to_csv(modeladmin, request, queryset):
@@ -22,8 +30,8 @@ export_to_csv.short_description = "Export selected to csv"
 
 
 admin.site.register(Breaker)
-#admin.site.register(Image)
-#admin.site.register( ImageFile )
+admin.site.register( CurrentEntry )
+admin.site.register( FormField )
 admin.site.register(OtherImage)
 admin.site.register(Record)
 admin.site.register(Sheet)
@@ -109,6 +117,7 @@ class ImageFileAdmin( admin.ModelAdmin ):
 
 #-- END ImageFileAdmin admin class --#
 
+#admin.site.register( ImageFile )
 admin.site.register( ImageFile, ImageFileAdmin )
 
 class ImageAdmin( admin.ModelAdmin ):
@@ -165,4 +174,5 @@ class ImageAdmin( admin.ModelAdmin ):
 
 #-- END ImageAdmin admin class --#
 
+#admin.site.register(Image)
 admin.site.register( Image, ImageAdmin )

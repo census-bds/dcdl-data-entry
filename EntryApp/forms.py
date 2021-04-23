@@ -195,7 +195,7 @@ class BaseBreakerFormSet(forms.BaseModelFormSet):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.queryset = Breaker.objects.none()
+        #self.queryset = Breaker.objects.none()
 
 
 

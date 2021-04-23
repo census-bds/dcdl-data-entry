@@ -64,21 +64,26 @@ import EntryApp.choices as choices
 #==============================================================================#
 
 # standard context names
+CONTEXT_BREAKER_INSTANCE = "breaker_instance"
+CONTEXT_BREAKER_FORMSET = "breaker_formset"
 CONTEXT_PARAM_NAMES = "param_names"
 CONTEXT_PAGE_STATUS_MESSAGE_LIST = "page_status_message_list"
-CONTEXT_BREAKER_INSTANCE = "breaker_instance"
+CONTEXT_SHEET_INSTANCE = "sheet_instance"
+CONTEXT_SHEET_FORM = "sheet_form"
 
 # input parameter names
 PARAM_NAME_ACTION = "action"
 PARAM_NAME_BREAKER_ID = "breaker_id"
 PARAM_NAME_IMAGE_ID = "image_id"
 PARAM_NAME_IMAGE_TYPE = "image_type"
+PARAM_NAME_SHEET_ID = "sheet_id"
 PARAM_NAME_YEAR = "year"
 PARAM_NAMES = {}
 PARAM_NAMES[ "PARAM_NAME_ACTION" ] = PARAM_NAME_ACTION
 PARAM_NAMES[ "PARAM_NAME_BREAKER_ID" ] = PARAM_NAME_BREAKER_ID
 PARAM_NAMES[ "PARAM_NAME_IMAGE_ID" ] = PARAM_NAME_IMAGE_ID
 PARAM_NAMES[ "PARAM_NAME_IMAGE_TYPE" ] = PARAM_NAME_IMAGE_TYPE
+PARAM_NAMES[ "PARAM_NAME_SHEET_ID" ] = PARAM_NAME_SHEET_ID
 PARAM_NAMES[ "PARAM_NAME_YEAR" ] = PARAM_NAME_YEAR
 
 # actions
@@ -164,6 +169,9 @@ def initialize_context( request_IN, dict_IN = None ):
     # return reference
     dict_OUT = None
 
+    # declare variables
+    current = None
+
     # set context to what is passed in.
     dict_OUT = dict_IN
 
@@ -180,6 +188,10 @@ def initialize_context( request_IN, dict_IN = None ):
 
     # param names
     dict_OUT[ CONTEXT_PARAM_NAMES ] = PARAM_NAMES
+
+    # retrieve things from current
+    current = CurrentEntry.objects.get( jbid = request_IN.user )
+    dict_OUT[ CONTEXT_BREAKER_INSTANCE ] = current.breaker
 
     return dict_OUT
 
@@ -390,18 +402,25 @@ class CodeImage( LoginRequiredMixin, FormView ):
         me = "CodeImage.action_update_breaker"
         error_message = None
         error_list = None
+        current = None
         inputs_IN = None
         image_id = None
         image_instance = None
         image_has_related_objects = None
         form = None
         field_query = None
+        breaker_fields = None
+        BreakerFormSet = None
+        formset = None
+        cleaned_data = None
+        cleaned_data_count = None
         breaker_id = None
         breaker_qs = None
         breaker_count = None
         breaker_instance = None
         breaker_data = None
         is_changed = None
+        temp_breaker_instance = None
 
         # init
         error_list_OUT = list()
@@ -425,43 +444,94 @@ class CodeImage( LoginRequiredMixin, FormView ):
             logger.info(f'FormField query length was {len(field_query)}')
             breaker_fields = [f.field_name for f in list(field_query)]
 
-            BreakerFormSet = modelformset_factory(Breaker, fields=breaker_fields, formset=BaseBreakerFormSet)
+            BreakerFormSet = modelformset_factory( Breaker, fields = breaker_fields, formset = BaseBreakerFormSet )
             formset = BreakerFormSet( inputs_IN, request_IN.FILES )
 
-            logger.info(f'Breaker formset clean data should have length 1: {formset.cleaned_data}')
+            # get data from request
+            cleaned_data = formset.cleaned_data
+            cleaned_data_count = len( cleaned_data )
 
-            # prepare data to use to create/update Breaker.
-            breaker_data = formset.cleaned_data[0]
-            breaker_data['img'] = image_instance
-            breaker_data['year'] = image_instance.year
-            breaker_data['jbid'] = request_IN.user
-            breaker_data['timestamp'] = datetime.datetime.now()
+            logger.info(f'Breaker formset clean data should have length 1: {cleaned_data}')
 
-            # do we have a breaker ID?
-            breaker_id = form.get( PARAM_NAME_BREAKER_ID, None )
-            if ( ( breaker_id is not None ) and ( breaker_id != "" ) ):
+            # do we have just 1?
+            if ( cleaned_data_count == 1 ):
 
-                # try to get breaker, to update.
-                breaker_qs = Breaker.objects.filter( pk = breaker_id )
+                # prepare data to use to create/update Breaker.
+                breaker_data = formset.cleaned_data[0]
+                breaker_data['img'] = image_instance
+                breaker_data['year'] = image_instance.year
+                breaker_data['jbid'] = request_IN.user.username
+                breaker_data['timestamp'] = datetime.datetime.now()
 
-                # update
-                breaker_qs.update( **breaker_data )
+                # Example breaker_data contents:
+                # breaker_data: {
+                #     'state': 'md',
+                #     'county': 'pg',
+                #     'mcd': '1',
+                #     'tract': '1',
+                #     'place': '1',
+                #     'smsa': '1',
+                #     'enumeration_district': '1',
+                #     'id': <Breaker: Breaker 24 - file ID: 46 - file path: fake_IMG_0.jpg - year: 1980 - type: breaker from morga424>,
+                #     'img': <Image: 24 - file ID: 46 - file path: fake_IMG_0.jpg - year: 1980 - type: breaker>,
+                #     'year': 1980,
+                #     'jbid': <SimpleLazyObject: <User: morga424>>,
+                #     'timestamp': datetime.datetime(2021, 4, 23, 11, 12, 51, 508171)
+                # }
 
-                # get instance
-                breaker_instance = breaker_qs.get()
+                # remove "id" since it breaks qs.update().
+                if ( "id" in breaker_data ):
+
+                    # id is there - remove it (we are already filtering on pk to make sure we update correct instance).
+                    temp_breaker_instance = breaker_data.pop( "id" )
+
+                #-- END check to see if ID in breaker data. --#
+
+                #error_message = "breaker_data: {}".format( breaker_data )
+                #error_list_OUT.append( error_message )
+
+                # do we have a breaker ID?
+                breaker_id = form.get( PARAM_NAME_BREAKER_ID, None )
+                if ( ( breaker_id is not None ) and ( breaker_id != "" ) ):
+
+                    # try to get breaker, to update.
+                    Breaker.objects.filter( pk = breaker_id ).update( **breaker_data )
+
+                    # update
+                    breaker_qs = Breaker.objects.filter( pk = breaker_id )
+
+                    # get instance
+                    breaker_instance = breaker_qs.get()
+
+                else:
+
+                    # no ID. New breaker.
+                    breaker_instance = Breaker.objects.create( **breaker_data )
+
+                    # is it time to set Image to complete?
+                    image_instance.is_complete = True
+                    image_instance.save()
+
+                    # new breaker - update CurrentEntry
+                    current = CurrentEntry.objects.get( jbid = request_IN.user )
+                    current.breaker = breaker_instance
+                    current.save()
+
+                #-- END check to see if new or existing --#
 
             else:
 
-                # no ID. New breaker.
-                breaker_instance = Breaker.objects.create( **breaker_data )
+                # no inputs?
+                error_message = "In {method}(): Data received for multiple Breaker records ( {breaker_data} ). What is going on?".format(
+                    method = me,
+                    breaker_data = breaker_data
+                )
+                error_list_OUT.append( error_message )
 
-            #-- END check to see if new or existing --#
+            #-- END check to see if more than one set of data passed in. --#
 
             # return the breaker instance in context?
             context_IN[ CONTEXT_BREAKER_INSTANCE ] = breaker_instance
-
-            # TODO: is it time to set Image to complete?
-            # TODO: do we want to keep using the Current thing?
 
         else:
 
@@ -508,7 +578,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
             # get inputs.
             inputs_IN = get_request_data( request_IN )
 
-            # get image for ID (TODO: check for image ID)
+            # get image for ID
             image_id = inputs_IN.get( PARAM_NAME_IMAGE_ID, None )
             image_instance = Image.objects.get( pk = image_id )
             image_has_related_objects = image_instance.has_related_objects()
@@ -530,8 +600,6 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
                         # changed value!
 
-                        # TODO: check if there are any child rows. If so, reject change.
-
                         # update
                         image_instance.year = year_value
                         is_changed = True
@@ -550,8 +618,6 @@ class CodeImage( LoginRequiredMixin, FormView ):
                     if ( image_type_value != image_instance.image_type ):
 
                         # changed value!
-
-                        # TODO: check if there are any child rows. If so, reject change.
 
                         # update
                         image_instance.image_type = image_type_value
@@ -607,21 +673,25 @@ class CodeImage( LoginRequiredMixin, FormView ):
         error_message = None
         error_list = None
         inputs_IN = None
+        current = None
         image_id = None
         image_instance = None
         image_has_related_objects = None
         associated_breaker = None
         form = None
         field_query = None
-        breaker_id = None
-        breaker_qs = None
-        breaker_count = None
-        breaker_instance = None
-        breaker_data = None
+        sheet_id = None
+        sheet_qs = None
+        sheet_count = None
+        sheet_instance = None
+        sheet_data = None
+        sheet_defaults = None
         is_changed = None
+        is_new_sheet = None
 
         # init
         error_list_OUT = list()
+        is_new_sheet = False
 
         # got request?
         if ( request_IN is not None ):
@@ -629,38 +699,71 @@ class CodeImage( LoginRequiredMixin, FormView ):
             # get inputs
             inputs_IN = get_request_data( request_IN )
 
-            # get image for ID (TODO: check for image ID)
+            # get image for ID
             image_id = inputs_IN.get( PARAM_NAME_IMAGE_ID, None )
             image_instance = Image.objects.get( pk = image_id )
             image_has_related_objects = image_instance.has_related_objects()
 
             form = inputs_IN
 
+            logger.info(f'Sheet form is{form}')
+
             # 1990 never has breakers, so assign the default dummy
             if image_instance.year == 1990:
                 # this breaker gets created for each user during data loading
-                associated_breaker = Breaker.objects.filter(year=1990).get(jbid=request.user)
+                associated_breaker = Breaker.objects.filter(year=1990).get(jbid=request_IN.user)
             else:
-                associated_breaker = CurrentEntry.objects.get(jbid=request.user).breaker
+                associated_breaker = CurrentEntry.objects.get(jbid=request_IN.user).breaker
+            #-- END figure out breaker based on year --#
 
             logger.info(f"associated breaker: {type(associated_breaker)}")
-            sheet, created = Sheet.objects.update_or_create(
-                img = current_img,
-                jbid = request.user,
-                year = current_img.year,
-            defaults = {
-                    'form_type': form['form_type'],
-                    'breaker': associated_breaker,
-                    'num_records': form['num_records'],
-                    'timestamp': datetime.datetime.now()
-                    }
-            )
-            logger.info(f'EnterSheetDataView update_or_create() returned {created}')
 
-            # next update CurrentEntry
-            current = CurrentEntry.objects.get(jbid=request.user)
-            current.sheet = sheet
-            current.save()
+            # do we have a sheet ID?
+            sheet_id = form.get( PARAM_NAME_SHEET_ID, None )
+            if ( ( sheet_id is not None ) and ( sheet_id != "" ) ):
+
+                # try to get sheet, to update.
+                sheet_qs = Sheet.objects.filter( pk = sheet_id )
+
+                # get instance
+                sheet_instance = sheet_qs.get()
+
+                # do not update "CurrentEntry" on update.
+                is_new_sheet = False
+
+            else:
+
+                # no ID. New sheet.
+                sheet_instance = Sheet()
+                is_new_sheet = True
+
+            #-- END check to see if new or existing --#
+
+            # set values and save.
+            sheet_instance.img = image_instance
+            sheet_instance.year = image_instance.year
+            sheet_instance.jbid = request_IN.user
+            sheet_instance.timestamp = datetime.datetime.now()
+            sheet_instance.form_type = form.get( 'form_type', None )
+            sheet_instance.breaker = associated_breaker
+            sheet_instance.num_records = form.get( 'num_records', None )
+            sheet_instance.save()
+
+            # new sheet?
+            if ( is_new_sheet == True ):
+
+                # new sheet - update CurrentEntry
+                current = CurrentEntry.objects.get( jbid = request_IN.user )
+                current.sheet = sheet_instance
+                current.save()
+
+            #-- END check if new sheet. --#
+
+            # return the sheet instance in context?
+            context_IN[ CONTEXT_SHEET_INSTANCE ] = sheet_instance
+
+            # TODO: is it time to set Image to complete? Not yet here - once
+            #     all records are complete. Add "finished" flag to record form.
 
         else:
 
@@ -712,6 +815,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
         field_qs = None
         breaker_fields = None
         BreakerFormSet = None
+        formset_extra_count = None
+
+        # init
+        formset_extra_count = 0
 
         # add on to context passed in.
         context_OUT = context_IN
@@ -725,10 +832,35 @@ class CodeImage( LoginRequiredMixin, FormView ):
         # is there an existing Breaker instance?
         breaker_qs = image_IN.breaker_set.all()
         breaker_count = breaker_qs.count()
+
+        # do we have a breaker?
         if ( breaker_count == 1 ):
+
+            # yes, one match - get instance
             my_breaker = breaker_qs.get()
+
+            # set up form so it displays current, doesn't output extra.
+            formset_extra_count = 0
+
+        elif ( breaker_count == 0 ):
+
+            # no instance yet...
+            my_breaker = None
+
+            # set up form so it displays 1 empty.
+            formset_extra_count = 1
+
         elif ( breaker_count > 1 ):
+
+            # multiple? how to pick? Don't...
+            my_breaker = None
+
+            # set up formset so it doesn't have extra (will output all)
+            formset_extra_count = 0
+
+            # log error message.
             logger.error( "Multiple breakers for image {image}. Not good.".format( image = image_IN ) )
+
         #-- END check if single breaker. --#
 
         context_OUT[ CONTEXT_BREAKER_INSTANCE ] = my_breaker
@@ -739,10 +871,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
         logger.info( f'FormField query length was {len(field_qs)}' )
         breaker_fields = [f.field_name for f in list(field_qs)]
 
-        BreakerFormSet = modelformset_factory(Breaker, fields=breaker_fields,formset=BaseBreakerFormSet)
+        BreakerFormSet = modelformset_factory( Breaker, fields = breaker_fields, formset = BaseBreakerFormSet, extra = formset_extra_count )
         formset = BreakerFormSet( queryset = breaker_qs )
 
-        context_OUT[ "breaker_formset" ] = formset
+        context_OUT[ CONTEXT_BREAKER_FORMSET ] = formset
 
         return context_OUT
 
@@ -796,6 +928,49 @@ class CodeImage( LoginRequiredMixin, FormView ):
     #-- END method prepare_image_context() --#
 
 
+    def prepare_sheet_context( self, image_IN, context_IN ):
+
+        # return reference
+        context_OUT = None
+
+        # declare variables
+        sheet_qs = None
+        sheet_count = None
+        my_sheet = None
+        sheet_values = None
+        my_form = None
+
+        # add on to context passed in.
+        context_OUT = context_IN
+
+        # - look up sheet instance for this image (could be None).
+        # is there an existing Sheet instance?
+        sheet_qs = image_IN.sheet_set.all()
+        sheet_count = sheet_qs.count()
+        if ( sheet_count == 1 ):
+            my_sheet = sheet_qs.get()
+        elif ( sheet_count > 1 ):
+            logger.error( "Multiple sheets for image {image}. Not good.".format( image = image_IN ) )
+        #-- END check if single sheet. --#
+
+        context_OUT[ CONTEXT_SHEET_INSTANCE ] = my_sheet
+
+        # - render sheet form, populated if there is already a sheet
+        #     instance for this image.
+        my_form = SheetForm( instance = my_sheet )
+        context_OUT[ CONTEXT_SHEET_FORM ] = my_form
+
+        # TODO
+        # - if sheet instance:
+        #     - render record form, prepopulate if record ID is present.
+        #     - pull in records, sorted by row ID, and then output list with
+        #         edit link next to each.
+
+        return context_OUT
+
+    #-- END method prepare_sheet_context() --#
+
+
     def process_action( self, request_IN, context_IN ):
 
         # return reference
@@ -819,7 +994,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         action_error_list = None
 
         # init
-        context = initialize_context( request )
+        context = initialize_context( request_IN )
         error_list = list()
         request = request_IN
 
@@ -827,7 +1002,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         if ( request_IN is not None ):
 
             # get request inputs (get or post)
-            request_inputs = get_request_data( request )
+            request_inputs = get_request_data( request_IN )
 
             # get IDs of image to process.
             current_image_id = request_inputs.get( PARAM_NAME_IMAGE_ID, None )
@@ -934,6 +1109,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         current_action = None
         image_qs = None
         current_image = None
+        image_has_related_objects = None
         context = None
         my_action = None
         got_action = None
@@ -951,6 +1127,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         # init
         context = initialize_context( request )
         error_list = list()
+        seed_current_entry( request ) # this ensures there's a value in CurrentEntry
 
         # get request inputs (get or post)
         request_inputs = get_request_data( request )
@@ -1004,15 +1181,8 @@ class CodeImage( LoginRequiredMixin, FormView ):
             # ==> sheet
             elif ( current_image_type == choices.IMAGE_TYPE_SHEET ):
 
-                # TODO: if sheet:
-                # - look up sheet instance for this image (could be None).
-                # - render sheet form, populated if there is already a sheet
-                #     instance for this image.
-                # - if sheet instance:
-                #     - render record form.
-                #     - pull in records, sorted by row ID, and then output list with
-                #         edit link next to each.
-                pass
+                # prepare sheet context
+                context = self.prepare_sheet_context( current_image, context )
 
             elif ( current_image_type == choices.IMAGE_TYPE_OTHER ):
 
@@ -1022,6 +1192,24 @@ class CodeImage( LoginRequiredMixin, FormView ):
                     me = self
                 )
                 error_list.append( error_message )
+
+            elif ( ( current_image_type is None ) or ( current_image_type == "" ) ):
+
+                # No image type.
+
+                # does it have related objects? If so, error, if not, new image,
+                #     proceed.
+                image_has_related_objects = current_image.has_related_objects()
+                if ( image_has_related_objects == True ):
+
+                    # unknown image type. Ummm...
+                    error_message = "No image type for image {me}, but it has related Breaker or Sheet. Error. Look in the admin for details. No further editing possible.".format(
+                        image_type = current_image_type,
+                        me = self
+                    )
+                    error_list.append( error_message )
+
+                #-- END check if has related objects. --#
 
             else:
 

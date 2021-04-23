@@ -64,6 +64,44 @@
                     </form>
                 </p>
     {% endif %}
+    {% if sheet_form %}
+                <p class = "sheet_info">
+                    <h2>Sheet data entry</h2>
+                    <div id="breakerCheck">
+                        <p>
+                            This sheet will be associated with the breaker image "{{breaker_instance.img.image_file.img_path}}": <img src = "/images/{{breaker_instance.img.image_file.img_path}}" style="width: 200px;" />
+                            <ul>
+                                <li>Breaker year: {{ breaker_instance.year }}</li>
+                                <li>Breaker state: {{breaker_instance.state }}</li>
+                                <li>Breaker county: {{ breaker_instance.county }}</li>
+                            </ul>
+                        </p>
+                    </div>
+                    <div id='sheetEntry'>
+                        <p>
+                            Select which kind of sheet this is and how many individual records it contains.
+                        </p>
+                        <form method="POST">
+                            {% csrf_token %}
+                            {{ sheet_form.as_p }}
+                            <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
+                            <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_sheet_type" />
+            {% if breaker_instance %}
+                            <input type="hidden" name="{{ param_names.PARAM_NAME_BREAKER_ID }}" value="{{ breaker_instance.id }}" />
+            {% endif %}
+            {% if sheet_instance %}
+                            <input type="hidden" name="{{ param_names.PARAM_NAME_SHEET_ID }}" value="{{ sheet_instance.id }}" />
+            {% endif %}
+                            <input type="submit" value="Submit">
+                        </form>
+                    </div>
+
+                    <!-- record form -->
+
+                    <!-- record list -->
+
+                </p>
+    {% endif %}
             </td>
         </tr>
     </table>
