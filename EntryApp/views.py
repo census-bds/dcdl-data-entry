@@ -107,25 +107,33 @@ logger = logging.getLogger('EntryApp.views')
 # functions
 #==============================================================================#
 
-def get_next_image(request):
+def get_next_image( request ):
+
     '''
     Helper function for BeginNewImageView
     Look up next image for user to enter and put it in CurrentEntry
     '''
 
-    # refine this, probably
-    try:
-        new_image = Image.objects.filter(is_complete=False).filter(jbid=request.user)[0]
-        logger.info(f'get_new_image got {new_image.img_path}')
+    # declare variables
+    current_user = None
+    current_username = None
+    todo_image_qs = None
 
-        if new_image:
-            current = CurrentEntry.objects.get(jbid=request.user)
-            current.img = new_image
-            current.save()
+    # get user
+    current_user = request.user
+    current_username = current_user.username
 
-    except Exception as e:
-        print(e)
-        raise Http404("get_next_image might not have found images to enter.")
+    # get user TODO image lists
+    todo_image_qs = get_image_todo_qs( request )
+    todo_image_count = todo_image_qs.count()
+    next_image = todo_image_qs.first()
+
+    logger.info(f'get_new_image got {new_image.img_path}')
+
+    if new_image:
+        current = CurrentEntry.objects.get(jbid=request.user)
+        current.img = next_image
+        current.save()
 
 #-- END function get_next_image() --#
 
@@ -156,6 +164,38 @@ def get_request_data( request_IN ):
     return request_data_OUT
 
 #-- END function get_request_data() --#
+
+
+def get_image_todo_qs( request ):
+
+    '''
+    Helper function for BeginNewImageView
+    Look up next image for user to enter and put it in CurrentEntry
+    '''
+
+    # return reference
+    qs_OUT = None
+
+    # declare variables
+    current_user = None
+    current_username = None
+    user_image_qs = None
+    todo_image_qs = None
+
+    # get user
+    current_user = request.user
+    current_username = current_user.username
+
+    # get user image lists
+    user_image_qs = Image.objects.filter( jbid = current_username )
+    todo_image_qs = user_image_qs.filter( is_complete = False )
+    todo_image_qs = todo_image_qs.order_by( 'image_file__img_reel_label', 'image_file__img_reel_index', 'image_file__img_position' )
+
+    qs_OUT = todo_image_qs
+
+    return qs_OUT
+
+#-- END function get_next_image() --#
 
 
 def initialize_context( request_IN, dict_IN = None ):
@@ -199,14 +239,24 @@ def initialize_context( request_IN, dict_IN = None ):
 
 
 def seed_current_entry(request):
+
     '''
     Helper function for BeginNewImageView: Put dummy data into current entry
      table. It should only be called for the first image for each user.
     '''
-    if CurrentEntry.objects.filter(jbid=request.user):
-        return
 
-    else:
+    # declare variables
+    current_qs = None
+    current_count = None
+    an_image = None
+    a_breaker = None
+    current = None
+
+    # got a current for current user?
+    current_qs = CurrentEntry.objects.filter(jbid=request.user)
+    current_count = current_qs.count()
+    if ( current_count == 0 ):
+
         # these will be overwritten, I think, so values don't matter
         logger.info(f'seed_current_entry inserting into CurrentEntry')
         an_image = Image.objects.all()[0]
@@ -216,6 +266,8 @@ def seed_current_entry(request):
                                             breaker = a_breaker, \
                                             sheet = None)
         a_breaker.delete() # delete temp breaker from Breaker model
+
+    #-- END check to see if we need to create current for new user. --#
 
 #-- END function seed_current_entry() --#
 
@@ -285,8 +337,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
         context[ 'num_images' ] = total_image_count
 
         # todo
-        todo_image_qs = user_image_qs.filter( is_complete = False )
-        todo_image_qs = todo_image_qs.order_by( 'image_file__img_reel_label', 'image_file__img_reel_index', 'image_file__img_position' )
+        todo_image_qs = get_image_todo_qs( request )
         todo_image_count = todo_image_qs.count()
         next_image = todo_image_qs.first()
         context[ 'num_todo' ] = todo_image_count
@@ -1128,6 +1179,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         context = initialize_context( request )
         error_list = list()
         seed_current_entry( request ) # this ensures there's a value in CurrentEntry
+        get_next_image( request )
 
         # get request inputs (get or post)
         request_inputs = get_request_data( request )
