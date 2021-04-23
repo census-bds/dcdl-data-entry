@@ -18,7 +18,7 @@
     <p>
         Next image ({{ num_todo }} remaining):
         <br />
-        <img src = "/images/{{ next_image.image_file.img_path }}" style="width: 200px;" />
+        <img src = "/images/{{ next_image.image_file.img_file_name }}" style="width: 200px;" />
         <form action={% url 'EntryApp:code_image' %} method="post">
             {% csrf_token %}
             <input type="hidden" name="image_id" value="{{ next_image.id }}" />
@@ -45,7 +45,7 @@
             </tr>
     {% for recent_image in recent_image_list %}
             <tr>
-                <td><img src = "/images/{{ recent_image.image_file.img_path }}" style="width: 200px;" /></td>
+                <td><img src = "/images/{{ recent_image.image_file.img_file_name }}" style="width: 200px;" /></td>
                 <td>{{ recent_image.year }}</td>
                 <td>{{ recent_image.image_type }}</td>
                 <td>{{ recent_image.is_complete }}</td>

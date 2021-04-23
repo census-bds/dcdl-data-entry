@@ -48,11 +48,12 @@ def load_images(path, users=[], ext = "*.jpg", reel_label_IN = None, reel_index_
     files = glob.glob(path + ext)
     print(files)
 
+    # if no list of users was provided, default to all in data_entry group
     if not users:
         g = Group.objects.get(name='data_entry')
         users = [u.username for u in g.user_set.all()]
 
-    # init reel label and inde
+    # init reel label and index
     file_reel_label = reel_label_IN
     if ( ( file_reel_label is None ) or ( file_reel_label == "" ) ):
 
@@ -67,11 +68,13 @@ def load_images(path, users=[], ext = "*.jpg", reel_label_IN = None, reel_index_
         # no reel string passed in, use path.
         file_reel_index = 0
 
-    #-- END check to see if we have a reel string passed in --#
+    #-- END check to see if we have a reel index passed in --#
 
     # loop over files in current path.
     file_counter = 0
     for full_file_path in files:
+
+        file_counter += 1
 
         # create ImageFile?
         image_file_qs = ImageFile.objects.filter( img_path = full_file_path )
@@ -85,6 +88,7 @@ def load_images(path, users=[], ext = "*.jpg", reel_label_IN = None, reel_index_
             image_file_instance.img_reel_index = file_reel_index
             image_file_instance.img_position = file_counter
             image_file_instance.save()
+            
 
         elif ( image_file_count == 1 ):
 
@@ -103,12 +107,14 @@ def load_images(path, users=[], ext = "*.jpg", reel_label_IN = None, reel_index_
 
         for u in users:
 
+            # TODO: use create method? to avoid overwrites?
             img = Image( image_file=image_file_instance, \
                     jbid=u, \
                     is_complete=False, \
                     year=None,
                     image_type=None, \
                     problem=False
+            )
             img.save()
 
         #-- END loop over users for a given file --#

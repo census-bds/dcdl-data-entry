@@ -128,9 +128,9 @@ def get_next_image( request ):
     todo_image_count = todo_image_qs.count()
     next_image = todo_image_qs.first()
 
-    logger.info(f'get_new_image got {new_image.img_path}')
+    logger.info(f'get_next_image got {next_image}')
 
-    if new_image:
+    if next_image:
         current = CurrentEntry.objects.get(jbid=request.user)
         current.img = next_image
         current.save()
@@ -323,7 +323,10 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
         # init
         recent_image_limit = 5
+        seed_current_entry( request ) # this ensures there's a value in CurrentEntry
+        get_next_image( request )
         context = initialize_context( request )
+
 
         # get current username
         logger.info(f'user info:\n \t {request.user}')
@@ -947,7 +950,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
         # send image info to template.
         context_OUT[ "img" ] = image_IN
-        context_OUT[ "slug" ] = image_IN.image_file.img_path
+        context_OUT[ "slug" ] = image_IN.image_file.img_file_name
 
         # does image have related objects?
         image_has_related_objects = image_IN.has_related_objects()
@@ -1316,7 +1319,7 @@ class BeginNewImageView(LoginRequiredMixin, FormView):
         context = {
             'image': img,
             'form': self.form_class(),
-            'slug': img.img_path
+            'slug': img.img_file_name
         }
         return render(request, self.template_name, context)
 
@@ -1426,7 +1429,7 @@ class EnterSheetData(LoginRequiredMixin, FormView):
         context = {
             'breaker': current.breaker,
             'form': self.form_class(),
-            'slug': current.img.img_path,
+            'slug': current.img.image_file.img_file_name, # THIS WORKS WITH THE DATA NOW
         }
         return render(request, self.template_name, context)
 
