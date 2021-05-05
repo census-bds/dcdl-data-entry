@@ -85,12 +85,8 @@ class BreakerForm(forms.ModelForm):
 
 class SheetForm(forms.ModelForm):
     """
-    Define form to enter sheet data (year and type)
-
-    Constructed using a jbid so possible breakers list can be populated
+    Define form to enter sheet data: # of records
     """
-
-    form_type = forms.ChoiceField(choices=choices.FORM_CHOICES, widget=forms.RadioSelect, label='Form type')
 
     class Meta:
         model = Sheet
@@ -154,6 +150,7 @@ class RecordForm(forms.ModelForm):
             'total_persons_hundreds': forms.RadioSelect,
             'total_persons_tens': forms.RadioSelect,
             'total_persons_ones': forms.RadioSelect,
+            'image_id': forms.HiddenInput,
         }
 
     def form_valid(self, form):
@@ -185,7 +182,7 @@ class BaseRecordFormSet(forms.BaseModelFormSet):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.queryset = Record.objects.none()
+        # self.queryset = Record.objects.none()
 
 
 class BaseBreakerFormSet(forms.BaseModelFormSet):
@@ -206,11 +203,12 @@ class CrispyFormSetHelper(FormHelper):
     This FormHelper applies CSS styling and defines layout.
     The layout comes from the year and form specified in __init__
     '''
-    def __init__(self, year, form, *args, **kwargs):
+    def __init__(self, year, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.form_method='POST'
         self.form_class='form-inline col-8'
         self.label_class = 'sr-only'
-        self.layout = layouts.FORM_DICT[year][form]
+        self.layout = layouts.FORM_DICT[year]
         self.render_required_fields=True
-        self.add_input(Submit("submit", "Submit"))
+        # self.add_input(Submit("submit", "Submit"))
+        self.form_tag = False

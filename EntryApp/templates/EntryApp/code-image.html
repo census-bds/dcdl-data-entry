@@ -11,100 +11,72 @@
 {% endblock header %}
 
 {% block content %}
-    <table>
-        <tr>
-            <td>
-                <div id="openseadragon1" style="width: 800px; height: 600px;"></div>
-                <script type="text/javascript">
-                    var Viewer = OpenSeadragon({
-                        id: "openseadragon1",
-                        prefixUrl: "/static/deepzoom/js/vendor/openseadragon/images/",
-                        tileSources: {
-                            type: 'image',
-                            url: "/images/{{ slug }}"
-                        },
-                        buildPyramid: false
-                    });
-                </script>
-            </td>
-            <td valign="top">
+    <div class="flex-container">
+        <div class="col-lg-5">
+            <div id="openseadragon1" style="width: 600px; height: 600px;"></div>
+            <script type="text/javascript">
+                var Viewer = OpenSeadragon({
+                    id: "openseadragon1",
+                    prefixUrl: "/static/openseadragon_images/",
+                    tileSources: {
+                        type: 'image',
+                        url: "/images/{{ slug }}"
+                    },
+                    buildPyramid: false
+                });
+            </script>
+        </div>
+        <div class="col-lg-7">
+        <div class="scrollingBox">
+            <div class="row">
+                        
                 <p class="image_info">
                     <h2>Basic image info</h2>
-    {% if image_form %}
-                    <form method="POST">
-                        {% csrf_token %}
-                        {{ image_form.as_p }}
-                        <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
-                        <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_image" />
-                        <input type="submit" value="Save">
-                    </form>
-    {% else %}
-                    <ul>
-                        <li><strong>year</strong>: {{ img.year }}
-                        <li><strong>image_type</strong>: {{ img.image_type }}
-                    </ul>
-    {% endif %}
-                </p>
-    {% if breaker_formset %}
-                <hr />
-                <p class = "breaker_info">
-                    <h2>Breaker info</h2>
-                    <form method="post">
-                        {{ breaker_formset.management_form }}
-                        <table>
-                            {% csrf_token %}
-                            {{ breaker_formset }}
-                        </table>
-                        <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
-                        <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_breaker_type" />
-        {% if breaker_instance %}
-                        <input type="hidden" name="{{ param_names.PARAM_NAME_BREAKER_ID }}" value="{{ breaker_instance.id }}" />
-        {% endif %}
-                        <input type="submit" value="Submit">
-                    </form>
-                </p>
-    {% endif %}
-    {% if sheet_form %}
-                <p class = "sheet_info">
-                    <h2>Sheet data entry</h2>
-                    <div id="breakerCheck">
-                        <p>
-                            This sheet will be associated with the breaker image "{{breaker_instance.img.image_file.img_file_name}}": <img src = "/images/{{breaker_instance.img.image_file.img_file_name}}" style="width: 200px;" />
+                {% if image_form %}
+                            <form method="POST">
+                                {% csrf_token %}
+                                {{ image_form.as_p }}
+                                <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
+                                <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_image" />
+                                <input type="submit" value="Submit">
+                            </form>
+                {% else %}
                             <ul>
-                                <li>Breaker year: {{ breaker_instance.year }}</li>
-                                <li>Breaker state: {{breaker_instance.state }}</li>
-                                <li>Breaker county: {{ breaker_instance.county }}</li>
+                                <li><strong>year</strong>: {{ img.year }}
+                                <li><strong>image_type</strong>: {{ img.image_type }}
                             </ul>
-                        </p>
-                    </div>
-                    <div id='sheetEntry'>
-                        <p>
-                            Select which kind of sheet this is and how many individual records it contains.
-                        </p>
-                        <form method="POST">
-                            {% csrf_token %}
-                            {{ sheet_form.as_p }}
-                            <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
-                            <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_sheet_type" />
-            {% if breaker_instance %}
-                            <input type="hidden" name="{{ param_names.PARAM_NAME_BREAKER_ID }}" value="{{ breaker_instance.id }}" />
-            {% endif %}
-            {% if sheet_instance %}
-                            <input type="hidden" name="{{ param_names.PARAM_NAME_SHEET_ID }}" value="{{ sheet_instance.id }}" />
-            {% endif %}
-                            <input type="submit" value="Submit">
-                        </form>
-                    </div>
-
-                    <!-- record form -->
-
-                    <!-- record list -->
-
+                {% endif %}
                 </p>
-    {% endif %}
-            </td>
-        </tr>
-    </table>
+            </div>
+            <div class="row">
+                {% if breaker_formset %}
+                            <hr />
+                            <p class = "breaker_info">
+                                <h2>Breaker info</h2>
+                                <form method="post">
+                                    {{ breaker_formset.management_form }}
+                                    <table>
+                                        {% csrf_token %}
+                                        {{ breaker_formset }}
+                                    </table>
+                                    <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
+                                    <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_breaker_type" />
+                    {% if breaker_instance %}
+                                    <input type="hidden" name="{{ param_names.PARAM_NAME_BREAKER_ID }}" value="{{ breaker_instance.id }}" />
+                    {% endif %}
+                                    <input type="submit" value="Submit">
+                                </form>
+                            </p>
+                {% endif %}
+                {% if sheet_form %}
+                        {% include "EntryApp/includes/code-image-edit-sheet.html" %}
+                {% endif %}
+
+            </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock content %}
 {% block logout %}
 {% endblock logout %}

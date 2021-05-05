@@ -61,11 +61,6 @@
             </tr>
     {% endfor %}
         </table>
-        Click here to view a list of your most recently entered images.
-        <form action={% url 'EntryApp:list_recent' %} method="get">
-            {% csrf_token %}
-            <input type="submit" value="See recent entries">
-        </form>
     </p>
 {% endblock content %}
 

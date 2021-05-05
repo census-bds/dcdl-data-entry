@@ -20,22 +20,6 @@ import EntryApp.choices as choices
 
 logger = logging.getLogger( 'EntryApp.models' )
 
-#=====================================================#
-# CHOICES
-#=====================================================#
-
-#YEAR_CHOICES = [
-#    (1960, 1960),
-#    (1970, 1970),
-#    (1980, 1980),
-#    (1990, 1990),
-#]
-
-#IMAGE_TYPE_CHOICES = [
-#    ("breaker", "Breaker"),
-#    ("sheet", "Sheet"),
-#    ("other", "Other")
-#]
 
 # TO DO: get names to match actual taxonomy - check w/Katie
 FORM_CHOICES = [
@@ -334,7 +318,7 @@ class Image(models.Model):
                     image_type = my_type,
                     me = self
                 )
-                logger.wraning( status_message )
+                logger.warning( status_message )
             #-- END check if type matches what found records. --#
         #-- END check if related breakers --#
 
@@ -440,7 +424,7 @@ class Sheet(models.Model):
     problem = models.BooleanField(default=False)
 
     # for entry
-    form_type = models.CharField(max_length=200, choices=choices.FORM_CHOICES)
+    # form_type = models.CharField(max_length=200, choices=choices.FORM_CHOICES)
     num_records = models.PositiveIntegerField(
         verbose_name = 'Number of records',
         null=True
@@ -451,7 +435,7 @@ class Sheet(models.Model):
     last_modified = models.DateTimeField( auto_now = True )
 
     def __str__(self):
-        return f'{self.img}: {self.form_type}' # FIX THIS
+        return f'{self.img}: sheet' # FIX THIS
 
 
 class OtherImage(models.Model):
@@ -869,6 +853,7 @@ class Record(models.Model):
 
     # entry info
     timestamp =  models.DateTimeField(null=True)
+    is_complete = models.BooleanField(default=False)
 
     # automatic create and update time stamps.
     create_date = models.DateTimeField( auto_now_add = True )

@@ -66,8 +66,12 @@ import EntryApp.choices as choices
 # standard context names
 CONTEXT_BREAKER_INSTANCE = "breaker_instance"
 CONTEXT_BREAKER_FORMSET = "breaker_formset"
+CONTEXT_FORM_HELPER = "helper"
 CONTEXT_PARAM_NAMES = "param_names"
 CONTEXT_PAGE_STATUS_MESSAGE_LIST = "page_status_message_list"
+CONTEXT_RECORD_INSTANCE = "record_instance"
+CONTEXT_RECORD_FORMSET = "record_formset"
+CONTEXT_RECORD_FORMSET_HELPER = "helper"
 CONTEXT_SHEET_INSTANCE = "sheet_instance"
 CONTEXT_SHEET_FORM = "sheet_form"
 
@@ -76,6 +80,7 @@ PARAM_NAME_ACTION = "action"
 PARAM_NAME_BREAKER_ID = "breaker_id"
 PARAM_NAME_IMAGE_ID = "image_id"
 PARAM_NAME_IMAGE_TYPE = "image_type"
+PARAM_NAME_RECORD_ID = "record_id"
 PARAM_NAME_SHEET_ID = "sheet_id"
 PARAM_NAME_YEAR = "year"
 PARAM_NAMES = {}
@@ -83,6 +88,7 @@ PARAM_NAMES[ "PARAM_NAME_ACTION" ] = PARAM_NAME_ACTION
 PARAM_NAMES[ "PARAM_NAME_BREAKER_ID" ] = PARAM_NAME_BREAKER_ID
 PARAM_NAMES[ "PARAM_NAME_IMAGE_ID" ] = PARAM_NAME_IMAGE_ID
 PARAM_NAMES[ "PARAM_NAME_IMAGE_TYPE" ] = PARAM_NAME_IMAGE_TYPE
+PARAM_NAMES[ "PARAM_NAME_RECORD_ID" ] = PARAM_NAME_RECORD_ID
 PARAM_NAMES[ "PARAM_NAME_SHEET_ID" ] = PARAM_NAME_SHEET_ID
 PARAM_NAMES[ "PARAM_NAME_YEAR" ] = PARAM_NAME_YEAR
 
@@ -106,6 +112,32 @@ logger = logging.getLogger('EntryApp.views')
 #==============================================================================#
 # functions
 #==============================================================================#
+
+def get_form_fields( year, form_type ):
+    '''
+    Looks up the fields that a given form needs to display in FormFields
+
+    Takes: 
+    - int year (must be 1960, 1970, 1980, or 1990)
+    - string form_type (must be breaker or record)
+    Returns:
+    - list of fields 
+    '''
+
+    allowed_years = [1960, 1970, 1980, 1990, ]
+    allowed_forms = ['breaker', 'short', 'long']
+    logger.info("get_form_fields got {year}, {form_type}".format(year=year, form_type=form_type))
+
+    if year in allowed_years and form_type in allowed_forms:
+
+        field_query = FormField.objects.filter(year=year).filter(form_type=form_type)
+        logger.info(f'FormField query length was {len(field_query)}')
+        return [f.field_name for f in list(field_query)]
+
+    else:
+
+        logger.info(f'Invalid argument for get_fields: {year} {form_type}')
+        return []
 
 def get_next_image( request ):
 
@@ -158,7 +190,7 @@ def get_request_data( request_IN ):
     elif ( request_IN.method == 'GET' ):
 
         request_data_OUT = request_IN.GET
-
+        
     #-- END check to see request type so we initialize form correctly. --#
 
     return request_data_OUT
@@ -189,7 +221,7 @@ def get_image_todo_qs( request ):
     # get user image lists
     user_image_qs = Image.objects.filter( jbid = current_username )
     todo_image_qs = user_image_qs.filter( is_complete = False )
-    todo_image_qs = todo_image_qs.order_by( 'image_file__img_reel_label', 'image_file__img_reel_index', 'image_file__img_position' )
+    todo_image_qs = todo_image_qs.order_by( 'image_file__img_reel_label', 'image_file__img_reel_index', 'image_file__img_position', )
 
     qs_OUT = todo_image_qs
 
@@ -494,9 +526,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
             logger.info(f'Breaker form is{form}')
 
             # define fields based on which year it is
-            field_query = FormField.objects.filter(year=image_instance.year).filter(form_type="breaker")
-            logger.info(f'FormField query length was {len(field_query)}')
-            breaker_fields = [f.field_name for f in list(field_query)]
+            breaker_fields = get_form_fields(image_instance.year, "breaker")
 
             BreakerFormSet = modelformset_factory( Breaker, fields = breaker_fields, formset = BaseBreakerFormSet )
             formset = BreakerFormSet( inputs_IN, request_IN.FILES )
@@ -713,6 +743,105 @@ class CodeImage( LoginRequiredMixin, FormView ):
     #-- END method action_update_image() --#
 
 
+    def action_update_record( self, request_IN, context_IN ):
+        '''
+        Accepts form inputs. Updates record from those inputs.
+        '''
+
+        # mini-init
+        me = "CodeImageView.action_update_record"
+        error_list_OUT = list()
+        formset = None
+        helper = None
+        record_instance = None
+
+        # got request?
+        if ( request_IN is not None ):
+
+            # get inputs
+            inputs_IN = get_request_data( request_IN )
+
+            # get image for ID 
+            image_id = inputs_IN.get( PARAM_NAME_IMAGE_ID, None )
+            image_instance = Image.objects.get( pk = image_id )
+
+            # get sheet 
+            sheet_id = inputs_IN.get( PARAM_NAME_SHEET_ID, None )
+            sheet_instance = Sheet.objects.get( pk = sheet_id )
+
+            form = inputs_IN
+            logger.info(f'{me}: Record form is {form}')
+
+            # check that there's a sheet ID passed in
+            if sheet_instance:
+
+                # are there any records associated with this sheet already? if not, set extra = sheet.num_records
+                if sheet_instance.record_set.all().count() > 0:
+                    num_blank_records = 0
+
+                else:
+                    num_blank_records = sheet_instance.num_records
+
+                # define fields based on which year it is
+                record_fields = get_form_fields(image_instance.year, 'long') #TODO: should not be hardcoded
+
+                # set up formset and CrispyForms layout helper
+                RecordFormSet = modelformset_factory( Record, fields = record_fields, formset = BaseRecordFormSet, can_delete = True, extra = num_blank_records )
+                helper = CrispyFormSetHelper(
+                    year=image_instance.year
+                )
+                
+                formset = RecordFormSet( inputs_IN, request_IN.FILES )
+
+                logger.info(f'{me}: request has {formset.total_form_count()} forms')
+
+                if formset.is_valid():
+
+                    # get data from request
+                    for r in formset.cleaned_data:
+
+                        logger.info(f'CodeImageView.action_update_record(): record form is {r}')
+
+                        # likely want to modify this per Jon's suggestions
+                        # if r.is_valid():
+                        r['sheet']=sheet_instance
+                        r['timestamp'] = datetime.datetime.now()
+                        r['jbid'] = request_IN.user.username
+                        r['is_complete'] = True
+                        record_instance, created = Record.update_or_create(**r)
+                        
+                        # else: 
+                        #     logger.warning("{me}(): record is not valid \n \t {r}".format(me = me, r = r))
+
+                        #-- END check to see that single record form is valid --#
+
+                else:
+                    logger.warning("{me}(): record formset is not valid".format(me = me))
+
+                    #-- END check that formset  is valid --#
+
+            else:
+
+                logger.warning("{me}: no sheet instance passed in context".format(me = me))
+
+            # return the record form instance + layout helper in context?
+            context_IN[ CONTEXT_RECORD_FORMSET ] = formset
+            context_IN[ CONTEXT_RECORD_INSTANCE ] = record_instance
+            context_IN[ CONTEXT_FORM_HELPER ] = helper
+
+        else:
+
+            # no inputs?
+            error_message = "In {method}(): No inputs passed in. What is going on?".format( method = me )
+            error_list_OUT.append( error_message )
+
+        #-- END check if inputs. --#
+
+        return error_list_OUT
+
+    #-- END method action_update_record() --#
+
+
     def action_update_sheet( self, request_IN, context_IN ):
 
         '''
@@ -723,7 +852,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         error_list_OUT = None
 
         # declare variables
-        me = "CodeImage.action_update_breaker"
+        me = "CodeImage.action_update_sheet"
         error_message = None
         error_list = None
         inputs_IN = None
@@ -770,10 +899,9 @@ class CodeImage( LoginRequiredMixin, FormView ):
                 associated_breaker = CurrentEntry.objects.get(jbid=request_IN.user).breaker
             #-- END figure out breaker based on year --#
 
-            logger.info(f"associated breaker: {type(associated_breaker)}")
-
             # do we have a sheet ID?
             sheet_id = form.get( PARAM_NAME_SHEET_ID, None )
+
             if ( ( sheet_id is not None ) and ( sheet_id != "" ) ):
 
                 # try to get sheet, to update.
@@ -795,10 +923,9 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
             # set values and save.
             sheet_instance.img = image_instance
-            sheet_instance.year = image_instance.year
-            sheet_instance.jbid = request_IN.user
+            sheet_instance.year = image_instance.year # should do this for all images and sheets automatically
+            sheet_instance.jbid = request_IN.user.username
             sheet_instance.timestamp = datetime.datetime.now()
-            sheet_instance.form_type = form.get( 'form_type', None )
             sheet_instance.breaker = associated_breaker
             sheet_instance.num_records = form.get( 'num_records', None )
             sheet_instance.save()
@@ -837,6 +964,8 @@ class CodeImage( LoginRequiredMixin, FormView ):
         # return reference
         response_OUT = None
 
+        logger.info('CodeImageView GET request')
+
         # render response
         response_OUT = self.process_request( request )
 
@@ -848,6 +977,8 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
         # return reference
         response_OUT = None
+
+        logger.info('CodeImageView POST request')
 
         # render response
         response_OUT = self.process_request( request )
@@ -863,6 +994,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         context_OUT = None
 
         # declare variables
+        me = 'CodeImage.prepare_breaker_context'
         breaker_qs = None
         breaker_count = None
         my_breaker = None
@@ -922,7 +1054,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         # set up form.
         field_qs = FormField.objects.filter( year = image_IN.year )
         field_qs = field_qs.filter( form_type = "breaker" )
-        logger.info( f'FormField query length was {len(field_qs)}' )
+        logger.info( f'{me}: FormField query length was {len(field_qs)}' )
         breaker_fields = [f.field_name for f in list(field_qs)]
 
         BreakerFormSet = modelformset_factory( Breaker, fields = breaker_fields, formset = BaseBreakerFormSet, extra = formset_extra_count )
@@ -982,12 +1114,59 @@ class CodeImage( LoginRequiredMixin, FormView ):
     #-- END method prepare_image_context() --#
 
 
+    def prepare_record_context( self, image_IN, context_IN ):
+
+        me = 'CodeImageView.prepare_record_context'
+
+        # add on to context passed in
+        context_OUT = context_IN
+
+        # look up parent sheet instance (relying on Jon's error check in prepare_sheet_context)
+        parent_sheet = image_IN.sheet_set.get()  
+
+        # look up associated record(s)
+        record_qs = parent_sheet.record_set.all()
+        record_count = record_qs.count()
+
+        # DEBUG
+        logger.info(f'{me}: record_count is {record_count}')
+
+        # how many records are already entered?
+        if record_count == 0:
+
+            my_record = None
+            formset_extra_count = parent_sheet.num_records
+        
+        else:
+
+            my_record = record_qs.pop()
+            formset_extra_count = 1
+
+        # set up form.
+        record_fields = get_form_fields( parent_sheet.year, 'long' ) #TODO: THIS SHOULD NOT BE HARD-CODED
+
+        RecordFormSet = modelformset_factory( Record, fields = record_fields, formset = BaseRecordFormSet, extra = formset_extra_count)
+        formset = RecordFormSet( queryset = my_record )
+
+        helper = CrispyFormSetHelper(year=parent_sheet.year)
+
+        context_OUT[ CONTEXT_RECORD_FORMSET ] = formset
+        context_OUT[ CONTEXT_RECORD_FORMSET_HELPER ] = helper
+
+        logger.info(f'context returned from prepare_record_context {context_OUT}')
+
+        return context_OUT
+
+    #-- END method prepare_record_context() --#
+
+
     def prepare_sheet_context( self, image_IN, context_IN ):
 
         # return reference
         context_OUT = None
 
         # declare variables
+        me = 'CodeImage.prepare_sheet_context'
         sheet_qs = None
         sheet_count = None
         my_sheet = None
@@ -1019,6 +1198,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
         #     - render record form, prepopulate if record ID is present.
         #     - pull in records, sorted by row ID, and then output list with
         #         edit link next to each.
+        if my_sheet:
+            context_OUT = self.prepare_record_context( image_IN, context_OUT )
+
+        # logger.info(f'{me}: context_OUT is {context_OUT}')
 
         return context_OUT
 
@@ -1070,6 +1253,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
                     # what action?
                     action_error_list = None
+                    logger.info(f'CodeImageView.process_action() action is {my_action}')
                     if ( my_action == ACTION_UPDATE_IMAGE ):
 
                         # update the image
@@ -1082,8 +1266,13 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
                     elif ( my_action == ACTION_UPDATE_SHEET_TYPE ):
 
-                        # update the breaker
+                        # update the sheet
                         action_error_list = self.action_update_sheet( request_IN, context_IN )
+
+                    elif ( my_action == ACTION_UPDATE_RECORD ):
+
+                        # update the record
+                        action_error_list = self.action_update_record( request_IN, context_IN )
 
                     else:
 
@@ -1178,7 +1367,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         # declare variables - image type
         current_image_type = None
 
-        # init
+        # init  
         context = initialize_context( request )
         error_list = list()
         seed_current_entry( request ) # this ensures there's a value in CurrentEntry
@@ -1188,10 +1377,11 @@ class CodeImage( LoginRequiredMixin, FormView ):
         request_inputs = get_request_data( request )
 
         # get current user info
-        logger.info(f'user info:\n \t {request.user}')
-        current_user = request.user
-        current_username = current_user.username
+        logger.info(f'{me} user info:\n \t {request.user}')
+        current_user = request.user.username
         context[ "user" ] = current_user
+
+        logger.info(f'CodeImageView.process_request(): request_inputs are {request_inputs}')
 
         # get IDs of image to process.
         current_image_id = request_inputs.get( PARAM_NAME_IMAGE_ID, None )
@@ -1236,8 +1426,9 @@ class CodeImage( LoginRequiredMixin, FormView ):
             # ==> sheet
             elif ( current_image_type == choices.IMAGE_TYPE_SHEET ):
 
-                # prepare sheet context
+                # prepare sheet context (which also prepares record context?)
                 context = self.prepare_sheet_context( current_image, context )
+                # logger.info(f'CodeImage prepare_sheet_context context is {context}')
 
             elif ( current_image_type == choices.IMAGE_TYPE_OTHER ):
 
@@ -1299,116 +1490,6 @@ class CodeImage( LoginRequiredMixin, FormView ):
     #-- END method process_request() --#
 
 #-- END class CodeImage --#
-
-
-#------------------------------------------------------------------------------#
-# IMAGE
-#------------------------------------------------------------------------------#
-
-class BeginNewImageView(LoginRequiredMixin, FormView):
-
-    form_class = ImageForm
-    template_name = 'EntryApp/begin-new-image.html'
-
-    def get(self, request):
-
-        seed_current_entry(request) # this ensures there's a value in CurrentEntry
-        get_next_image(request) # this loads the next image into CurrentEntry
-
-        img = CurrentEntry.objects.get(jbid=request.user).img
-        context = {
-            'image': img,
-            'form': self.form_class(),
-            'slug': img.img_file_name
-        }
-        return render(request, self.template_name, context)
-
-    def post(self, request):
-        try:
-            form = request.POST
-            logger.info(f'BeginNewImage post() form is {form}')
-            current = CurrentEntry.objects.get(jbid=request.user)
-            image, created = Image.objects.update_or_create(
-                img_path = current.img.img_path,
-                jbid = request.user,
-                defaults = {'year': form['year'],
-                'image_type': form['image_type'].lower(),
-                'is_complete': True,
-                'timestamp': datetime.datetime.now()
-                }
-            )
-            logger.info(f'BeginNewImage post() current image is {image}')
-
-            return redirect(reverse(f'EntryApp:enter_{image.image_type}_data'))
-
-        except KeyError:
-            logger.info("KeyError in post() for BeginNewImage")
-            return render(request, 'EntryApp/begin-new-image.html')
-
-
-
-#------------------------------------------------------------------------------#
-# BREAKER
-#------------------------------------------------------------------------------#
-
-class EnterBreakerData(LoginRequiredMixin, FormView):
-
-    template_name = 'EntryApp/enter-breaker-data.html'
-
-    def get(self, request):
-        logger.info(f'breaker request is {request}')
-
-        current = CurrentEntry.objects.get(jbid=request.user)
-
-        field_query = FormField.objects.filter(year=current.img.year).filter(form_type="breaker")
-        logger.info(f'FormField query length was {len(field_query)}')
-        breaker_fields = [f.field_name for f in list(field_query)]
-
-        BreakerFormSet = modelformset_factory(Breaker, fields=breaker_fields,formset=BaseBreakerFormSet)
-        formset = BreakerFormSet(queryset=Breaker.objects.none)
-
-        context = {
-            'breaker_img_path': current.img.img_path,
-            'formset': formset,
-        }
-        return render(request, self.template_name, context)
-
-    def post(self, request):
-        form = request.POST
-        logger.info(f'Breaker form is{form}')
-
-        current = CurrentEntry.objects.get(jbid=request.user)
-
-        # define fields based on which year it is
-        field_query = FormField.objects.filter(year=current.img.year).filter(form_type="breaker")
-        logger.info(f'FormField query length was {len(field_query)}')
-        breaker_fields = [f.field_name for f in list(field_query)]
-
-        BreakerFormSet = modelformset_factory(Breaker, fields=breaker_fields, formset=BaseBreakerFormSet)
-        formset = BreakerFormSet(request.POST, request.FILES)
-
-        logger.info(f'Breaker formset clean data should have length 1: {formset.cleaned_data}')
-
-        try:
-            b = formset.cleaned_data[0]
-            b['img'] = current.img
-            b['year'] = current.img.year
-            b['jbid'] = request.user
-            b['timestamp'] = datetime.datetime.now()
-            breaker, created = Breaker.objects.update_or_create(**b)
-            logger.info(f'submit_breaker update_or_create() returned {created}')
-
-            # next update CurrentEntry
-            current = CurrentEntry.objects.get(jbid=request.user)
-            current.breaker = breaker
-            current.save()
-
-            return redirect(reverse('EntryApp:index'))
-
-        except KeyError:
-            logger.warn("KeyError in submit_breaker post()")
-            return render(request, reverse(self.template_name))
-
 
 #------------------------------------------------------------------------------#
 # SHEET
@@ -1542,38 +1623,6 @@ def enter_records(request):
         'slug': current.img.img_path
     }
     return render(request, 'EntryApp/enter-records.html', context)
-
-#------------------------------------------------------------------------------#
-# VIEW RECENT IMAGES
-#------------------------------------------------------------------------------#
-
-class ListRecentView(LoginRequiredMixin, ListView):
-    '''
-    View to list 5 most recent entries in case editing is needed
-    '''
-    model = Image
-    template_name = 'EntryApp/list-recent.html'
-
-    def get_queryset(self):
-        jbid = self.request.user
-        return Image.objects.filter(jbid=jbid) \
-                            .filter(is_complete=True) \
-                            .order_by('-timestamp')[1:5] # FIX THIS LATER
-
-
-#------------------------------------------------------------------------------#
-# EDIT VIEW
-#------------------------------------------------------------------------------#
-
-@login_required
-def edit_entry(request):
-    '''
-    Edit details that have already been entered
-
-    IMPLEMENTATION TBD
-    '''
-    pass
-
 
 
 #------------------------------------------------------------------------------#

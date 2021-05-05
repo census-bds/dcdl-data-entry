@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '' 
+SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -42,15 +42,21 @@ LOGGING = {
             'filename': '/data/data/user/django_user/dev/logs/info.log',
             'formatter': 'verbose'
         },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
     },
+    
     'loggers': {
         'root': {
-            'handlers': ['console'],
+            'handlers': ['console',],
             'level': 'INFO',
             'formatter': 'verbose'
         },
         'django': {
-            'handlers': ['file'],
+            'handlers': ['console', 'file',],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': True,
         },
@@ -160,12 +166,14 @@ LOGIN_REDIRECT_URL = '/EntryApp/'
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/deepzoom/js/vendor/openseadragon/images/')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/') # where it puts the static files
+
+# where it looks for static files: everything inside these goes into STATIC_ROOT
+STATICFILES_DIRS = (
+    # os.path.join(BASE_DIR, 'boot'), 
+    '/data/data/user/django_user/dev/static/',  
+)
 
 MEDIA_URL = '/images/' # this is the thing to change
 MEDIA_ROOT = '/data/data/git/images'
 
-STATICFILES_DIRS = (
-    # os.path.join(BASE_DIR, 'boot'), 
-    '/data/data/git/openseadragon/images/',
-)
