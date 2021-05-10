@@ -1,0 +1,77 @@
+{% load crispy_forms_tags %}
+
+<p class = "sheet_info">
+    <h2>Sheet data entry</h2>
+    <div id="breakerCheck">
+        <p>
+            This sheet will be associated with the breaker image "{{breaker_instance.img.image_file.img_file_name}}": <img src = "/images/{{breaker_instance.img.image_file.img_file_name}}" style="width: 200px;" />
+            <ul>
+                <li>Breaker year: {{ breaker_instance.year }}</li>
+                <li>Breaker state: {{breaker_instance.state }}</li>
+                <li>Breaker county: {{ breaker_instance.county }}</li>
+            </ul>
+        </p>
+    </div>
+    <div id='sheetEntry'>
+        <p>
+            Select which kind of sheet this is and how many individual records it contains.
+        </p>
+        <form method="POST">
+            {% csrf_token %}
+            {{ sheet_form.as_p }}
+            <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
+            <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_sheet_type" />
+{% if breaker_instance %}
+            <input type="hidden" name="{{ param_names.PARAM_NAME_BREAKER_ID }}" value="{{ breaker_instance.id }}" />
+{% endif %}
+{% if sheet_instance %}
+            <input type="hidden" name="{{ param_names.PARAM_NAME_SHEET_ID }}" value="{{ sheet_instance.id }}" />
+{% endif %}
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    </div>
+    <div id="recordList">
+    <p>
+    {% include "EntryApp/includes/code-image-record-list.html" %}
+    </p>    
+</div>
+<div class="row" id="recordEntry">
+    <div class="flex-container">
+{% if record_formset %}
+    <p>
+        Enter record data.
+    </p>
+    <form method="POST">
+        {% csrf_token %}
+        {% crispy record_formset helper %}
+        <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
+        <input type="hidden" name="{{ param_names.PARAM_NAME_SHEET_ID }}" value="{{ sheet_instance.id }}" />
+        <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_record" />
+
+        <div class="form-actions">
+            <input type="submit" value="Submit" class="btn btn-primary" id="records-submit-save">
+        </div>
+
+        {% if record_instance %}
+            <input type="hidden" name="{{ param_names.PARAM_NAME_RECORD_ID }}" value="{{ record.id }}" />
+        {% endif %}
+
+    </form>
+{% endif %}
+</div>
+<div class="row" id="record-form-test">
+    {% if record_form %}
+    <p>
+        Record form goes here.
+    </p>
+    <form method="POST">
+        {% csrf_token %}
+        {% crispy record_form helper %}
+        <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
+        <input type="hidden" name="{{ param_names.PARAM_NAME_SHEET_ID }}" value="{{ sheet_instance.id }}" />
+        <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_record" />
+        <input type="submit" value="Submit">
+    </form>
+    {% endif %}
+</div>

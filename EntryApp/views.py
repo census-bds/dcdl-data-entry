@@ -17,6 +17,7 @@ from django.contrib.auth.models import Permission
 from django.contrib.auth.models import User
 from django.db.models import Q
 from django.forms import formset_factory
+from django.forms import modelform_factory
 from django.forms import modelformset_factory
 from django.forms import RadioSelect
 from django.http import Http404
@@ -48,6 +49,7 @@ from EntryApp.models import Sheet
 from EntryApp.forms import BaseBreakerFormSet
 from EntryApp.forms import BaseRecordFormSet
 from EntryApp.forms import BreakerForm
+from EntryApp.forms import CrispyFormHelper
 from EntryApp.forms import ImageForm
 from EntryApp.forms import ImageTypeForm
 from EntryApp.forms import ImageYearForm
@@ -70,8 +72,10 @@ CONTEXT_FORM_HELPER = "helper"
 CONTEXT_PARAM_NAMES = "param_names"
 CONTEXT_PAGE_STATUS_MESSAGE_LIST = "page_status_message_list"
 CONTEXT_RECORD_INSTANCE = "record_instance"
+CONTEXT_RECORD_FORM = "record_form"
 CONTEXT_RECORD_FORMSET = "record_formset"
 CONTEXT_RECORD_FORMSET_HELPER = "helper"
+CONTEXT_RECORD_LIST = "record_list"
 CONTEXT_SHEET_INSTANCE = "sheet_instance"
 CONTEXT_SHEET_FORM = "sheet_form"
 
@@ -139,7 +143,7 @@ def get_form_fields( year, form_type ):
         logger.info(f'Invalid argument for get_fields: {year} {form_type}')
         return []
 
-def get_next_image( request ):
+def get_next_image(request):
 
     '''
     Helper function for BeginNewImageView
@@ -775,59 +779,84 @@ class CodeImage( LoginRequiredMixin, FormView ):
             # check that there's a sheet ID passed in
             if sheet_instance:
 
-                # are there any records associated with this sheet already? if not, set extra = sheet.num_records
-                if sheet_instance.record_set.all().count() > 0:
-                    num_blank_records = 0
+                # # are there any records associated with this sheet already? if not, set extra = sheet.num_records
+                # if sheet_instance.record_set.all().count() > 0:
+                #     num_blank_records = 0
 
-                else:
-                    num_blank_records = sheet_instance.num_records
+                # else:
+                #     num_blank_records = 1 # this maybe isn't right
 
                 # define fields based on which year it is
                 record_fields = get_form_fields(image_instance.year, 'long') #TODO: should not be hardcoded
+                field_widgets = {f: choices.FORM_WIDGETS[f] for f in record_fields if f in choices.FORM_WIDGETS}
 
                 # set up formset and CrispyForms layout helper
-                RecordFormSet = modelformset_factory( Record, fields = record_fields, formset = BaseRecordFormSet, can_delete = True, extra = num_blank_records )
-                helper = CrispyFormSetHelper(
-                    year=image_instance.year
-                )
+                # RecordFormSet = modelformset_factory( Record, fields = record_fields, formset = BaseRecordFormSet, can_delete = True, extra = num_blank_records )
+                # helper = CrispyFormSetHelper(
+                #     year=image_instance.year
+                # )
+                # formset = RecordFormSet( inputs_IN, request_IN.FILES )
+
+                # logger.info(f'{me}: request has {formset.total_form_count()} forms')
+
+                # set up RecordForm and CrispyForms layout helper
+                RecordForm = modelform_factory(Record, fields = record_fields, widgets = field_widgets)
+                helper = CrispyFormHelper(year=image_instance.year)
+
+                # set values and save
+                r_data = {**form}
+                logger.info(f'{me}(): cleaned_data from record form is {r_data}')
                 
-                formset = RecordFormSet( inputs_IN, request_IN.FILES )
+                if r_data:
 
-                logger.info(f'{me}: request has {formset.total_form_count()} forms')
-
-                if formset.is_valid():
-
-                    # get data from request
-                    for r in formset.cleaned_data:
-
-                        logger.info(f'CodeImageView.action_update_record(): record form is {r}')
-
-                        # likely want to modify this per Jon's suggestions
-                        # if r.is_valid():
-                        r['sheet']=sheet_instance
-                        r['timestamp'] = datetime.datetime.now()
-                        r['jbid'] = request_IN.user.username
-                        r['is_complete'] = True
-                        record_instance, created = Record.update_or_create(**r)
+                    logger.info(f'{me}(): record form cleaned_data is {r_data}')
                         
-                        # else: 
-                        #     logger.warning("{me}(): record is not valid \n \t {r}".format(me = me, r = r))
+                    # collect data that we're entering for this record
+                    r_data['sheet'] = sheet_instance
+                    r_data['jbid'] = request_IN.user.username
+                    r_data['timestamp'] = datetime.datetime.now()
+                    r_data['is_complete'] = True
 
-                        #-- END check to see that single record form is valid --#
+                    # remove middleware token
+                    if "csrfmiddlewaretoken" in r_data:
+                        r_data.pop("csrfmiddlewaretoken")
 
+                    # remove id from record if it is present b/c it breaks update()
+                    if "id" in r_data:
+                        r_data.pop("id")
+
+                    record_id = form.get(PARAM_NAME_RECORD_ID, None)
+
+                    # if the request passed in a record, we do an update
+                    if record_id:
+
+                        # get the record and update it 
+                        Record.objects.filter(pk=record_id).update(**r_data)
+
+                        # get the instance
+                        record_instance = Record.objects.filter(pk=record_id).get()
+                    
+                    # no ID => new record
+                    else:
+                        record_instance = Record.objects.create(**r_data)
+
+                    #-- END check to see if this is a record create or update--#
+                
                 else:
-                    logger.warning("{me}(): record formset is not valid".format(me = me))
 
-                    #-- END check that formset  is valid --#
+                    error_message = "In {method}(): Form data was invalid ({form})".format(method = me, form = form)
 
+                #-- END check to see if there was more than one record passed in --#
+                 
             else:
 
                 logger.warning("{me}: no sheet instance passed in context".format(me = me))
 
             # return the record form instance + layout helper in context?
-            context_IN[ CONTEXT_RECORD_FORMSET ] = formset
+            context_IN[ CONTEXT_RECORD_FORM ] = form
             context_IN[ CONTEXT_RECORD_INSTANCE ] = record_instance
             context_IN[ CONTEXT_FORM_HELPER ] = helper
+            
 
         else:
 
@@ -1131,27 +1160,36 @@ class CodeImage( LoginRequiredMixin, FormView ):
         # DEBUG
         logger.info(f'{me}: record_count is {record_count}')
 
-        # how many records are already entered?
-        if record_count == 0:
+        # # how many records are already entered?
+        # if record_count == 0:
 
-            my_record = None
-            formset_extra_count = parent_sheet.num_records
+        #     my_record = None
+        #     formset_extra_count = 1
         
-        else:
+        # else:
 
-            my_record = record_qs.pop()
-            formset_extra_count = 1
+        #     my_record = None
+        #     formset_extra_count = 0
 
         # set up form.
         record_fields = get_form_fields( parent_sheet.year, 'long' ) #TODO: THIS SHOULD NOT BE HARD-CODED
+        field_widgets = {f: choices.FORM_WIDGETS[f] for f in record_fields if f in choices.FORM_WIDGETS}
 
-        RecordFormSet = modelformset_factory( Record, fields = record_fields, formset = BaseRecordFormSet, extra = formset_extra_count)
-        formset = RecordFormSet( queryset = my_record )
 
-        helper = CrispyFormSetHelper(year=parent_sheet.year)
+        # ELIMINATE THIS SOON
+        # RecordFormSet = modelformset_factory( Record, fields = record_fields, formset = BaseRecordFormSet, extra = formset_extra_count)
+        # formset = RecordFormSet( queryset = my_record )
+        # helper = CrispyFormSetHelper(year=parent_sheet.year)
 
-        context_OUT[ CONTEXT_RECORD_FORMSET ] = formset
+
+        RecordForm = modelform_factory(Record, fields = record_fields, widgets = field_widgets)
+        form = RecordForm()
+        helper = CrispyFormHelper(year=parent_sheet.year)
+
+        context_OUT[ CONTEXT_RECORD_FORM ] = form
         context_OUT[ CONTEXT_RECORD_FORMSET_HELPER ] = helper
+        context_OUT[ CONTEXT_RECORD_LIST ] = record_qs
+
 
         logger.info(f'context returned from prepare_record_context {context_OUT}')
 

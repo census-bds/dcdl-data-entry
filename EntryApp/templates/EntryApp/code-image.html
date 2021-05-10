@@ -12,7 +12,8 @@
 
 {% block content %}
     <div class="flex-container">
-        <div class="col-lg-5">
+    <div class="row row-height">
+        <div class="col-lg-4">
             <div id="openseadragon1" style="width: 600px; height: 600px;"></div>
             <script type="text/javascript">
                 var Viewer = OpenSeadragon({
@@ -26,10 +27,8 @@
                 });
             </script>
         </div>
-        <div class="col-lg-7">
-        <div class="scrollingBox">
-            <div class="row">
-                        
+        <div class="col-lg-8 justify-content-center align-items-start right-col">
+            <div class="row">            
                 <p class="image_info">
                     <h2>Basic image info</h2>
                 {% if image_form %}
@@ -73,8 +72,8 @@
                 {% endif %}
 
             </div>
-            </div>
         </div>
+    </div>
     </div>
 
 {% endblock content %}

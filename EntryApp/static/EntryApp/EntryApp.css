@@ -123,3 +123,20 @@ td.page_layout
 {
     background-color: #22e40c;
 }
+
+.sidebarBox
+{
+    width: 850px; /* Replace with your sidebar width */
+    height: 100%;
+    float: right;
+    position: relative;
+    /* overflow-y: scroll; */
+}
+
+.scrollingBox
+{
+    min-height: 0px;
+    height: 200px;   
+    overflow: scroll;
+    position: absolute;
+}

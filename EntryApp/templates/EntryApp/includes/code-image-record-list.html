@@ -1,0 +1,36 @@
+<p class="record-list">
+    {% if record_list %}
+    <table class="gridtable">
+        <div>
+            <div id="record-table-header">
+                <tr>
+                    <th>Line number</th>
+                    <th>Last name</th>
+                    <th>First name</th>
+                    <th>Middle initial</th>
+                    <th>Age</th>
+                    <th>Make changes</th>
+                </tr>
+                {% for record in record_list %}
+                    <tr>
+                        <td>{{ record.line_no }}</td>
+                        <td>{{ record.last_name }}</td>
+                        <td>{{ record.first_name }}</td>
+                        <td>{{ record.middle_init }}</td>
+                        <td>{{ record.age }}</td>
+                        <td>
+                            <form>
+                                <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
+                                <input type="hidden" name="{{ param_names.PARAM_NAME_SHEET_ID }}" value="{{ sheet_instance.id }}" />
+                                <input type="hidden" name="{{ param_names.PARAM_NAME_RECORD_ID }}" value="{{ record.id }}" />
+                                <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_record" />
+                                <input type="submit" value="Edit (BROKEN)">
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </div>
+        </div>
+    </table>
+    {% endif %}
+</p>
