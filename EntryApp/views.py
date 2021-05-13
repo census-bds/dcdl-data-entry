@@ -97,11 +97,13 @@ PARAM_NAMES[ "PARAM_NAME_SHEET_ID" ] = PARAM_NAME_SHEET_ID
 PARAM_NAMES[ "PARAM_NAME_YEAR" ] = PARAM_NAME_YEAR
 
 # actions
+ACTION_COMPLETE_IMAGE = "complete_image"
 ACTION_UPDATE_IMAGE = "update_image"
 ACTION_UPDATE_BREAKER_TYPE = "update_breaker_type"
 ACTION_UPDATE_SHEET_TYPE = "update_sheet_type"
 ACTION_UPDATE_RECORD = "update_record"
 VALID_ACTIONS = []
+VALID_ACTIONS.append( ACTION_COMPLETE_IMAGE )
 VALID_ACTIONS.append( ACTION_UPDATE_IMAGE )
 VALID_ACTIONS.append( ACTION_UPDATE_BREAKER_TYPE )
 VALID_ACTIONS.append( ACTION_UPDATE_SHEET_TYPE )
@@ -454,6 +456,45 @@ class CodeImage( LoginRequiredMixin, FormView ):
     form_image = ImageForm
     template_name = 'EntryApp/code-image.html'
 
+    def action_complete_image( self, request_IN, context_IN ):
+        '''
+        Marks an image as "complete" from button 
+        Only applies to sheets - happens to breakers automatically 
+        '''
+        
+        me = "CodeImage.action_complete_sheet"
+        error_message = None
+        error_list_OUT = None
+
+        # check for request
+        if request_IN:
+
+            inputs_IN = get_request_data(request_IN)
+            form = inputs_IN
+            
+            image_id = form.get( PARAM_NAME_IMAGE_ID, None )
+            
+            # check for image ID
+            if image_id:
+
+                # if we get one, mark as complete
+                image_instance = Image.objects.get(pk = image_id)
+                image_instance.is_complete = True
+                image_instance.save()
+            
+            else:
+
+                logger.info(f"{me}(): no image id")
+                                # no inputs?
+                error_message = "In {method}(): No image ID received ( {form} ).".format(
+                    method = me,
+                    form = form
+                )
+                error_list_OUT.append( error_message )
+
+        return error_list_OUT
+
+
     def action_update_breaker( self, request_IN, context_IN ):
 
         '''
@@ -646,6 +687,8 @@ class CodeImage( LoginRequiredMixin, FormView ):
             image_instance = Image.objects.get( pk = image_id )
             image_has_related_objects = image_instance.has_related_objects()
 
+            logger.info(f"{me}(): image has related? {image_has_related_objects}")
+
             # Only allow updates if image doesn't already have related.
             if ( image_has_related_objects == False ):
 
@@ -653,6 +696,8 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
                 # year
                 year_value = inputs_IN.get( PARAM_NAME_YEAR, None )
+
+                logger.info(f"{me}(): {image_id} and {year_value}")
 
                 # got a value?
                 if ( ( year_value is not None ) and ( year_value != "" ) ):
@@ -1116,6 +1161,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
         # DEBUG
         logger.info(f'{me}: record_count is {record_count}')
+        logger.info(f'{me}: context_IN is {context_IN}')
 
 
         # set up form.
@@ -1242,7 +1288,13 @@ class CodeImage( LoginRequiredMixin, FormView ):
                     # what action?
                     action_error_list = None
                     logger.info(f'CodeImageView.process_action() action is {my_action}')
-                    if ( my_action == ACTION_UPDATE_IMAGE ):
+                    
+                    if ( my_action == ACTION_COMPLETE_IMAGE ):
+                        
+                        # mark image as complete
+                        action_error_list = self.action_complete_image( request_IN, context_IN ) 
+                    
+                    elif ( my_action == ACTION_UPDATE_IMAGE ):
 
                         # update the image
                         action_error_list = self.action_update_image( request_IN, context_IN )
@@ -1356,6 +1408,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         current_image_type = None
 
         # init  
+        return_template_name = self.template_name
         context = initialize_context( request )
         error_list = list()
         seed_current_entry( request ) # this ensures there's a value in CurrentEntry
@@ -1379,6 +1432,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
             # is there an action?
             my_action = request_inputs.get( PARAM_NAME_ACTION, None )
+            logger.info(f"{me}() my_action is {my_action}")
             if ( ( my_action is not None ) and ( my_action in VALID_ACTIONS ) ):
 
                 # process action
@@ -1387,6 +1441,13 @@ class CodeImage( LoginRequiredMixin, FormView ):
                 if ( ( returned_error_list is not None ) and ( len( returned_error_list ) > 0 ) ):
                     error_list.extend( returned_error_list )
                 #-- END check if process_action errors. --#
+
+                # if the action is complete_image, we return to the index
+                if my_action == ACTION_COMPLETE_IMAGE:
+                    
+                    return redirect(reverse("EntryApp:index"))
+                
+                #-- END check to see if action is completing image --#
 
             #-- END check to see if action. --#
 
@@ -1471,147 +1532,13 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
         #-- END check for error list --#
 
-        response_OUT = render( request, self.template_name, context )
+        response_OUT = render( request, return_template_name, context )
 
         return response_OUT
 
     #-- END method process_request() --#
 
 #-- END class CodeImage --#
-
-#------------------------------------------------------------------------------#
-# SHEET
-#------------------------------------------------------------------------------#
-
-class EnterSheetData(LoginRequiredMixin, FormView):
-
-    form_class = SheetForm
-    template_name = 'EntryApp/enter-sheet-data.html'
-
-    def get(self, request):
-        '''
-        Handle GET request and return page with empty form
-        '''
-
-        logger.info(f'EnterSheet GET request')
-        current = CurrentEntry.objects.get(jbid=request.user)
-        context = {
-            'breaker': current.breaker,
-            'form': self.form_class(),
-            'slug': current.img.image_file.img_file_name, # THIS WORKS WITH THE DATA NOW
-        }
-        return render(request, self.template_name, context)
-
-    def post(self, request):
-        '''
-        Handle POST request with populated form; save form data to DB
-        '''
-
-        form = request.POST
-        logger.info(f'EnterSheet POST request form: {form}')
-
-        try:
-            # first save the data in Sheet
-            current_img = CurrentEntry.objects.get(jbid=request.user).img
-
-            # 1990 never has breakers, so assign the default dummy
-            if current_img.year == 1990:
-                # this breaker gets created for each user during data loading
-                associated_breaker = Breaker.objects.filter(year=1990).get(jbid=request.user)
-            else:
-                associated_breaker = CurrentEntry.objects.get(jbid=request.user).breaker
-
-            logger.info(f"associated breaker: {type(associated_breaker)}")
-            sheet, created = Sheet.objects.update_or_create(
-                img = current_img,
-                jbid = request.user,
-                year = current_img.year,
-            defaults = {
-                    'form_type': form['form_type'],
-                    'breaker': associated_breaker,
-                    'num_records': form['num_records'],
-                    'timestamp': datetime.datetime.now()
-                    }
-            )
-            logger.info(f'EnterSheetDataView update_or_create() returned {created}')
-
-            # next update CurrentEntry
-            current = CurrentEntry.objects.get(jbid=request.user)
-            current.sheet = sheet
-            current.save()
-
-            return redirect(reverse('EntryApp:enter_records'))
-
-        except KeyError:
-            logger.warn("KeyError in submit_sheet post()")
-            return render(request, reverse(self.template_name))
-
-
-#------------------------------------------------------------------------------#
-# RECORD
-#------------------------------------------------------------------------------#
-
-@login_required
-def enter_records(request):
-    '''
-    View where the user can enter 1 or more person records
-    '''
-
-    # get the current metadata
-    current = CurrentEntry.objects.get(jbid=request.user)
-    num_records = current.sheet.num_records
-
-    # this query would fail if sheet is None but that shouldn't happen
-    logger.info(f'FormField: year of current entry is {current.img.year}')
-    field_query = FormField.objects.filter(year=current.img.year).filter(form_type=current.sheet.form_type)
-    logger.info(f'FormField query length was {len(field_query)}')
-    record_fields = [f.field_name for f in list(field_query)]
-    logger.info(f'form records fields are {record_fields}')
-
-
-    RecordFormSet = modelformset_factory(
-        Record,
-        form=RecordForm,
-        fields=record_fields,
-        extra=num_records,
-        formset=BaseRecordFormSet,
-    )
-    helper = CrispyFormSetHelper(
-        year=current.img.year,
-        form=current.sheet.form_type
-    )
-
-    if request.method == 'POST':
-
-        logger.info(f'enter_record view POST request')
-        formset = RecordFormSet(request.POST, request.FILES)
-        logger.info(f'{formset.is_valid()}')
-
-        if formset.is_valid():
-            for r in formset.cleaned_data:
-                r['sheet'] = current.sheet
-                r['timestamp'] = datetime.datetime.now()
-                r['jbid'] = request.user
-                logger.info(f'record value is {r}')
-                record, created = Record.objects.get_or_create(**r)
-
-                if created:
-                    logger.info(f'{record} created.')
-                else:
-                    logger.info(f'{record} updated.')
-
-            return redirect(reverse('EntryApp:index'))
-
-    else:
-        formset = RecordFormSet(queryset=Record.objects.none)
-
-    context = {
-        'formset': formset,
-        'helper': helper,
-        'slug': current.img.img_path
-    }
-    return render(request, 'EntryApp/enter-records.html', context)
-
 
 #------------------------------------------------------------------------------#
 # PROBLEM VIEW

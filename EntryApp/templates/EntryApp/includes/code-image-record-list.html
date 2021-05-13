@@ -9,7 +9,6 @@
                     <th>First name</th>
                     <th>Middle initial</th>
                     <th>Make changes</th>
-                    <th>Delete</th>
                 </tr>
                 {% for record in record_list %}
                     <tr>
@@ -25,16 +24,6 @@
                                 <input type="hidden" name="{{ param_names.PARAM_NAME_RECORD_ID }}" value="{{ record.id }}" />
                                 <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_record" />
                                 <input type="submit" value="Edit">
-                            </form>
-                        </td>
-                        <td>
-                            <form>
-                                {% csrf_token %}
-                                <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
-                                <input type="hidden" name="{{ param_names.PARAM_NAME_SHEET_ID }}" value="{{ sheet_instance.id }}" />
-                                <input type="hidden" name="{{ param_names.PARAM_NAME_RECORD_ID }}" value="{{ record.id }}" />
-                                <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="delete_record" />
-                                <input type="submit" value="Delete (NOT YET IMPLEMENTED)">
                             </form>
                         </td>
                     </tr>

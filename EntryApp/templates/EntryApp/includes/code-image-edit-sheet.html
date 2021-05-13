@@ -16,7 +16,7 @@
         <p>
             Select which kind of sheet this is and how many individual records it contains.
         </p>
-        <form method="POST">
+        <form method="GET">
             {% csrf_token %}
             {{ sheet_form.as_p }}
             <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
@@ -36,7 +36,15 @@
     {% include "EntryApp/includes/code-image-record-list.html" %}
     </p>    
 </div>
-<div class="row" id="recordEntry">
+<div class="row" id="image-complete">
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
+        <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="complete_image" />
+        <input type="submit" value="Mark image complete">
+    </form>
+</div>
+<div class="row" id="record-entry">
     <div class="flex-container">
     {% if record_form %}
     <p>

@@ -5,8 +5,6 @@ from EntryApp import views
 app_name = 'EntryApp'
 urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
-    path('enter-sheet-data/', views.EnterSheetData.as_view(), name='enter_sheet_data'),
-    path('enter-records/', views.enter_records, name='enter_records'),
     path('report-problem/', views.report_problem, name='report_problem'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('test-crispy-formset/<int:year>', views.test_crispy_formset_view, name='test_crispy_formset'),
