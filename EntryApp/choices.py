@@ -2,6 +2,8 @@
 # DEFINE CHOICES FOR ALL DATA ENTRY FIELDS
 #=====================================================#
 
+from django import forms
+
 YEAR_CHOICES = [
     (1960, 1960),
     (1970, 1970),
@@ -9,10 +11,13 @@ YEAR_CHOICES = [
     (1990, 1990),
 ]
 
+IMAGE_TYPE_BREAKER = "breaker"
+IMAGE_TYPE_SHEET = "sheet"
+IMAGE_TYPE_OTHER = "other"
 IMAGE_TYPE_CHOICES = [
-    ("breaker", "Breaker"),
-    ("sheet", "Sheet"),
-    ("other", "Other"),
+    ( IMAGE_TYPE_BREAKER, "Breaker" ),
+    ( IMAGE_TYPE_SHEET, "Sheet" ),
+    ( IMAGE_TYPE_OTHER, "Other"),
 ]
 
 # TO DO: get names to match actual taxonomy - check w/Katie
@@ -29,6 +34,46 @@ STATE_LIST = [
                 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', \
                 'TX', 'UT',	'VT', 'VA',	'WA', 'WV',	'WI', 'WY',
             ]
+
+FORM_WIDGETS = {
+    'relp_1960': forms.RadioSelect,
+    'relp_1970': forms.RadioSelect,
+    'relp_1980': forms.RadioSelect,
+    'relp_1990': forms.RadioSelect,
+    'sex': forms.RadioSelect,
+    'race_1960': forms.RadioSelect,
+    'race_1970': forms.RadioSelect,
+    'race_1980': forms.RadioSelect,
+    'race_1990': forms.RadioSelect,
+    'birth_quarter': forms.RadioSelect,
+    'birth_decade': forms.RadioSelect,
+    'birth_year': forms.RadioSelect,
+    'marital_status': forms.RadioSelect,
+    'age_hundreds': forms.RadioSelect,
+    'age_tens': forms.RadioSelect,
+    'age_ones': forms.RadioSelect,
+    'birth_year_thousands': forms.RadioSelect,
+    'birth_year_hundreds': forms.RadioSelect,
+    'birth_year_tens': forms.RadioSelect,
+    'birth_year_ones': forms.RadioSelect,
+    'block_1': forms.RadioSelect,
+    'block_2': forms.RadioSelect,
+    'block_3': forms.RadioSelect,
+    'serial_no_1':forms.RadioSelect,
+    'serial_no_2':forms.RadioSelect,
+    'serial_no_3':forms.RadioSelect,
+    'serial_no_4':forms.RadioSelect,
+    'serial_no_5':forms.RadioSelect,
+    'serial_no_6':forms.RadioSelect,
+    'serial_no_7':forms.RadioSelect,
+    'serial_no_8':forms.RadioSelect,
+    'serial_no_9':forms.RadioSelect,
+    'serial_no_10':forms.RadioSelect,
+    'serial_no_11':forms.RadioSelect,
+    'total_persons_hundreds': forms.RadioSelect,
+    'total_persons_tens': forms.RadioSelect,
+    'total_persons_ones': forms.RadioSelect,
+}
 
 #================================#
 # FIELD-LEVEL CHOICES

@@ -5,7 +5,7 @@ TO DO:
 -Validation methods
 """
 
-from django import forms 
+from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 
@@ -18,18 +18,58 @@ from EntryApp.models import Breaker, Image, Record, Sheet, FormField, CurrentEnt
 # FORMS FOR DATA ENTRY
 #================================#
 
+class ImageYearForm(forms.Form):
+
+    """
+    Form where user records the year to which an image belongs
+    """
+
+    year = forms.MultipleChoiceField(
+                widget=forms.RadioSelect,
+                choices=choices.YEAR_CHOICES,
+                label='Year'
+            )
+
+    # TO DO
+    def form_valid(self, form):
+        return True
+
+#-- END form ImageYearForm --#
+
+class ImageTypeForm(forms.Form):
+
+    """
+    Form where user records the form type to which an image belongs
+    """
+
+    image_type = forms.MultipleChoiceField(
+                     widget=forms.RadioSelect,
+                     choices=choices.IMAGE_TYPE_CHOICES,
+                     label='Image type'
+                 )
+
+    # TO DO
+    def form_valid(self, form):
+        return True
+
+#-- END form ImageTypeForm --#
+
 class ImageForm(forms.Form):
     """
-    Form where user records the year and form type to which a sheet belongs 
+    Form where user records the year and form type to which a sheet belongs
     """
 
     year = forms.MultipleChoiceField(
                 widget=forms.RadioSelect,
                 choices=choices.YEAR_CHOICES, label='Year'
             )
-    image_type = forms.MultipleChoiceField(widget=forms.RadioSelect, choices=choices.IMAGE_TYPE_CHOICES, label='Image type')
+    image_type = forms.MultipleChoiceField(
+        widget=forms.RadioSelect,
+        choices=choices.IMAGE_TYPE_CHOICES,
+        label='Image type'
+        )
 
-    # TO DO    
+    # TODO?
     def form_valid(self, form):
         return True
 
@@ -45,84 +85,35 @@ class BreakerForm(forms.ModelForm):
 
     def form_valid(self):
         return True
-        
+
 
 class SheetForm(forms.ModelForm):
     """
-    Define form to enter sheet data (year and type)
-
-    Constructed using a jbid so possible breakers list can be populated
+    Define form to enter sheet data: # of records
     """
 
-    form_type = forms.ChoiceField(choices=choices.FORM_CHOICES, widget=forms.RadioSelect, label='Form type')
-    
     class Meta:
         model = Sheet
-        fields = ['num_records']    
+        fields = ['num_records']
 
 
 #================================#
 # RECORD FORMS FOR EACH YEAR
 #================================#
 
-
 class RecordForm(forms.ModelForm):
     """
     Define form to enter record data (i.e. individual data)
     """
-
-    # https://stackoverflow.com/questions/3419997/creating-a-dynamic-choice-field
-
+    
     class Meta:
         model = Record
         exclude = [
             'jbid',
             'timestamp',
             'is_illegible',
+            'is_complete',
         ]
-        widgets = {
-            'relp_1960': forms.RadioSelect,
-            'relp_1970': forms.RadioSelect,
-            'relp_1980': forms.RadioSelect,
-            'relp_1990': forms.RadioSelect,
-            'sex': forms.RadioSelect,
-            'race_1960': forms.RadioSelect,
-            'race_1970': forms.RadioSelect,
-            'race_1980': forms.RadioSelect,
-            'race_1990': forms.RadioSelect,
-            'birth_quarter': forms.RadioSelect,
-            'birth_decade': forms.RadioSelect,
-            'birth_year': forms.RadioSelect,
-            'marital_status': forms.RadioSelect,
-            'age_hundreds': forms.RadioSelect,
-            'age_tens': forms.RadioSelect,
-            'age_ones': forms.RadioSelect,
-            'birth_year_thousands': forms.RadioSelect,
-            'birth_year_hundreds': forms.RadioSelect,
-            'birth_year_tens': forms.RadioSelect,
-            'birth_year_ones': forms.RadioSelect,
-            'block_1': forms.RadioSelect,
-            'block_2': forms.RadioSelect,
-            'block_3': forms.RadioSelect,
-            'serial_no_1':forms.RadioSelect,
-            'serial_no_2':forms.RadioSelect,
-            'serial_no_3':forms.RadioSelect,
-            'serial_no_4':forms.RadioSelect,
-            'serial_no_5':forms.RadioSelect,
-            'serial_no_6':forms.RadioSelect,
-            'serial_no_7':forms.RadioSelect,
-            'serial_no_8':forms.RadioSelect,
-            'serial_no_9':forms.RadioSelect,
-            'serial_no_10':forms.RadioSelect,
-            'serial_no_11':forms.RadioSelect,
-            'total_persons_hundreds': forms.RadioSelect,
-            'total_persons_tens': forms.RadioSelect,
-            'total_persons_ones': forms.RadioSelect,
-        }
-    
-    def form_valid(self, form):
-        return True
-
 
 
 #================================#
@@ -149,7 +140,7 @@ class BaseRecordFormSet(forms.BaseModelFormSet):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.queryset = Record.objects.none() 
+        # self.queryset = Record.objects.none()
 
 
 class BaseBreakerFormSet(forms.BaseModelFormSet):
@@ -159,7 +150,7 @@ class BaseBreakerFormSet(forms.BaseModelFormSet):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.queryset = Breaker.objects.none()
+        #self.queryset = Breaker.objects.none()
 
 
 
@@ -170,12 +161,30 @@ class CrispyFormSetHelper(FormHelper):
     This FormHelper applies CSS styling and defines layout.
     The layout comes from the year and form specified in __init__
     '''
-    def __init__(self, year, form, *args, **kwargs):
+    def __init__(self, year, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.form_method='POST'
         self.form_class='form-inline col-8'
         self.label_class = 'sr-only'
-        self.layout = layouts.FORM_DICT[year][form]
+        self.layout = layouts.FORM_DICT[year]
         self.render_required_fields=True
-        self.add_input(Submit("submit", "Submit"))
+        # self.add_input(Submit("submit", "Submit"))
+        self.form_tag = False
 
+
+class CrispyFormHelper(FormHelper):
+    '''
+    Custom FormHelper for Record form layout
+
+    This FormHelper applies CSS styling and defines layout.
+    The layout comes from the year and form specified in __init__
+    '''
+    def __init__(self, year, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.form_method='POST'
+        self.form_class='form-inline col-8'
+        self.label_class = 'sr-only'
+        self.layout = layouts.FORM_DICT[year]
+        self.render_required_fields=True
+        # self.add_input(Submit("submit", "Submit"))
+        self.form_tag = False

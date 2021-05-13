@@ -5,13 +5,8 @@ from EntryApp import views
 app_name = 'EntryApp'
 urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
-    path('begin-new-image/', views.BeginNewImageView.as_view(), name='begin_new_image'),
-    path('enter-sheet-data/', views.EnterSheetData.as_view(), name='enter_sheet_data'),
-    path('enter-breaker-data/', views.EnterBreakerData.as_view(), name='enter_breaker_data'),
-    path('enter-records/', views.enter_records, name='enter_records'),
     path('report-problem/', views.report_problem, name='report_problem'),
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('test-crispy-formset/<int:year>', views.test_crispy_formset_view, name='test_crispy_formset'),
-    path('list-recent/', views.ListRecentView.as_view(), name='list_recent'),
-    path('edit-entry/', views.edit_entry, name='edit_entry')
-] 
+    path( 'code-image/', views.CodeImage.as_view(), name="code_image" )
+]
