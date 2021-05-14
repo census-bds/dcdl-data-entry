@@ -12,10 +12,12 @@ YEAR_CHOICES = [
 ]
 
 IMAGE_TYPE_BREAKER = "breaker"
+IMAGE_TYPE_LONGFORM = "longform"
 IMAGE_TYPE_SHEET = "sheet"
 IMAGE_TYPE_OTHER = "other"
 IMAGE_TYPE_CHOICES = [
     ( IMAGE_TYPE_BREAKER, "Breaker" ),
+    ( IMAGE_TYPE_LONGFORM, "1990 Long Form" ),
     ( IMAGE_TYPE_SHEET, "Sheet" ),
     ( IMAGE_TYPE_OTHER, "Other"),
 ]
@@ -73,6 +75,7 @@ FORM_WIDGETS = {
     'total_persons_hundreds': forms.RadioSelect,
     'total_persons_tens': forms.RadioSelect,
     'total_persons_ones': forms.RadioSelect,
+    'industry_category': forms.RadioSelect,
 }
 
 #================================#
@@ -131,6 +134,14 @@ MARITAL_STATUS_CHOICES = [
     ('Divorced', 'Divorced'),
     ('Separated', 'Separated'),
     ('Never married', 'Never married')
+]
+
+INDUSTRY_CHOICES = [
+    ('Manufacturing', 'Manufacturing'),
+    ('Wholesale trade', 'Wholesale trade'),
+    ('Retail trade', 'Retail trade'),
+    ('Other (agriculture, construction, service, government, etc.)', \
+        'Other (agriculture, construction, service, government, etc.)'),
 ]
 
 RELP_CHOICES_1960 = [

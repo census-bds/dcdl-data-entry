@@ -41,6 +41,7 @@ from EntryApp.models import Breaker
 from EntryApp.models import CurrentEntry
 from EntryApp.models import FormField
 from EntryApp.models import Image
+from EntryApp.models import LongForm1990
 from EntryApp.models import OtherImage
 from EntryApp.models import Record
 from EntryApp.models import Sheet
@@ -49,12 +50,14 @@ from EntryApp.models import Sheet
 from EntryApp.forms import BaseBreakerFormSet
 from EntryApp.forms import BaseRecordFormSet
 from EntryApp.forms import BreakerForm
-from EntryApp.forms import CrispyFormHelper
 from EntryApp.forms import ImageForm
 from EntryApp.forms import ImageTypeForm
 from EntryApp.forms import ImageYearForm
+from EntryApp.forms import LongForm1990Form
+from EntryApp.forms import LongFormHelper
 from EntryApp.forms import ProblemForm
 from EntryApp.forms import RecordForm
+from EntryApp.forms import RecordFormHelper
 from EntryApp.forms import SheetForm
 
 # EntryApp choices
@@ -69,11 +72,13 @@ import EntryApp.choices as choices
 CONTEXT_BREAKER_INSTANCE = "breaker_instance"
 CONTEXT_BREAKER_FORMSET = "breaker_formset"
 CONTEXT_FORM_HELPER = "helper"
+CONTEXT_LONGFORM_INSTANCE = "longform_instance"
+CONTEXT_LONGFORM_FORM = "longform_form"
+CONTEXT_LONGFORM_HELPER = "helper"
 CONTEXT_PARAM_NAMES = "param_names"
 CONTEXT_PAGE_STATUS_MESSAGE_LIST = "page_status_message_list"
 CONTEXT_RECORD_INSTANCE = "record_instance"
 CONTEXT_RECORD_FORM = "record_form"
-CONTEXT_RECORD_FORMSET = "record_formset"
 CONTEXT_RECORD_FORMSET_HELPER = "helper"
 CONTEXT_RECORD_LIST = "record_list"
 CONTEXT_SHEET_INSTANCE = "sheet_instance"
@@ -84,6 +89,7 @@ PARAM_NAME_ACTION = "action"
 PARAM_NAME_BREAKER_ID = "breaker_id"
 PARAM_NAME_IMAGE_ID = "image_id"
 PARAM_NAME_IMAGE_TYPE = "image_type"
+PARAM_NAME_LONGFORM_ID = "longform_id"
 PARAM_NAME_RECORD_ID = "record_id"
 PARAM_NAME_SHEET_ID = "sheet_id"
 PARAM_NAME_YEAR = "year"
@@ -92,20 +98,23 @@ PARAM_NAMES[ "PARAM_NAME_ACTION" ] = PARAM_NAME_ACTION
 PARAM_NAMES[ "PARAM_NAME_BREAKER_ID" ] = PARAM_NAME_BREAKER_ID
 PARAM_NAMES[ "PARAM_NAME_IMAGE_ID" ] = PARAM_NAME_IMAGE_ID
 PARAM_NAMES[ "PARAM_NAME_IMAGE_TYPE" ] = PARAM_NAME_IMAGE_TYPE
+PARAM_NAMES[ "PARAM_NAME_LONGFORM_ID" ] = PARAM_NAME_LONGFORM_ID
 PARAM_NAMES[ "PARAM_NAME_RECORD_ID" ] = PARAM_NAME_RECORD_ID
 PARAM_NAMES[ "PARAM_NAME_SHEET_ID" ] = PARAM_NAME_SHEET_ID
 PARAM_NAMES[ "PARAM_NAME_YEAR" ] = PARAM_NAME_YEAR
 
 # actions
 ACTION_COMPLETE_IMAGE = "complete_image"
-ACTION_UPDATE_IMAGE = "update_image"
 ACTION_UPDATE_BREAKER_TYPE = "update_breaker_type"
+ACTION_UPDATE_IMAGE = "update_image"
+ACTION_UPDATE_LONGFORM = "update_longform"
 ACTION_UPDATE_SHEET_TYPE = "update_sheet_type"
 ACTION_UPDATE_RECORD = "update_record"
 VALID_ACTIONS = []
 VALID_ACTIONS.append( ACTION_COMPLETE_IMAGE )
-VALID_ACTIONS.append( ACTION_UPDATE_IMAGE )
 VALID_ACTIONS.append( ACTION_UPDATE_BREAKER_TYPE )
+VALID_ACTIONS.append( ACTION_UPDATE_IMAGE )
+VALID_ACTIONS.append( ACTION_UPDATE_LONGFORM )
 VALID_ACTIONS.append( ACTION_UPDATE_SHEET_TYPE )
 VALID_ACTIONS.append( ACTION_UPDATE_RECORD )
 
@@ -767,6 +776,146 @@ class CodeImage( LoginRequiredMixin, FormView ):
     #-- END method action_update_image() --#
 
 
+    def action_update_longform( self, request_IN, context_IN ):
+
+        '''
+        Accepts form inputs. Updates longform from inputs.
+        '''
+
+        # return reference
+        error_list_OUT = None
+
+        # inits
+        me = "CodeImage.action_update_longform"
+        error_message = None
+        error_list = None
+        inputs_IN = None
+        current = None
+        image_id = None
+        image_instance = None
+        image_has_related_objects = None
+        associated_breaker = None
+        form = None
+        field_query = None
+        longform_id = None
+        longform_qs = None
+        longform_count = None
+        longform_instance = None
+        longform_data = None
+        longform_defaults = None
+        is_changed = None
+        is_new_longform = False
+
+        # init
+        error_list_OUT = list()
+        
+
+        # got request?
+        if ( request_IN is not None ):
+
+            # get inputs
+            inputs_IN = get_request_data( request_IN )
+
+            # get image for ID
+            image_id = inputs_IN.get( PARAM_NAME_IMAGE_ID, None )
+            image_instance = Image.objects.get( pk = image_id )
+            image_has_related_objects = image_instance.has_related_objects()
+
+            form = inputs_IN
+
+            logger.info(f'{me}(): LongForm1990 inputs_IN is {form}')
+
+            # do we have a longform ID?
+            longform_id = form.get( PARAM_NAME_SHEET_ID, None )
+
+            if longform_id:
+
+                # try to get instance to update.
+                longform_qs = LongForm1990.objects.filter( pk = longform_id )
+
+                # get instance
+                longform_instance = longform_qs.get()
+
+                # do not update "CurrentEntry" on update.
+                is_new_longform = False
+
+            else:
+
+                # no ID. New sheet.
+                longform_instance = LongForm1990()
+                is_new_longform = True
+
+            #-- END check to see if new or existing --#
+
+                # define fields based on which year it is
+                fields = get_form_fields(1990, 'long') 
+                field_widgets = {f: choices.FORM_WIDGETS[f] for f in record_fields if f in choices.FORM_WIDGETS}
+
+                # TODO: what should this condition actually check for?                
+                if form:
+
+                    # collect data that we're entering for this longform
+                    l_data = {f: form[f] for f in form if f in fields}
+                    logger.info(f'{me}(): longform form collected data is {l_data}')
+                        
+                    # add additional fields
+                    l_data['img'] = image_instance
+                    l_data['jbid'] = request_IN.user.username
+                    l_data['last_modified'] = datetime.datetime.now()
+
+                    # if the request passed in an instance, we do an update
+                    if longform_id:
+                        logger.info(f"{me}(): got longform_id {longform_id}")
+
+                        # get the existing longform record and update it 
+                        LongForm1990.objects.filter(pk=longform_id).update(**l_data)
+
+                        # get the instance
+                        longform_instance = LongForm1990.objects.filter(pk=longform_id).get()
+                    
+                    # no ID => new longform record
+                    else:
+                        logger.info(f"{me}(): no longform_id, creating new object")
+                        longform_instance = LongForm1990.objects.create(**l_data)
+
+                    #-- END check to see if this is a longform create or update--#
+                
+                else:
+
+                    error_message = "In {method}(): Form data was invalid ({form})".format(method = me, form = form)
+
+                #-- END check to see if there was more than one record passed in --#
+
+            # new sheet? do I need to update CurrentEntry? Not sure
+            if ( is_new_longform == True ):
+
+                # # new sheet - update CurrentEntry
+                # current = CurrentEntry.objects.get( jbid = request_IN.user )
+                # current.sheet = sheet_instance
+                # current.save()
+                pass
+
+            #-- END check if new sheet. --#
+
+            # return the sheet instance in context?
+            context_IN[ CONTEXT_SHEET_INSTANCE ] = longform_instance
+
+            # TODO: is it time to set Image to complete? Not yet here - once
+            #     all records are complete. Add "finished" flag to record form.
+
+        else:
+
+            # no inputs?
+            error_message = "In {method}(): No inputs passed in. What is going on?".format( method = me )
+            error_list_OUT.append( error_message )
+
+        #-- END check if inputs. --#
+
+        return error_list_OUT
+
+    #-- END method action_update_longform() --#
+
+
     def action_update_record( self, request_IN, context_IN ):
         '''
         Accepts form inputs. Updates record from those inputs.
@@ -804,16 +953,6 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
                 # define fields based on which year it is
                 record_fields = get_form_fields(image_instance.year, 'long') #TODO: should not be hardcoded
-                field_widgets = {f: choices.FORM_WIDGETS[f] for f in record_fields if f in choices.FORM_WIDGETS}
-
-                # set up formset and CrispyForms layout helper
-                # RecordFormSet = modelformset_factory( Record, fields = record_fields, formset = BaseRecordFormSet, can_delete = True, extra = num_blank_records )
-                # helper = CrispyFormSetHelper(
-                #     year=image_instance.year
-                # )
-                # formset = RecordFormSet( inputs_IN, request_IN.FILES )
-
-                # logger.info(f'{me}: request has {formset.total_form_count()} forms')
 
                 # TODO: what should this condition actually check for?                
                 if form:
@@ -1145,6 +1284,51 @@ class CodeImage( LoginRequiredMixin, FormView ):
     #-- END method prepare_image_context() --#
 
 
+    def prepare_longform_context( self, image_IN, context_IN ):
+
+        me = 'CodeImageView.prepare_longform_context'
+
+        # inits
+        context_OUT = context_IN
+        this_longform = None
+
+        # look up existing instance for this image
+        longform_qs = image_IN.longform1990_set.all()
+
+        # there shouldn't be more than one
+        if longform_qs.count() == 1:
+            this_longform = longform_qs.get()
+        elif longform_qs.count() > 1:
+            logger.error(f"Multiple 1990 long forms associated with image {image_IN}.")
+
+        context_OUT[ CONTEXT_LONGFORM_INSTANCE ] = this_longform
+
+        # define fields based on which year it is
+        # fields = get_form_fields(1990, 'long') #TODO: should not be hardcoded
+        fields = [
+            'serial_no',
+            'person_no',
+            'employer',
+            'industry',
+            'industry_category',
+            'occupation',
+            'occupation_detail',
+        ]
+        field_widgets = {f: choices.FORM_WIDGETS[f] for f in fields if f in choices.FORM_WIDGETS}
+
+        # - render form, populated if there is already a longform
+        #     instance for this image.
+        this_form = modelform_factory(LongForm1990, fields=fields, widgets = field_widgets)
+        helper = LongFormHelper(year=1990)
+
+
+        context_OUT[ CONTEXT_LONGFORM_FORM ] = this_form
+        context_OUT[ CONTEXT_LONGFORM_HELPER ] = helper
+
+        logger.info(f'{me}: context_OUT is {context_OUT}')
+
+        return context_OUT
+
     def prepare_record_context( self, image_IN, context_IN ):
 
         me = 'CodeImageView.prepare_record_context'
@@ -1169,7 +1353,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         field_widgets = {f: choices.FORM_WIDGETS[f] for f in record_fields if f in choices.FORM_WIDGETS}
 
         RecordForm = modelform_factory(Record, fields = record_fields, widgets = field_widgets)
-        helper = CrispyFormHelper(year=parent_sheet.year)
+        helper = RecordFormHelper(year=parent_sheet.year)
 
         if CONTEXT_RECORD_INSTANCE in context_IN.keys():
             record_instance = context_IN[ CONTEXT_RECORD_INSTANCE ]
@@ -1204,9 +1388,8 @@ class CodeImage( LoginRequiredMixin, FormView ):
         me = 'CodeImage.prepare_sheet_context'
         sheet_qs = None
         sheet_count = None
-        my_sheet = None
-        sheet_values = None
-        my_form = None
+        this_sheet = None
+        this_form = None
 
         # add on to context passed in.
         context_OUT = context_IN
@@ -1216,23 +1399,23 @@ class CodeImage( LoginRequiredMixin, FormView ):
         sheet_qs = image_IN.sheet_set.all()
         sheet_count = sheet_qs.count()
         if ( sheet_count == 1 ):
-            my_sheet = sheet_qs.get()
+            this_sheet = sheet_qs.get()
         elif ( sheet_count > 1 ):
             logger.error( "Multiple sheets for image {image}. Not good.".format( image = image_IN ) )
         #-- END check if single sheet. --#
 
-        context_OUT[ CONTEXT_SHEET_INSTANCE ] = my_sheet
+        context_OUT[ CONTEXT_SHEET_INSTANCE ] = this_sheet
 
         # - render sheet form, populated if there is already a sheet
         #     instance for this image.
-        my_form = SheetForm( instance = my_sheet )
-        context_OUT[ CONTEXT_SHEET_FORM ] = my_form
+        this_form = SheetForm( instance = this_sheet )
+        context_OUT[ CONTEXT_SHEET_FORM ] = this_form
 
         # - if sheet instance:
         #     - render record form, prepopulate if record ID is present.
         #     - pull in records, sorted by row ID, and then output list with
         #         edit link next to each.
-        if my_sheet:
+        if this_sheet:
             context_OUT = self.prepare_record_context( image_IN, context_OUT )
 
         # logger.info(f'{me}: context_OUT is {context_OUT}')
@@ -1467,15 +1650,19 @@ class CodeImage( LoginRequiredMixin, FormView ):
             # ==> breaker
             if ( current_image_type == choices.IMAGE_TYPE_BREAKER ):
 
-                logger.info(f'breaker request is {request}')
-
                 # prepare breaker context.
                 context = self.prepare_breaker_context( current_image, context )
+
+            # ==> 1990 long form
+            elif ( current_image_type == choices.IMAGE_TYPE_LONGFORM ):
+                
+                # prepare longform context
+                context = self.prepare_longform_context( current_image, context )
 
             # ==> sheet
             elif ( current_image_type == choices.IMAGE_TYPE_SHEET ):
 
-                # prepare sheet context (which also prepares record context?)
+                # prepare sheet context (which also prepares record context)
                 context = self.prepare_sheet_context( current_image, context )
                 # logger.info(f'CodeImage prepare_sheet_context context is {context}')
 
@@ -1571,18 +1758,40 @@ def report_problem(request):
     flagged_view = None
 
     if request.method == "GET":
-        logger.info(f'report_problem GET request for {current.img.img_path}')
-        logger.info(f"report_problem referred from {request.META['HTTP_REFERER']}")
-        flagged_view = parse_http_referral(request.META['HTTP_REFERER'])
-        return render(
-                request, \
+
+        inputs_IN = get_request_data(request)
+
+        # did we get image ID? 
+        image_id = inputs_IN.get( PARAM_NAME_IMAGE_ID, None )
+
+        if image_id:
+
+            image_instance = Image.objects.get(pk=image_id)
+
+            logger.info(f'report_problem GET request for {image_id}')
+            logger.info(f"report_problem referred from {request.META['HTTP_REFERER']}")
+            flagged_view = parse_http_referral(request.META['HTTP_REFERER'])
+            return render(
+                    request, \
+                    'EntryApp/report-problem.html',
+                    {
+                        'image': image_instance,
+                        'slug': image_instance.img_path,
+                        'form': ProblemForm()
+                    }
+            )
+        else:
+            
+            logger.info(f"report_problem GET request with no image id")
+            logger.info(f"report_problem referred from {request.META['HTTP_REFERER']}")
+
+            return render(
+                request,
                 'EntryApp/report-problem.html',
                 {
-                    'image': current.img,
-                    'slug': current.img.img_path,
                     'form': ProblemForm()
                 }
-        )
+            )
 
     elif request.method == "POST":
 

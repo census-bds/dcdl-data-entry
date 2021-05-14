@@ -11,7 +11,14 @@ from crispy_forms.layout import Submit
 
 import EntryApp.choices as choices
 import EntryApp.layouts as layouts
-from EntryApp.models import Breaker, Image, Record, Sheet, FormField, CurrentEntry
+from EntryApp.models import Breaker
+from EntryApp.models import Image
+from EntryApp.models import Record
+from EntryApp.models import Sheet
+from EntryApp.models import OtherImage
+from EntryApp.models import LongForm1990 
+from EntryApp.models import FormField
+from EntryApp.models import CurrentEntry
 
 
 #================================#
@@ -96,10 +103,37 @@ class SheetForm(forms.ModelForm):
         model = Sheet
         fields = ['num_records']
 
+class LongForm1990Form(forms.ModelForm):
+    """
+    Define form to enter data from 1990 long forms w/employer info
+    """
 
-#================================#
-# RECORD FORMS FOR EACH YEAR
-#================================#
+    class Meta:
+        model = LongForm1990
+        exclude = [
+            'img',
+            'jbid',
+            'timestamp',
+            'create_date',
+            'last_modified',
+        ]
+
+
+class OtherImageForm(forms.ModelForm):
+    """
+    Define form to capture data about 'other' images where no data entered
+    """
+
+    class Meta:
+        model = OtherImage
+        exclude = [
+            'img',
+            'jbid',
+            'timestamp',
+            'create_date',
+            'last_modified',
+        ]
+
 
 class RecordForm(forms.ModelForm):
     """
@@ -172,7 +206,7 @@ class CrispyFormSetHelper(FormHelper):
         self.form_tag = False
 
 
-class CrispyFormHelper(FormHelper):
+class RecordFormHelper(FormHelper):
     '''
     Custom FormHelper for Record form layout
 
@@ -186,5 +220,15 @@ class CrispyFormHelper(FormHelper):
         self.label_class = 'sr-only'
         self.layout = layouts.FORM_DICT[year]
         self.render_required_fields=True
-        # self.add_input(Submit("submit", "Submit"))
         self.form_tag = False
+
+
+class LongFormHelper(RecordFormHelper):
+    '''
+    Custom FormHelper for 1990 special form output
+
+    Subclasses the record form helper
+    '''
+    def __init__(self, year, *args, **kwargs):
+        super().__init__(year, *args, **kwargs)
+        self.layout = layouts.LONG_FORM_1990

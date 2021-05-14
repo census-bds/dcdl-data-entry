@@ -438,6 +438,71 @@ class Sheet(models.Model):
         return f'{self.img}: sheet' # FIX THIS
 
 
+class LongForm1990(models.Model):
+    '''
+    Class defining the 1990 long form page containing industry and employer
+
+    Attributes:
+    - image object (foreign key)
+    - household ID
+    - person #
+    - industry 
+    - employer
+    - jbid
+    - timestamp
+    '''
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields = ['img', 'jbid'],
+                name="unique_1990LF_entry"
+            )
+        ]
+    
+
+    img = models.ForeignKey(Image, on_delete = models.CASCADE)
+    jbid = models.CharField(max_length=20, default="jbid000")
+    
+    # automatic create and update time stamps.
+    create_date = models.DateTimeField( auto_now_add = True )
+    last_modified = models.DateTimeField( auto_now = True )
+    
+    serial_no = models.IntegerField(null=True, verbose_name="Household serial number")
+    person_no = models.PositiveIntegerField(null=True, verbose_name="Person number")
+    employer = models.CharField(
+        null=True,
+        max_length=255,
+        verbose_name="28a. Name of company, business, or other employer"
+    )
+    industry = models.CharField(
+        max_length=255,
+        null=True,
+        verbose_name="28b. What kind of business or industry was this?"
+    )
+    industry_category = models.CharField(
+        choices=choices.INDUSTRY_CHOICES,
+        max_length=255,
+        blank=False,
+        default=choices.INDUSTRY_CHOICES[0],
+        null=True,
+        verbose_name=" 28c. Is this business mainly - Fill ONE circle"
+    )
+    occupation = models.CharField(
+        max_length=255,
+        null=True,
+        verbose_name="29a. What kind of work was this person doing?"
+    )
+    occupation_detail = models.CharField(
+        max_length=255,
+        null=True,
+        verbose_name="29b. What were this person's most important activities or duties?"
+    )
+
+    def __str__(self):
+        return f"LongForm1990 from {self.jbid}: serial_no {self.serial_no} person_no {self.person_no}"
+
+
 class OtherImage(models.Model):
     '''
     Class defining an image that is neither a breaker nor a sheet
@@ -503,9 +568,9 @@ class Record(models.Model):
 
     # fields that appear in some year-forms but not all
     page_no = models.PositiveIntegerField(null=True)
-    line_no = models.PositiveIntegerField(
+    person_no = models.PositiveIntegerField(
             null=True,
-            verbose_name="Line number"
+            verbose_name="Person number"
         )
     serial_no = models.IntegerField(null=True, verbose_name="Serial number")
     do_id = models.IntegerField(null=True, verbose_name="DO ID")
