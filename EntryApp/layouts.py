@@ -200,7 +200,7 @@ LONG_FORM_1990 = Layout(
             css_class='row'
         ),
         Div('employer', css_class='row'),
-        Div('indsustry', css_class='row'),
+        Div('industry', css_class='row'),
         Div('industry_category', css_class='row'),
         Div('occupation', css_class='row'),
         Div('occupation_detail', css_class='row'),

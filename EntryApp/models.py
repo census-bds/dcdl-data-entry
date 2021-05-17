@@ -546,7 +546,7 @@ class Record(models.Model):
         verbose_name='Page number',
         null=True
     )
-    row_num = models.PositiveIntegerField(verbose_name='Row number', null=True)
+    line_no = models.PositiveIntegerField(verbose_name='Line number', null=True)
     col_num = models.PositiveIntegerField(
             verbose_name='Column number',
             null=True

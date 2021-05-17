@@ -49,6 +49,7 @@
             <div id='home-button'>
                 <form action={% url 'EntryApp:index' %}>
                     <input type="submit" value="Return to main page">
+                    <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}"
                 </form>
             </div>
             {% endblock navigation %}

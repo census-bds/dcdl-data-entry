@@ -849,7 +849,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
                 # define fields based on which year it is
                 fields = get_form_fields(1990, 'long') 
-                field_widgets = {f: choices.FORM_WIDGETS[f] for f in record_fields if f in choices.FORM_WIDGETS}
+                field_widgets = {f: choices.FORM_WIDGETS[f] for f in fields if f in choices.FORM_WIDGETS}
 
                 # TODO: what should this condition actually check for?                
                 if form:
@@ -877,6 +877,11 @@ class CodeImage( LoginRequiredMixin, FormView ):
                     else:
                         logger.info(f"{me}(): no longform_id, creating new object")
                         longform_instance = LongForm1990.objects.create(**l_data)
+
+                        # set Image to complete after initial creation
+                        image_instance.is_complete = True
+                        image_instance.save()
+
 
                     #-- END check to see if this is a longform create or update--#
                 
@@ -952,7 +957,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
             if sheet_instance:
 
                 # define fields based on which year it is
-                record_fields = get_form_fields(image_instance.year, 'long') #TODO: should not be hardcoded
+                record_fields = get_form_fields(image_instance.year, 'short') #TODO: should not be hardcoded?
 
                 # TODO: what should this condition actually check for?                
                 if form:
@@ -1304,16 +1309,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         context_OUT[ CONTEXT_LONGFORM_INSTANCE ] = this_longform
 
         # define fields based on which year it is
-        # fields = get_form_fields(1990, 'long') #TODO: should not be hardcoded
-        fields = [
-            'serial_no',
-            'person_no',
-            'employer',
-            'industry',
-            'industry_category',
-            'occupation',
-            'occupation_detail',
-        ]
+        fields = get_form_fields(1990, 'long') 
         field_widgets = {f: choices.FORM_WIDGETS[f] for f in fields if f in choices.FORM_WIDGETS}
 
         # - render form, populated if there is already a longform
@@ -1349,7 +1345,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
 
         # set up form.
-        record_fields = get_form_fields( parent_sheet.year, 'long' ) #TODO: THIS SHOULD NOT BE HARD-CODED
+        record_fields = get_form_fields( parent_sheet.year, 'short' ) #TODO: THIS SHOULD NOT BE HARD-CODED
         field_widgets = {f: choices.FORM_WIDGETS[f] for f in record_fields if f in choices.FORM_WIDGETS}
 
         RecordForm = modelform_factory(Record, fields = record_fields, widgets = field_widgets)
@@ -1486,6 +1482,11 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
                         # update the breaker
                         action_error_list = self.action_update_breaker( request_IN, context_IN )
+
+                    elif ( my_action == ACTION_UPDATE_LONGFORM ):
+
+                        # update the 1990 longform
+                        action_error_list = self.action_update_longform( request_IN, context_IN )
 
                     elif ( my_action == ACTION_UPDATE_SHEET_TYPE ):
 
@@ -1853,7 +1854,7 @@ def test_crispy_formset_view(request, year):
     View for testing django crispy formsets
     '''
 
-    field_q = FormField.objects.filter(year=year).filter(form_type='long')
+    field_q = FormField.objects.filter(year=year).filter(form_type='short')
     fields = [f.field_name for f in list(field_q)]
     logger.info(f'crispy formset fields are {fields}')
     TestCrispyFormset = modelformset_factory(
@@ -1902,7 +1903,7 @@ def test_crispy_formset_view(request, year):
         }
     )
     formset = TestCrispyFormset()
-    helper = CrispyFormSetHelper(year=year, form='long')
+    helper = CrispyFormSetHelper(year=year)
     context = {
         'formset': formset,
         'helper': helper
