@@ -129,6 +129,7 @@ class OtherImageForm(forms.ModelForm):
         exclude = [
             'img',
             'jbid',
+            'year',
             'timestamp',
             'create_date',
             'last_modified',

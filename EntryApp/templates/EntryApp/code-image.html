@@ -73,7 +73,9 @@
                 {% if longform_form %}
                         {% include "EntryApp/includes/code-image-edit-longform.html" %}
                 {% endif %}
-
+                {% if other_image_form %}
+                        {% include "EntryApp/includes/code-image-edit-other-image.html" %}
+                {% endif %}
             </div>
         </div>
     </div>

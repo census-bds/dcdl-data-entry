@@ -55,6 +55,7 @@ from EntryApp.forms import ImageTypeForm
 from EntryApp.forms import ImageYearForm
 from EntryApp.forms import LongForm1990Form
 from EntryApp.forms import LongFormHelper
+from EntryApp.forms import OtherImageForm
 from EntryApp.forms import ProblemForm
 from EntryApp.forms import RecordForm
 from EntryApp.forms import RecordFormHelper
@@ -77,6 +78,8 @@ CONTEXT_LONGFORM_FORM = "longform_form"
 CONTEXT_LONGFORM_HELPER = "helper"
 CONTEXT_PARAM_NAMES = "param_names"
 CONTEXT_PAGE_STATUS_MESSAGE_LIST = "page_status_message_list"
+CONTEXT_OTHER_IMAGE_INSTANCE = "other_image_instance"
+CONTEXT_OTHER_IMAGE_FORM = "other_image_form"
 CONTEXT_RECORD_INSTANCE = "record_instance"
 CONTEXT_RECORD_FORM = "record_form"
 CONTEXT_RECORD_FORMSET_HELPER = "helper"
@@ -90,6 +93,7 @@ PARAM_NAME_BREAKER_ID = "breaker_id"
 PARAM_NAME_IMAGE_ID = "image_id"
 PARAM_NAME_IMAGE_TYPE = "image_type"
 PARAM_NAME_LONGFORM_ID = "longform_id"
+PARAM_NAME_OTHER_IMAGE_ID = "other_image_id"
 PARAM_NAME_RECORD_ID = "record_id"
 PARAM_NAME_SHEET_ID = "sheet_id"
 PARAM_NAME_YEAR = "year"
@@ -99,6 +103,7 @@ PARAM_NAMES[ "PARAM_NAME_BREAKER_ID" ] = PARAM_NAME_BREAKER_ID
 PARAM_NAMES[ "PARAM_NAME_IMAGE_ID" ] = PARAM_NAME_IMAGE_ID
 PARAM_NAMES[ "PARAM_NAME_IMAGE_TYPE" ] = PARAM_NAME_IMAGE_TYPE
 PARAM_NAMES[ "PARAM_NAME_LONGFORM_ID" ] = PARAM_NAME_LONGFORM_ID
+PARAM_NAMES[ "PARAM_NAME_OTHER_IMAGE_ID" ] = PARAM_NAME_OTHER_IMAGE_ID
 PARAM_NAMES[ "PARAM_NAME_RECORD_ID" ] = PARAM_NAME_RECORD_ID
 PARAM_NAMES[ "PARAM_NAME_SHEET_ID" ] = PARAM_NAME_SHEET_ID
 PARAM_NAMES[ "PARAM_NAME_YEAR" ] = PARAM_NAME_YEAR
@@ -108,6 +113,7 @@ ACTION_COMPLETE_IMAGE = "complete_image"
 ACTION_UPDATE_BREAKER_TYPE = "update_breaker_type"
 ACTION_UPDATE_IMAGE = "update_image"
 ACTION_UPDATE_LONGFORM = "update_longform"
+ACTION_UPDATE_OTHER_IMAGE = "update_other_image"
 ACTION_UPDATE_SHEET_TYPE = "update_sheet_type"
 ACTION_UPDATE_RECORD = "update_record"
 VALID_ACTIONS = []
@@ -115,6 +121,7 @@ VALID_ACTIONS.append( ACTION_COMPLETE_IMAGE )
 VALID_ACTIONS.append( ACTION_UPDATE_BREAKER_TYPE )
 VALID_ACTIONS.append( ACTION_UPDATE_IMAGE )
 VALID_ACTIONS.append( ACTION_UPDATE_LONGFORM )
+VALID_ACTIONS.append( ACTION_UPDATE_OTHER_IMAGE )
 VALID_ACTIONS.append( ACTION_UPDATE_SHEET_TYPE )
 VALID_ACTIONS.append( ACTION_UPDATE_RECORD )
 
@@ -921,6 +928,83 @@ class CodeImage( LoginRequiredMixin, FormView ):
     #-- END method action_update_longform() --#
 
 
+    def action_update_other_image( self, request_IN, context_IN ):
+
+        '''
+        Accepts form inputs. Looks for inputs from OtherImage form. If found, 
+        tries to update values.
+        '''
+
+        # return reference
+        error_list_OUT = None
+
+        # declare variables
+        me = "CodeImage.action_update_other_image"
+        error_message = None
+        error_list = None
+        inputs_IN = None
+        image_id = None
+        image_instance = None
+
+        # init
+        error_list_OUT = list()
+
+        # got request?
+        if ( request_IN is not None ):
+
+            # get inputs.
+            inputs_IN = get_request_data( request_IN )
+
+            # get image for ID
+            image_id = inputs_IN.get( PARAM_NAME_IMAGE_ID, None )
+            image_instance = Image.objects.get( pk = image_id )
+
+            # do we have an image ID?
+            other_image_id = inputs_IN.get( PARAM_NAME_OTHER_IMAGE_ID, None )
+    
+            # update if so
+            if other_image_id:
+    
+                logger.info(f"{me}(): got OtherImage id, updating description")
+
+                other_image_instance = OtherImage.objects.get(pk = other_image_id)
+
+                other_image_instance['description'] = inputs_IN['description']
+                other_image_instance.save()
+    
+            # otherwise create one
+            else: 
+                                
+                logger.info(f"{me}(): no OtherImage id, creating new instance")
+
+                ot_data = {}
+                ot_data['img'] = image_instance
+                ot_data['jbid'] = request_IN.user
+                ot_data['year'] = image_instance.year
+                ot_data['description'] = inputs_IN['description']
+                
+                other_image_instance = OtherImage.objects.create(**ot_data) 
+
+                # set Image to complete after initial creation
+                image_instance.is_complete = True
+                image_instance.save()
+
+            #-- END check to see if other image ID present --#
+
+        else:
+
+            # no inputs?
+            error_message = "In {method}(): No request passed in. What is going on?".format( method = me )
+            error_list_OUT.append( error_message )
+
+        #-- END check if inputs. --#
+
+        return error_list_OUT
+
+    #-- END method action_update_other_image() --#
+
+
+
     def action_update_record( self, request_IN, context_IN ):
         '''
         Accepts form inputs. Updates record from those inputs.
@@ -1325,6 +1409,37 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
         return context_OUT
 
+
+    def prepare_other_image_context( self, image_IN, context_IN ):
+        
+        me = 'CodeImageView.prepare_other_image_context'
+
+        # inits
+        context_OUT = context_IN
+        this_other_image = None
+
+        # look up existing instance for this image
+        other_image_qs = image_IN.otherimage_set.all()
+
+        # there shouldn't be more than one
+        if other_image_qs.count() == 1:
+            this_other_image = other_image_qs.get()
+        elif other_image_qs.count() > 1:
+            logger.error(f"Multiple OtherImages associated with image {image_IN}.")
+
+        context_OUT[ CONTEXT_OTHER_IMAGE_INSTANCE ] = this_other_image
+
+        # - render form, populated if there is already an OtherImage
+        #     instance for this image.
+        this_form = OtherImageForm( this_other_image )
+
+        context_OUT[ CONTEXT_OTHER_IMAGE_FORM ] = this_form
+
+        logger.info(f'{me}: context_OUT is {context_OUT}')
+
+        return context_OUT
+
+
     def prepare_record_context( self, image_IN, context_IN ):
 
         me = 'CodeImageView.prepare_record_context'
@@ -1488,15 +1603,20 @@ class CodeImage( LoginRequiredMixin, FormView ):
                         # update the 1990 longform
                         action_error_list = self.action_update_longform( request_IN, context_IN )
 
-                    elif ( my_action == ACTION_UPDATE_SHEET_TYPE ):
+                    elif ( my_action == ACTION_UPDATE_OTHER_IMAGE ):
 
-                        # update the sheet
-                        action_error_list = self.action_update_sheet( request_IN, context_IN )
+                        # update the OtherImage
+                        action_error_list = self.action_update_other_image( request_IN, context_IN )
 
                     elif ( my_action == ACTION_UPDATE_RECORD ):
 
                         # update the record
                         action_error_list = self.action_update_record( request_IN, context_IN )
+
+                    elif ( my_action == ACTION_UPDATE_SHEET_TYPE ):
+
+                        # update the sheet
+                        action_error_list = self.action_update_sheet( request_IN, context_IN )
 
                     else:
 
@@ -1626,8 +1746,8 @@ class CodeImage( LoginRequiredMixin, FormView ):
                     error_list.extend( returned_error_list )
                 #-- END check if process_action errors. --#
 
-                # if the action is complete_image, we return to the index
-                if my_action == ACTION_COMPLETE_IMAGE:
+                # if the action is complete_image OR update_other_image, we return to the index
+                if my_action in [ACTION_COMPLETE_IMAGE, ACTION_UPDATE_OTHER_IMAGE, ]:
                     
                     return redirect(reverse("EntryApp:index"))
                 
@@ -1670,11 +1790,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
             elif ( current_image_type == choices.IMAGE_TYPE_OTHER ):
 
                 # unknown image type. Ummm...
-                error_message = "Image {me} is of type {image_type}. No further editing possible.".format(
-                    image_type = current_image_type,
-                    me = self
-                )
-                error_list.append( error_message )
+                context = self.prepare_other_image_context( current_image, context )
 
             elif ( ( current_image_type is None ) or ( current_image_type == "" ) ):
 

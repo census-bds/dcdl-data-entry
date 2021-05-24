@@ -522,8 +522,6 @@ class OtherImage(models.Model):
     jbid = models.CharField(max_length=20, default='jbid000')
     year = models.PositiveIntegerField(choices=choices.YEAR_CHOICES)
     description = models.TextField(max_length=500)
-    timestamp =  models.DateTimeField(null=True)
-    problem = models.BooleanField(default=False)
 
     # automatic create and update time stamps.
     create_date = models.DateTimeField( auto_now_add = True )
