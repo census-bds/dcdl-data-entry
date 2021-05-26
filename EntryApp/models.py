@@ -358,16 +358,11 @@ class Breaker(models.Model):
     )
     # ^ remove 1990 as option because that census did not include breakers
     state = models.CharField(
-<<<<<<< EntryApp/models.py
-        max_length=255,
-        null=True
-=======
         max_length=25,
         null=True,
         blank=False,
         choices=choices.STATE_CHOICES,
         default=choices.STATE_CHOICES[0]
->>>>>>> EntryApp/models.py
     )
     county = models.CharField(
         max_length=255,
@@ -389,19 +384,11 @@ class Breaker(models.Model):
         max_length=255,
         null=True
     )
-<<<<<<< EntryApp/models.py
     smsa = models.CharField(max_length=255, null=True)
 
     # automatic create and update time stamps.
     create_date = models.DateTimeField( auto_now_add = True )
     last_modified = models.DateTimeField( auto_now = True )
-=======
-    smsa = models.CharField(
-        max_length=30,
-        null=True
-    )
-    
->>>>>>> EntryApp/models.py
 
     def __str__(self):
         return f'Breaker {self.img} from {self.jbid}'
@@ -565,11 +552,7 @@ class Record(models.Model):
             verbose_name='Column number',
             null=True
         )
-<<<<<<< EntryApp/models.py
-    jbid = models.CharField(max_length=20, default='jbid000')
-=======
     jbid = models.CharField(max_length=255, default='jbid000') 
->>>>>>> EntryApp/models.py
 
     # fields common among all year-forms
     first_name = models.CharField(max_length=255, null=True)
@@ -592,18 +575,12 @@ class Record(models.Model):
     page_no = models.PositiveIntegerField(null=True)
     person_no = models.PositiveIntegerField(
             null=True,
-<<<<<<< EntryApp/models.py
-            verbose_name="Person number"
-        )
-    serial_no = models.IntegerField(null=True, verbose_name="Serial number")
-=======
             verbose_name="Line number"
         ) 
     serial_no = models.PositiveIntegerField(
                 null=True,
                 verbose_name="Serial number"
             )
->>>>>>> EntryApp/models.py
     do_id = models.IntegerField(null=True, verbose_name="DO ID")
     block = models.CharField(
                 max_length=255,
@@ -1006,16 +983,8 @@ class FormField(models.Model):
     """
 
     year = models.FloatField()
-<<<<<<< EntryApp/models.py
     form_type = models.CharField(max_length=200, choices=FORM_CHOICES)
     field_name = models.CharField(max_length=50)
-=======
-    form_type = models.CharField(
-            max_length=255,
-            choices=FORM_CHOICES
-        )     
-    field_name = models.CharField(max_length=255)
->>>>>>> EntryApp/models.py
 
     def __str__(self):
         return f'FormField {self.year} {self.form_type}: {self.field_name}'
