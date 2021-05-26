@@ -20,31 +20,44 @@
 {% block header %}
         <h2>Step 3: Enter individual records from sheet</h2>
 {% endblock header %}
-{% block content %}    
+{% block content %}
 
 {% load crispy_forms_tags %}
-
-
 <div class='flex-container'>
+<<<<<<< EntryApp/templates/EntryApp/enter-records.html
     <div id='crispyformset' class='flex-item'>
     {% crispy formset helper %}
     </div>
     <br>
     <div id="openseadragon1" style="width: 20%; height: 800px;" class='flex-item'>
+=======
+<div class='row' >
+    <div class='col-lg-3'>
+        <div id="openseadragon1" style="width: 95%; height: 800px;"></div>
+>>>>>>> EntryApp/templates/EntryApp/enter-records.html
         <script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
         <script type="text/javascript">
                 var Viewer = OpenSeadragon({
                     id: "openseadragon1",
-                    prefixUrl: "/static/deepzoom/js/vendor/openseadragon/images/",
+                    prefixUrl: "/static/images/",
                     tileSources: {
                         type: 'image',
-                        url: "/images/{{ slug }}"
+                        url: "/images/fake_IMG_0.jpg"
                     },
                     buildPyramid: false
                 });
-            </script>
+            </script>    
+    </div>
+    
+    <div class='col-lg-8'>
+        <div id='the_crispy_formset' class='container-fluid col-8'>
+        </div>
+        {% crispy formset helper %}
     </div>
 </div>
+</div>
+    
+    
     {% endblock content %}
 {% block logout %}
 {% endblock logout %}

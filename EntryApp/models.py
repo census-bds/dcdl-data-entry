@@ -358,8 +358,16 @@ class Breaker(models.Model):
     )
     # ^ remove 1990 as option because that census did not include breakers
     state = models.CharField(
+<<<<<<< EntryApp/models.py
         max_length=255,
         null=True
+=======
+        max_length=25,
+        null=True,
+        blank=False,
+        choices=choices.STATE_CHOICES,
+        default=choices.STATE_CHOICES[0]
+>>>>>>> EntryApp/models.py
     )
     county = models.CharField(
         max_length=255,
@@ -381,11 +389,19 @@ class Breaker(models.Model):
         max_length=255,
         null=True
     )
+<<<<<<< EntryApp/models.py
     smsa = models.CharField(max_length=255, null=True)
 
     # automatic create and update time stamps.
     create_date = models.DateTimeField( auto_now_add = True )
     last_modified = models.DateTimeField( auto_now = True )
+=======
+    smsa = models.CharField(
+        max_length=30,
+        null=True
+    )
+    
+>>>>>>> EntryApp/models.py
 
     def __str__(self):
         return f'Breaker {self.img} from {self.jbid}'
@@ -549,16 +565,24 @@ class Record(models.Model):
             verbose_name='Column number',
             null=True
         )
+<<<<<<< EntryApp/models.py
     jbid = models.CharField(max_length=20, default='jbid000')
+=======
+    jbid = models.CharField(max_length=255, default='jbid000') 
+>>>>>>> EntryApp/models.py
 
     # fields common among all year-forms
-    first_name = models.CharField(max_length=50, null=True)
-    middle_init = models.CharField(max_length=50, null=True, blank=True)
-    last_name = models.CharField(max_length=50, null=True)
+    first_name = models.CharField(max_length=255, null=True)
+    middle_init = models.CharField(
+                max_length=255,
+                null=True,
+                blank=True
+            )
+    last_name = models.CharField(max_length=255, null=True)
     age = models.PositiveIntegerField(null=True)
     sex = models.CharField(
             choices=choices.SEX_CHOICES,
-            max_length=50,
+            max_length=255,
             blank=False,
             default=choices.SEX_CHOICES[0],
             null=True
@@ -568,26 +592,52 @@ class Record(models.Model):
     page_no = models.PositiveIntegerField(null=True)
     person_no = models.PositiveIntegerField(
             null=True,
+<<<<<<< EntryApp/models.py
             verbose_name="Person number"
         )
     serial_no = models.IntegerField(null=True, verbose_name="Serial number")
+=======
+            verbose_name="Line number"
+        ) 
+    serial_no = models.PositiveIntegerField(
+                null=True,
+                verbose_name="Serial number"
+            )
+>>>>>>> EntryApp/models.py
     do_id = models.IntegerField(null=True, verbose_name="DO ID")
-    block = models.CharField(max_length=50, null=True)
+    block = models.CharField(
+                max_length=255,
+                null=True
+            )
     sample_key_gq = models.CharField(
-            max_length=50,
+            max_length=255,
             blank=False,
             default=choices.SAMPLE_GQ_CHOICES[0],
             null=True,
             choices=choices.SAMPLE_GQ_CHOICES,
             verbose_name="Sample key"
         )
-    street_name = models.CharField(max_length=50, null=True)
-    house_no = models.IntegerField(null=True, verbose_name="House number")
-    apt_no = models.IntegerField(null=True, verbose_name="Apartment number")
+    street_name = models.CharField(
+            max_length=255,
+            null=True,
+            blank=True
+        )
+    house_no = models.CharField(
+            max_length=255,
+            null=True,
+            verbose_name="House number",
+            blank=True
+        )
+    apt_no = models.CharField(
+            max_length=255,
+            null=True,
+            verbose_name="Apartment number",
+            blank=True
+        )
 
     # relp options vary by year
     relp_1960 = models.CharField(
-            max_length=50,
+            max_length=255,
             blank=False,
             default=choices.RELP_CHOICES_1960[0],
             null=True,
@@ -595,7 +645,7 @@ class Record(models.Model):
             verbose_name="Relationship to household head"
         )
     relp_1970 = models.CharField(
-            max_length=50,
+            max_length=255,
             blank=False,
                     default=choices.RELP_CHOICES_1970[0],
             null=True,
@@ -603,7 +653,7 @@ class Record(models.Model):
             verbose_name="Relationship to household head"
         )
     relp_1980 = models.CharField(
-            max_length=50,
+            max_length=255,
             blank=False,
             default=choices.RELP_CHOICES_1980[0],
             null=True,
@@ -611,7 +661,7 @@ class Record(models.Model):
             verbose_name="Relationship to household head"
         )
     relp_1990 = models.CharField(
-            max_length=50,
+            max_length=255,
             blank=False,
             default=choices.RELP_CHOICES_1990[0],
             null=True,
@@ -619,7 +669,7 @@ class Record(models.Model):
             verbose_name="Relationship to household head"
         )
     race_1960 = models.CharField(
-            max_length=50,
+            max_length=255,
             blank=False,
             default=choices.RACE_CHOICES_1960[0],
             null=True,
@@ -627,7 +677,7 @@ class Record(models.Model):
             verbose_name="Race"
         )
     race_1970 = models.CharField(
-            max_length=50,
+            max_length=255,
             blank=False,
             default=choices.RACE_CHOICES_1970[0],
             null=True,
@@ -635,7 +685,7 @@ class Record(models.Model):
             verbose_name="Race"
         )
     race_1980 = models.CharField(
-            max_length=50,
+            max_length=255,
             blank=False,
             default=choices.RACE_CHOICES_1980[0],
             null=True,
@@ -643,7 +693,7 @@ class Record(models.Model):
             verbose_name="Race"
         )
     race_1990 = models.CharField(
-            max_length=50,
+            max_length=255,
             blank=False,
             default=choices.RACE_CHOICES_1990[0],
             null=True,
@@ -685,7 +735,7 @@ class Record(models.Model):
         )
 
     marital_status = models.CharField(
-            max_length=50,
+            max_length=255,
             blank=False,
             default=choices.MARITAL_STATUS_CHOICES[0],
             null=False,
@@ -693,12 +743,12 @@ class Record(models.Model):
         )
 
     ind = models.CharField(
-        max_length=50,
+        max_length=255,
         null=True,
         verbose_name='Industry'
         )
     occp = models.CharField(
-        max_length=50,
+        max_length=255,
         null=True,
         verbose_name='Occupation'
         )
@@ -706,7 +756,6 @@ class Record(models.Model):
     total_persons = models.PositiveIntegerField(null=True)
 
     # bubble fields
-
 
     age_hundreds = models.CharField(
         null=True,
@@ -937,7 +986,7 @@ class CurrentEntry(models.Model):
     #     create an ImageReel model if it adds value.).
 
     img = models.ForeignKey(Image, on_delete=models.CASCADE)
-    jbid = models.CharField(max_length=20, default='jbid000')
+    jbid = models.CharField(max_length=255, default='jbid000')
     breaker = models.ForeignKey(Breaker, on_delete=models.SET_NULL, null=True)
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, null=True)
 
@@ -957,8 +1006,16 @@ class FormField(models.Model):
     """
 
     year = models.FloatField()
+<<<<<<< EntryApp/models.py
     form_type = models.CharField(max_length=200, choices=FORM_CHOICES)
     field_name = models.CharField(max_length=50)
+=======
+    form_type = models.CharField(
+            max_length=255,
+            choices=FORM_CHOICES
+        )     
+    field_name = models.CharField(max_length=255)
+>>>>>>> EntryApp/models.py
 
     def __str__(self):
         return f'FormField {self.year} {self.form_type}: {self.field_name}'
