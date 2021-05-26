@@ -11,22 +11,27 @@
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         {% load static %}
+        <link rel="stylesheet" href="{% static "EntryApp/EntryApp.css" %}" />
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link rel="stylesheet" href="{% static "EntryApp/custom.css" %}" />
         <style>
             .numberinput {width:100%;}
             .textinput {width:100%;}
-            /* #div_id_form-0-race_1980 {
-                display:block;
-            } */
         </style>
+        {% block end_of_head_tag %}
+        {% endblock end_of_head_tag %}
     </head>
-    <div id="header">
-        {% block header %}
-        {% endblock header %}
-    </div>
     <body>
+        <div id="header">
+
+{% include "EntryApp/includes/render_page_status_message_list.html" %}
+
+            {% block header %}
+            {% endblock header %}
+        </div>
         <div id="content">
-            {% block content %}{% endblock content %}
+            {% block content %}
+            {% endblock content %}
         </div>
         <div id="problem">
             {% block problem %}
@@ -44,6 +49,7 @@
             <div id='home-button'>
                 <form action={% url 'EntryApp:index' %}>
                     <input type="submit" value="Return to main page">
+                    <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}"
                 </form>
             </div>
             {% endblock navigation %}

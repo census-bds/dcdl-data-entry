@@ -13,6 +13,7 @@
         </form>
     </div>
     <br>
+    {% if slug %}
     <div id="openseadragon1" style="width: 800px; height: 600px;"></div>
     <script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
    <script type="text/javascript">
@@ -26,6 +27,7 @@
             buildPyramid: false
         });
     </script>
+    {% endif %}
 {% endblock content %}
 {% block problem %}
 {% endblock problem %}

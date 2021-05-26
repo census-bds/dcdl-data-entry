@@ -6,7 +6,7 @@ DEFINE LAYOUTS FOR DCDL DATA ENTRY
 from crispy_forms.layout import Submit, Layout
 from crispy_forms.bootstrap import Div, InlineRadios
 
-LONG_1960 = Layout(
+FORM_1960 = Layout(
     Div(
         Div(
             Div('page_no', css_class='col-lg-1'),
@@ -35,7 +35,7 @@ LONG_1960 = Layout(
 )
 
 
-LONG_1970 = Layout(
+FORM_1970 = Layout(
     Div(    
     Div(
         Div('last_name',
@@ -192,22 +192,27 @@ FORM_1990 = Layout(
     )
 )
 
+LONG_FORM_1990 = Layout(
+    Div(
+        Div(
+            Div('serial_no', css_class='col-lg-1 col-md-1 col-sm-1'),
+            Div('person_no', css_class='col-lg-1 col-md-1 col-sm-1'),
+            css_class='row'
+        ),
+        Div('employer', css_class='row'),
+        Div('industry', css_class='row'),
+        Div('industry_category', css_class='row'),
+        Div('occupation', css_class='row'),
+        Div('occupation_detail', css_class='row'),
+        css_class = 'table-bordered'
+    )
+)
+
 
 FORM_DICT = {
-    1960: {
-        'short': LONG_1960,
-        'long': LONG_1960,
-    },
-    1970: {
-        'short': LONG_1970,
-        'long': LONG_1970,
-    },
-    1980: {
-        'short': FORM_1980,
-        'long': FORM_1980,
-    },
-    1990: {
-        'short': FORM_1990,
-        'long': FORM_1990,
+    1960: FORM_1960,
+    1970: FORM_1970,
+    1980: FORM_1980,
+    1990: FORM_1990
     }
-}
+

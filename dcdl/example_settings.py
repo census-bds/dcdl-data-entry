@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '' 
+SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -29,21 +29,35 @@ DEBUG = True
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        }
+    },
     'handlers': {
         'file': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': '/data/data/user/django_user/test/logs/debug.log'
+            'filename': '/data/data/user/django_user/dev/logs/info.log',
+            'formatter': 'verbose'
+        },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
         },
     },
-    # 'root': {
-    #     'handlers': ['file'],
-    #     'level': 'INFO',
-    # },
+    
     'loggers': {
+        'root': {
+            'handlers': ['console',],
+            'level': 'INFO',
+            'formatter': 'verbose'
+        },
         'django': {
-            'handlers': ['file'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
+            'handlers': ['console', 'file',],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': True,
         },
     }
@@ -104,7 +118,7 @@ WSGI_APPLICATION = 'dcdl.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dcdl_test', 
+        'NAME': 'dcdl_dev', 
         'USER': 'django_user',                      # Not used with sqlite3.
         'PASSWORD':'', # ADD PASSWORD HERE Not used with sqlite3.
         'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -152,12 +166,14 @@ LOGIN_REDIRECT_URL = '/EntryApp/'
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/deepzoom/js/vendor/openseadragon/images/')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/') # where it puts the static files
+
+# where it looks for static files: everything inside these goes into STATIC_ROOT
+STATICFILES_DIRS = (
+    # os.path.join(BASE_DIR, 'boot'), 
+    '/data/data/user/django_user/dev/static/',  
+)
 
 MEDIA_URL = '/images/' # this is the thing to change
 MEDIA_ROOT = '/data/data/git/images'
 
-STATICFILES_DIRS = (
-    # os.path.join(BASE_DIR, 'boot'), 
-    '/data/data/git/openseadragon/images/',
-)

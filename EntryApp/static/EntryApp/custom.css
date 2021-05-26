@@ -1,0 +1,14 @@
+/* set the column height to the viewport */
+.row-height {
+    height:100vh;
+}
+
+.left-col {
+    height: 100%;
+    overflow-y: scroll;
+}
+
+.right-col {
+    height:100%;
+    overflow: scroll;
+}
