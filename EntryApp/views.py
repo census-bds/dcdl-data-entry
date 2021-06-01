@@ -402,12 +402,14 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
         # completed work
         completed_image_qs = user_image_qs.filter( is_complete = True )
+        completed_image_qs = completed_image_qs.exclude( Q(year__exact = 1990) & Q(image_type__contains = 'breaker')) # exclude 1900 dummy breaker
         completed_image_qs = completed_image_qs.order_by( '-last_modified' )
         completed_count = completed_image_qs.count()
         context[ 'num_completed' ] = completed_count
 
         # recent work
         recent_image_qs = user_image_qs.filter( Q( year__isnull = False ) | Q( image_type__isnull = False ) )
+        recent_image_qs = recent_image_qs.exclude( Q(year__exact = 1990) & Q(image_type__contains = 'breaker')) # exclude 1900 dummy breaker
         recent_image_qs = recent_image_qs.order_by( '-last_modified' )
         recent_image_count = recent_image_qs.count()
         context[ 'num_in_progress' ] = recent_image_count

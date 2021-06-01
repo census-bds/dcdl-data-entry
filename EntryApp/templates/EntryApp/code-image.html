@@ -32,7 +32,7 @@
                 <p class="image_info">
                     <h2>Basic image info</h2>
                 {% if image_form %}
-                            <form method="POST">
+                            <form id="image-info" method="POST">
                                 {% csrf_token %}
                                 {{ image_form.as_p }}
                                 <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
