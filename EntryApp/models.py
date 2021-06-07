@@ -575,8 +575,8 @@ class Record(models.Model):
     page_no = models.PositiveIntegerField(null=True)
     person_no = models.PositiveIntegerField(
             null=True,
-            verbose_name="Line number"
-        ) 
+            verbose_name="Person number"
+        )
     serial_no = models.PositiveIntegerField(
                 null=True,
                 verbose_name="Serial number"
@@ -983,8 +983,11 @@ class FormField(models.Model):
     """
 
     year = models.FloatField()
-    form_type = models.CharField(max_length=200, choices=FORM_CHOICES)
-    field_name = models.CharField(max_length=50)
+    form_type = models.CharField(
+            max_length=255,
+            choices=FORM_CHOICES
+        )     
+    field_name = models.CharField(max_length=255)
 
     def __str__(self):
         return f'FormField {self.year} {self.form_type}: {self.field_name}'
