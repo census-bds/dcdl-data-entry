@@ -402,12 +402,14 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
         # completed work
         completed_image_qs = user_image_qs.filter( is_complete = True )
+        completed_image_qs = completed_image_qs.exclude( Q(year__exact = 1990) & Q(image_type__contains = 'breaker')) # exclude 1900 dummy breaker
         completed_image_qs = completed_image_qs.order_by( '-last_modified' )
         completed_count = completed_image_qs.count()
         context[ 'num_completed' ] = completed_count
 
         # recent work
         recent_image_qs = user_image_qs.filter( Q( year__isnull = False ) | Q( image_type__isnull = False ) )
+        recent_image_qs = recent_image_qs.exclude( Q(year__exact = 1990) & Q(image_type__contains = 'breaker')) # exclude 1900 dummy breaker
         recent_image_qs = recent_image_qs.order_by( '-last_modified' )
         recent_image_count = recent_image_qs.count()
         context[ 'num_in_progress' ] = recent_image_count
@@ -1421,17 +1423,21 @@ class CodeImage( LoginRequiredMixin, FormView ):
         # look up existing instance for this image
         other_image_qs = image_IN.otherimage_set.all()
 
+        logger.info(f"{me}(): other_image_qs is {other_image_qs}")
+
         # there shouldn't be more than one
         if other_image_qs.count() == 1:
             this_other_image = other_image_qs.get()
         elif other_image_qs.count() > 1:
             logger.error(f"Multiple OtherImages associated with image {image_IN}.")
 
+        logger.info(f"{me}(): this_other_image is {this_other_image}")
+
         context_OUT[ CONTEXT_OTHER_IMAGE_INSTANCE ] = this_other_image
 
         # - render form, populated if there is already an OtherImage
         #     instance for this image.
-        this_form = OtherImageForm( this_other_image )
+        this_form = OtherImageForm( instance = this_other_image )
 
         context_OUT[ CONTEXT_OTHER_IMAGE_FORM ] = this_form
 
