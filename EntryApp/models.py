@@ -949,7 +949,7 @@ class Record(models.Model):
     last_modified = models.DateTimeField( auto_now = True )
 
     def __str__(self):
-        return f'Record {self.row_num} {self.jbid} on {self.sheet}: {self.last_name, self.first_name}'
+        return f'Record {self.line_no} {self.jbid} on {self.sheet}: {self.last_name, self.first_name}'
 
 #=====================================================#
 # MODELS FOR METADATA AND BACKEND
