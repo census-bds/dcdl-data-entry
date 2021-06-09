@@ -199,13 +199,15 @@ class Image(models.Model):
         default='jbid000'
     )
 
-    # these values will be populated as entry proceeds
+    # this should get populated on load
     year = models.IntegerField( blank = True, null = True )
+
+    # these values will be populated as entry proceeds
     image_type = models.CharField(
-        max_length=8,
-        blank = True,
+        max_length=255,
         null=True,
-        choices = choices.IMAGE_TYPE_CHOICES
+        choices = choices.IMAGE_TYPE_CHOICES,
+        default = choices.IMAGE_TYPE_CHOICES[0]
     )
 
     # metadata

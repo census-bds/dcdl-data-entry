@@ -61,24 +61,18 @@ class ImageTypeForm(forms.Form):
 
 #-- END form ImageTypeForm --#
 
-class ImageForm(forms.Form):
+
+class ImageForm(forms.ModelForm):
     """
-    Form where user records the year and form type to which a sheet belongs
+    Model form version of the Image form
     """
 
-    year = forms.MultipleChoiceField(
-                widget=forms.RadioSelect,
-                choices=choices.YEAR_CHOICES, label='Year'
-            )
-    image_type = forms.MultipleChoiceField(
-        widget=forms.RadioSelect,
-        choices=choices.IMAGE_TYPE_CHOICES,
-        label='Image type'
-        )
-
-    # TODO?
-    def form_valid(self, form):
-        return True
+    class Meta:
+        model = Image
+        fields = ['image_type']
+        widgets = {
+            'image_type': forms.RadioSelect
+        }
 
 
 class BreakerForm(forms.ModelForm):
@@ -160,14 +154,8 @@ class ProblemForm(forms.Form):
     Define form where users can record a problem with a data entry task
     '''
 
-    problem = forms.BooleanField(
-        label="Check here to indicate bad data",
-        required=False
-    )
-    description = forms.CharField(
-        widget=forms.Textarea,
-        required=False
-    )
+    problem = forms.BooleanField(label="Check here to indicate bad data")
+    description = forms.CharField(widget=forms.Textarea, required=False)
 
 
 #================================#
