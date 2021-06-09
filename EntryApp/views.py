@@ -1423,17 +1423,21 @@ class CodeImage( LoginRequiredMixin, FormView ):
         # look up existing instance for this image
         other_image_qs = image_IN.otherimage_set.all()
 
+        logger.info(f"{me}(): other_image_qs is {other_image_qs}")
+
         # there shouldn't be more than one
         if other_image_qs.count() == 1:
             this_other_image = other_image_qs.get()
         elif other_image_qs.count() > 1:
             logger.error(f"Multiple OtherImages associated with image {image_IN}.")
 
+        logger.info(f"{me}(): this_other_image is {this_other_image}")
+
         context_OUT[ CONTEXT_OTHER_IMAGE_INSTANCE ] = this_other_image
 
         # - render form, populated if there is already an OtherImage
         #     instance for this image.
-        this_form = OtherImageForm( this_other_image )
+        this_form = OtherImageForm( instance = this_other_image )
 
         context_OUT[ CONTEXT_OTHER_IMAGE_FORM ] = this_form
 

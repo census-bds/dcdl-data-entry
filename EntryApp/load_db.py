@@ -19,20 +19,24 @@ logger = logging.getLogger('EntryApp.load_db')
 
 if socket.gethostname() == 'erd-web008-dev.compute.csp1.census.gov':
     FORM_FIELDS_CSV = os.path.join(Path(__file__).parent.parent.absolute(), 'form_fields.csv')
-    IMAGE_DIR = '/data/data/git/images/'
+    IMAGE_DIR = '/data/data/git/dev_images/'
 else:
     FORM_FIELDS_CSV = "Z:/1950-1980 censuses/cecile_dev/FormFields.csv"
     IMAGE_DIR = "Z:/1950-1980 censuses/cecile_dev/dcdl/images/"
 
 
-def load_images(path, users=[], ext = "*.jpg", reel_label_IN = None, reel_index_IN = None ):
+def load_images(path, year, users=[], ext = "*.jpg", reel_label_IN = None, reel_index_IN = None ):
     '''
     Loads images into the DB, 1 row per entry-user
 
-    Takes:
+    Required arguments:
     - string filepath
+    - integer year (the decennial year to which images belong)
+    Optional arguments:
     - list of username strings (default all in data_entry group)
     - file extension (default .jpg)
+    - reel label (text string)
+    - reel index (e.g. reel #2)
     Returns: none
     '''
 
@@ -87,6 +91,7 @@ def load_images(path, users=[], ext = "*.jpg", reel_label_IN = None, reel_index_
             image_file_instance.img_reel_label = file_reel_label
             image_file_instance.img_reel_index = file_reel_index
             image_file_instance.img_position = file_counter
+            image_file_instance.year = year
             image_file_instance.save()
             
 
@@ -111,7 +116,7 @@ def load_images(path, users=[], ext = "*.jpg", reel_label_IN = None, reel_index_
             img = Image( image_file=image_file_instance, \
                     jbid=u, \
                     is_complete=False, \
-                    year=None,
+                    year=year,
                     image_type=None, \
                     problem=False
             )
@@ -283,7 +288,7 @@ def refresh_db():
     '''
     delete_model_data()
     load_form_fields(FORM_FIELDS_CSV)
-    load_images(IMAGE_DIR, ['jbid123', 'jbid456'])
+    load_images(IMAGE_DIR, 1960, ['jbid123', 'jbid456'])
     create_1990_dummy_breakers(['jbid123', 'jbid456'])
 
 

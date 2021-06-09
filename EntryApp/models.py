@@ -199,13 +199,15 @@ class Image(models.Model):
         default='jbid000'
     )
 
-    # these values will be populated as entry proceeds
+    # this should get populated on load
     year = models.IntegerField( blank = True, null = True )
+
+    # these values will be populated as entry proceeds
     image_type = models.CharField(
-        max_length=8,
-        blank = True,
+        max_length=255,
         null=True,
-        choices = choices.IMAGE_TYPE_CHOICES
+        choices = choices.IMAGE_TYPE_CHOICES,
+        default = choices.IMAGE_TYPE_CHOICES[0]
     )
 
     # metadata
@@ -575,8 +577,8 @@ class Record(models.Model):
     page_no = models.PositiveIntegerField(null=True)
     person_no = models.PositiveIntegerField(
             null=True,
-            verbose_name="Line number"
-        ) 
+            verbose_name="Person number"
+        )
     serial_no = models.PositiveIntegerField(
                 null=True,
                 verbose_name="Serial number"
@@ -983,8 +985,11 @@ class FormField(models.Model):
     """
 
     year = models.FloatField()
-    form_type = models.CharField(max_length=200, choices=FORM_CHOICES)
-    field_name = models.CharField(max_length=50)
+    form_type = models.CharField(
+            max_length=255,
+            choices=FORM_CHOICES
+        )     
+    field_name = models.CharField(max_length=255)
 
     def __str__(self):
         return f'FormField {self.year} {self.form_type}: {self.field_name}'
