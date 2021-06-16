@@ -87,8 +87,8 @@ def add_entry_user(jbid, pw):
         username=jbid,
         password=make_password(pw)
     )
-    group_id = Group.objects.get(name='data_entry').id
-    user.groups.add(group_id)
+    # group_id = Group.objects.get(name='data_entry').id
+    # user.groups.add(group_id)
     user.save()        
 
 

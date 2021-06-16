@@ -407,8 +407,9 @@ class IndexView(LoginRequiredMixin, TemplateView):
         completed_count = completed_image_qs.count()
         context[ 'num_completed' ] = completed_count
 
-        # recent work
+        # recent work: completed images with a year and a type, but not 1990 breakers
         recent_image_qs = user_image_qs.filter( Q( year__isnull = False ) | Q( image_type__isnull = False ) )
+        recent_image_qs = recent_image_qs.filter(is_complete = True)
         recent_image_qs = recent_image_qs.exclude( Q(year__exact = 1990) & Q(image_type__contains = 'breaker')) # exclude 1900 dummy breaker
         recent_image_qs = recent_image_qs.order_by( '-last_modified' )
         recent_image_count = recent_image_qs.count()
@@ -443,7 +444,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         - if action = image, retrieve information from image form, use it to update image.
 
             - if image already has breaker or sheet, don't allow type to be updated.
-
+ 
         - if action = type, retrieve type, then based on type, retrieve information from type form and update breaker or sheet.
 
     # Template cells:
@@ -1330,6 +1331,8 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
     def prepare_image_context( self, image_IN, context_IN ):
 
+        me = "CodeImageView.prepare_image_context()"
+
         # return reference
         context_OUT = None
 
@@ -1437,7 +1440,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
         # - render form, populated if there is already an OtherImage
         #     instance for this image.
-        this_form = OtherImageForm( instance = this_other_image )
+        this_form = OtherImageForm( instance =  xthis_other_image )
 
         context_OUT[ CONTEXT_OTHER_IMAGE_FORM ] = this_form
 
@@ -1899,7 +1902,7 @@ def report_problem(request):
                     'EntryApp/report-problem.html',
                     {
                         'image': image_instance,
-                        'slug': image_instance.img_path,
+                        'slug': image_instance.image_file.image_file_name,
                         'form': ProblemForm()
                     }
             )
@@ -1959,7 +1962,7 @@ def report_problem(request):
                 'EntryApp/report-problem.html',
                 {
                     'image': current.img,
-                    'slug': current.img.img_path,
+                    'slug': current.img.image_file.image_file_name,
                     'form': ProblemForm()
                 }
         )
