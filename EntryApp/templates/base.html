@@ -48,17 +48,21 @@
             {% block navigation %}
             <div id='home-button'>
                 <form action={% url 'EntryApp:index' %}>
-                    <input type="submit" value="Return to main page">
+                    <input type="submit" value="Return to main page" class="btn btn-primary">
                     <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}"
                 </form>
             </div>
             {% endblock navigation %}
             {% block logout %}
                 <div id='logout'>
-                    <form action={% url 'EntryApp:logout' %}>
-                        {% csrf_token %}
-                        <input type="submit" value="Log out">
-                    </form>
+                    <!-- <form action="{% url 'logout'%}?next={{request.path}}"> -->
+                        <!-- {% csrf_token %} -->
+                        <!-- <input type="submit" value="Log out"> -->
+                    <!-- </form> -->
+                    <p>
+                        <br>
+                        <a href="{% url 'logout'%}?next={{request.path}}" class="btn btn-primary">Logout</a>
+                    </p>
                 </div>
             {% endblock logout %}
         </div>

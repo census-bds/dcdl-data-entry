@@ -10,12 +10,14 @@ import datetime
 import logging
 import re
 
+
 # django imports
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Permission
 from django.contrib.auth.models import User
 from django.db.models import Q
+import django.forms as forms
 from django.forms import formset_factory
 from django.forms import modelform_factory
 from django.forms import modelformset_factory
@@ -50,6 +52,7 @@ from EntryApp.models import Sheet
 from EntryApp.forms import BaseBreakerFormSet
 from EntryApp.forms import BaseRecordFormSet
 from EntryApp.forms import BreakerForm
+from EntryApp.forms import CrispyFormSetHelper
 from EntryApp.forms import ImageForm
 from EntryApp.forms import ImageTypeForm
 from EntryApp.forms import ImageYearForm
@@ -1968,11 +1971,25 @@ def report_problem(request):
         )
 
 #------------------------------------------------------------------------------#
-# DUMMY VIEWS
+# AUTHENTICATION VIEWS
 #------------------------------------------------------------------------------#
 
-from EntryApp.forms import CrispyFormSetHelper
-import django.forms as forms
+def login_user(request):
+    '''
+    View for logging users into the entry application
+    '''
+    pass
+
+
+def logout_user(request):
+    '''
+    View for logging users out of the application
+    '''
+    pass
+
+#------------------------------------------------------------------------------#
+# DUMMY VIEWS
+#------------------------------------------------------------------------------#
 
 def test_crispy_formset_view(request, year):
     '''
