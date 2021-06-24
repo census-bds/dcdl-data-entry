@@ -45,12 +45,12 @@ LOGGING = {
     },
     'loggers': {
         'root': {
-            'handlers': ['console'],
+            'handlers': ['file'],
             'level': 'INFO',
             'formatter': 'verbose'
         },
         'django': {
-            'handlers': ['file'],
+            'handlers': ['console', 'file'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': True,
         },
