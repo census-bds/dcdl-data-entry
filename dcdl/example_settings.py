@@ -29,20 +29,30 @@ DEBUG = True
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        }
+    },
     'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': '/data/data/user/django_user/dev/logs/info.log',
+            'formatter': 'verbose'
         },
     },
-    'root': {
-        'handlers': ['console'],
-        'level': 'INFO',
-    },
     'loggers': {
-        'django': {
+        'root': {
             'handlers': ['console'],
+            'level': 'INFO',
+            'formatter': 'verbose'
+        },
+        'django': {
+            'handlers': ['file'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
-            'propagate': False,
+            'propagate': True,
         },
     }
 }
@@ -102,7 +112,7 @@ WSGI_APPLICATION = 'dcdl.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dcdl_prod', 
+        'NAME': 'dcdl_dev', 
         'USER': 'django_user',                      # Not used with sqlite3.
         'PASSWORD':'', # ADD PASSWORD HERE Not used with sqlite3.
         'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -153,9 +163,13 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/deepzoom/js/vendor/openseadragon/images/')
 
 MEDIA_URL = '/images/' # this is the thing to change
-MEDIA_ROOT = '/data/data/git/images'
+MEDIA_ROOT = '/data/data/images/dev_images'
 
 STATICFILES_DIRS = (
     # os.path.join(BASE_DIR, 'boot'), 
-    '/data/data/git/openseadragon/images/',
+    '/data/data/user/django_user/dev/static/',
 )
+
+# globals for loading data
+FORM_FIELDS_CSV = os.path.join(Path(__file__).parent.absolute(), 'form_fields.csv')
+IMAGE_DIR = '/data/data/images/dev_images'

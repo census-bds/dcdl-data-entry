@@ -10,19 +10,21 @@ import os
 import socket
 from pathlib import Path
 
-from django.db import connection
+from django.conf import settings
 from django.contrib.auth.models import Group
+from django.db import connection
 
-from EntryApp.models import ImageFile, Image, Breaker, Sheet, Record, OtherImage, FormField, CurrentEntry
+from EntryApp.models import Breaker
+from EntryApp.models import CurrentEntry
+from EntryApp.models import ImageFile
+from EntryApp.models import Image
+from EntryApp.models import FormField
+from EntryApp.models import OtherImage
+from EntryApp.models import Record
+from EntryApp.models import Sheet
+
 
 logger = logging.getLogger('EntryApp.load_db')
-
-if socket.gethostname() == 'erd-web008-dev.compute.csp1.census.gov':
-    FORM_FIELDS_CSV = os.path.join(Path(__file__).parent.parent.absolute(), 'form_fields.csv')
-    IMAGE_DIR = '/data/data/git/dev_images/'
-else:
-    FORM_FIELDS_CSV = "Z:/1950-1980 censuses/cecile_dev/FormFields.csv"
-    IMAGE_DIR = "Z:/1950-1980 censuses/cecile_dev/dcdl/images/"
 
 
 def load_images(path, year, users=[], ext = "*.jpg", reel_label_IN = None, reel_index_IN = None ):
@@ -84,6 +86,7 @@ def load_images(path, year, users=[], ext = "*.jpg", reel_label_IN = None, reel_
         image_file_qs = ImageFile.objects.filter( img_path = full_file_path )
         image_file_count = image_file_qs.count()
         if ( image_file_count == 0 ):
+
 
             # make new.
             image_file_instance = ImageFile()
@@ -287,8 +290,8 @@ def refresh_db():
     INTENDED FOR DEV ONLY
     '''
     delete_model_data()
-    load_form_fields(FORM_FIELDS_CSV)
-    load_images(IMAGE_DIR, 1960, ['jbid123', 'jbid456'])
+    load_form_fields(settings.FORM_FIELDS_CSV)
+    load_images(settings.IMAGE_DIR, 1960, ['jbid123', 'jbid456'])
     create_1990_dummy_breakers(['jbid123', 'jbid456'])
 
 
@@ -297,6 +300,6 @@ def bulk_load_db():
     Function to load form fields, images, and dummy 1990 breakers
     FOR PRODUCTION
     '''
-    load_form_fields(FORM_FIELDS_CSV)
-    load_images(IMAGE_DIR, [])
+    load_form_fields(settings.FORM_FIELDS_CSV)
+    load_images(settings.IMAGE_DIR, [])
     create_1990_dummy_breakers([])
