@@ -1443,7 +1443,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
         # - render form, populated if there is already an OtherImage
         #     instance for this image.
-        this_form = OtherImageForm( instance =  xthis_other_image )
+        this_form = OtherImageForm( instance =  this_other_image )
 
         context_OUT[ CONTEXT_OTHER_IMAGE_FORM ] = this_form
 
