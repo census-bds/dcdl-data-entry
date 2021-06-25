@@ -1,5 +1,5 @@
 #===============================================================#
-# LOAD DATA INTO DATABASE
+# LOAD IMAGES INTO DATABASE
 #===============================================================#
 
 import csv
@@ -115,15 +115,14 @@ def load_images(path, year, users=[], ext = "*.jpg", reel_label_IN = None, reel_
 
         for u in users:
 
-            # TODO: use create method? to avoid overwrites?
-            img = Image( image_file=image_file_instance, \
+            img = Image.objects.create( 
+                    image_file=image_file_instance, \
                     jbid=u, \
                     is_complete=False, \
                     year=year,
                     image_type=None, \
                     problem=False
             )
-            img.save()
 
         #-- END loop over users for a given file --#
 
@@ -286,8 +285,8 @@ def load_form_fields(field_tbl_path, reload=True):
 
 def refresh_db():
     '''
-    Convenience function to wipe existing rows and reload Images
     INTENDED FOR DEV ONLY
+    Convenience function to wipe existing rows and reload Images
     '''
     delete_model_data()
     load_form_fields(settings.FORM_FIELDS_CSV)

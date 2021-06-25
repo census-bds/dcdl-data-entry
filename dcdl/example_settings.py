@@ -173,3 +173,4 @@ STATICFILES_DIRS = (
 # globals for loading data
 FORM_FIELDS_CSV = os.path.join(Path(__file__).parent.absolute(), 'form_fields.csv')
 IMAGE_DIR = '/data/data/images/dev_images'
+USER_INFO = os.path.join(pathlib.Path(__file__).parent.absolute(), 'user_info.csv')

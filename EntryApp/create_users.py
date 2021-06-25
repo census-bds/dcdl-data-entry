@@ -6,45 +6,24 @@ import os
 import pathlib
 import pandas as pd
 
+from django.conf import settings
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.auth.hashers import make_password
 from EntryApp.models import Image
 
-# expects the csv with user data to be in root of project (git repo level)
-USER_INFO = os.path.join(pathlib.Path(__file__).parent.parent.absolute(), 'user_info.csv')
-
-DATA_MODELS = [
-        'breaker',
-        'currententry',
-        'image',
-        'sheet',
-        'record',
-        'otherimage'
-    ]
 
 
-def create_entry_group(data_models=DATA_MODELS):
+def create_entry_group():
     '''
-    Create a group for users with data entry permissions
-    Assumes that the add, change, and view permission exists for each model
+    Create a group for entry users (no extra permissions)
 
     Takes: 
-    - list of model names as string in lowercase with spaces
+    - None
     Returns:
     - None
     '''
 
-    # first create the group
     group, _ = Group.objects.get_or_create(name='data_entry')
-    
-    for d in data_models:
-        for p in ['add', 'change', 'view']:
-            print(f'Can {p} {d}')
-            perm = Permission.objects.get(
-                codename=f'{p}_{d}'
-            )
-            group.permissions.add(perm)
-    group.save()
 
 
 def create_entry_users(jbids=['jbid123', 'jbid456'], pws=['dcdl1980', 'dcdl1980']):
@@ -74,7 +53,7 @@ def create_entry_users(jbids=['jbid123', 'jbid456'], pws=['dcdl1980', 'dcdl1980'
 
 def add_entry_user(jbid, pw):
     '''
-    Add a new user to the data entry group
+    Create a new user and add to the data entry group
 
     Takes:
     - string username (jbid)
@@ -87,14 +66,14 @@ def add_entry_user(jbid, pw):
         username=jbid,
         password=make_password(pw)
     )
-    # group_id = Group.objects.get(name='data_entry').id
-    # user.groups.add(group_id)
+    group_id = Group.objects.get(name='data_entry').id
+    user.groups.add(group_id)
     user.save()        
 
 
-def bulk_load_entry_users(path=USER_INFO):
+def bulk_load_entry_users(path=settings.USER_INFO):
     '''
-    NOT WORKING YET - Create entry users from a csv file 
+    Create entry users from a csv file 
 
     Takes:
     - string filepath to csv
@@ -104,7 +83,3 @@ def bulk_load_entry_users(path=USER_INFO):
 
     df = pd.read_csv(path)
     df.apply(lambda x: add_entry_user(x.jbid, x.password), axis=1)
-
-
-# import EntryApp.create_users as users
-
