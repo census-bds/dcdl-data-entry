@@ -51,7 +51,7 @@ def load_images(path, year, users=[], ext = "*.jpg", reel_label_IN = None, reel_
     image_file_count = None
     image_file = None
 
-    files = glob.glob(path + ext)
+    files = glob.glob(path + f'/{year}/' + ext)
     print(files)
 
     # if no list of users was provided, default to all in data_entry group

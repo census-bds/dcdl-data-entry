@@ -1,5 +1,9 @@
-# django setttings for DCDL
+# DCDL-specific django files
 dcdl/settings.py
+form_fields.csv
+user_info.csv
+logs/
+static/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
