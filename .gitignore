@@ -1,6 +1,17 @@
 # django setttings for DCDL
 dcdl/settings.py
 
+# actual versions of user info and form field files
+form_fields.csv
+user_info.csv
+
+# migrations? yes, for now anyway
+EntryApp/migrations/00*
+
+# directories to ignore
+static/
+temp/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
