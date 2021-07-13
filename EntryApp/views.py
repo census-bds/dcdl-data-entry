@@ -1758,8 +1758,8 @@ class CodeImage( LoginRequiredMixin, FormView ):
                     error_list.extend( returned_error_list )
                 #-- END check if process_action errors. --#
 
-                # if the action is complete_image OR update_other_image, we return to the index
-                if my_action in [ACTION_COMPLETE_IMAGE, ACTION_UPDATE_OTHER_IMAGE, ]:
+                # if the action is complete_image, update_breaker_type, update_other_image, we return to the index
+                if my_action in [ACTION_COMPLETE_IMAGE, ACTION_UPDATE_OTHER_IMAGE, ACTION_UPDATE_BREAKER_TYPE]:
                     
                     return redirect(reverse("EntryApp:index"))
                 
