@@ -27,12 +27,12 @@ from EntryApp.models import Sheet
 logger = logging.getLogger('EntryApp.load_db')
 
 
-def load_images(path, year, users=[], ext = "*.jpg", reel_label_IN = None, reel_index_IN = None ):
+def load_images(filepath, year, users=[], reel_label_IN = None, reel_index_IN = None ):
     '''
-    Loads images into the DB, 1 row per entry-user
+    Loads images into the DB, 1 row per entry-user. Expects .jpg images. 
 
     Required arguments:
-    - string filepath
+    - string filepath to images, e.g. /data/data/images/1960/a_1960_reel/
     - integer year (the decennial year to which images belong)
     Optional arguments:
     - list of username strings (default all in data_entry group)
@@ -51,7 +51,7 @@ def load_images(path, year, users=[], ext = "*.jpg", reel_label_IN = None, reel_
     image_file_count = None
     image_file = None
 
-    files = glob.glob(path + ext)
+    files = glob.glob(path + "*.jpg")
     print(files)
 
     # if no list of users was provided, default to all in data_entry group
