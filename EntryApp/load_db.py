@@ -22,14 +22,14 @@ from EntryApp.models import FormField
 from EntryApp.models import OtherImage
 from EntryApp.models import Record
 from EntryApp.models import Sheet
-
+from EntryApp.models import UserEntry
 
 logger = logging.getLogger('EntryApp.load_db')
 
 
 def load_images(filepath, year, users=[], reel_label_IN = None, reel_index_IN = None ):
     '''
-    Loads images into the DB, 1 row per entry-user. Expects .jpg images. 
+    Loads images from a given reel into the DB, 1 row per entry-user. Expects .jpg images. 
 
     Required arguments:
     - string filepath to images, e.g. /data/data/images/1960/a_1960_reel/
@@ -55,6 +55,7 @@ def load_images(filepath, year, users=[], reel_label_IN = None, reel_index_IN = 
     print(files)
 
     # if no list of users was provided, default to all in data_entry group
+    # TO DO: this needs to change
     if not users:
         g = Group.objects.get(name='data_entry')
         users = [u.username for u in g.user_set.all()]
@@ -131,6 +132,35 @@ def load_images(filepath, year, users=[], reel_label_IN = None, reel_index_IN = 
     return
 
 #-- END function load_images() --#
+
+def find_next_users():
+    '''
+    Looks in the UserEntry model to find next two users for assignment
+
+    Takes: None
+    Returns: tuple of usernames(?)
+    '''
+
+    next_queryset = UserEntry.objects.filter(is_next=True)
+
+
+
+def load_reel(reel_name, year, users=[]):
+    '''
+    Wrapper method to load a group of reels from a given year
+
+    Takes:
+    - string of reel directory names 
+    - integer year to which the images belong
+      (e.g. ['1960_reel_0', '1960_reel_1', ...])
+    - optional l
+    Returns:
+    - None
+    '''
+    pass
+
+
+#-- END function load_reel() --#
 
 
 def create_1990_dummy_breakers(users):

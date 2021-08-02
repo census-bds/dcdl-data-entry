@@ -8,6 +8,7 @@ TO DO:
 import logging
 import os
 
+from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 
@@ -37,6 +38,58 @@ FORM_CHOICES = [
 #    # tags! - django_taggit - not sure if you need or want tags.
 #    tags = TaggableManager( blank = True )
 
+class Reel(models.Model):
+    """
+    Class to track assignment of reels to users and completion. Captures reel 
+        name, year, load date, number of images, assigned users, and completion 
+        status for each user.
+
+    Problem: I probably need two rows for each reel, one per user
+    """
+
+    reel_name = models.CharField( max_length = 255, null = False)
+    year = models.IntegerField(blank = True, null = False)
+    reel_folder_path = models.CharField( max_length = 255, blank = True, null = False)
+    reel_index = models.IntegerField( blank = True, null = True )
+    reel_label = models.TextField()
+
+    # automatic create and update time stamps.
+    create_date = models.DateTimeField( auto_now_add = True )
+    last_modified = models.DateTimeField( auto_now = True )
+
+    # useful, but when to populate this?
+    image_count = models.PositiveIntegerField(null = True)
+
+    # user info: set foreign key to auth user table?
+    # or would it be better to set it to the app-specific one?
+    # okay so I h
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # do I want this delete behvior?
+
+    # need to modify view to update these
+    # probably create a new class method in CodeImageView?
+    user_start_time = models.DateTimeField()
+    user_complete_time = models.DateTimeField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields = ['reel_name', 'year', 'user'],
+                name='unique_reel'
+            )
+        ]
+
+
+    #TODO: improve __str__ method
+    def __str__(self):
+        
+        string_list = [
+            'Reel',
+            self.reel_name,
+            str(self.year)
+        ]
+
+        return ' '.join(string_list)
+
 
 class ImageFile(models.Model):
 
@@ -59,8 +112,8 @@ class ImageFile(models.Model):
     img_path = models.CharField( max_length = 255, unique = True )
     img_file_name = models.CharField( max_length = 255 )
     img_folder_path = models.CharField( max_length = 255, blank = True, null = True )
-    img_reel_label = models.CharField( max_length = 255 )
-    img_reel_index = models.IntegerField( blank = True, null = True )
+    # img_reel_label = models.CharField( max_length = 255 ) # move to Reel model eventually
+    # img_reel_index = models.IntegerField( blank = True, null = True ) # move to Reel model eventually
     img_position = models.IntegerField()
 
     # automatic create and update time stamps.
@@ -117,8 +170,8 @@ class ImageFile(models.Model):
         # path
         string_list.append( "path: {}".format( self.img_path ) )
 
-        # reel
-        string_list.append( "reel: {reel_label} ( {reel_index} )".format( reel_label = self.img_reel_label, reel_index = self.img_reel_index ) )
+        # # reel
+        # string_list.append( "reel: {reel_label} ( {reel_index} )".format( reel_label = self.img_reel_label, reel_index = self.img_reel_index ) )
 
         # position
         string_list.append( "position: {}".format( self.img_position ) )
@@ -200,7 +253,7 @@ class Image(models.Model):
     )
 
     # this should get populated on load
-    year = models.IntegerField( blank = True, null = True )
+    year = models.IntegerField( blank = True, null = False )
 
     # these values will be populated as entry proceeds
     image_type = models.CharField(
@@ -959,15 +1012,17 @@ class Record(models.Model):
 
 class CurrentEntry(models.Model):
 
-    # shouldn't need this. Should key work progress on "Image" (order by
-    #     reel, then position, ASC - if there is a higher-order collection for
-    #     images above reel, might need to add that to ImageFile - could also
-    #     create an ImageReel model if it adds value.).
+    '''
+    Model to track current image and breaker for each user.
+
+    This is basically a pointer: one row for each user, with foreign keys to
+    specify the 
+    '''
 
     img = models.ForeignKey(Image, on_delete=models.CASCADE)
     jbid = models.CharField(max_length=255, default='jbid000')
     breaker = models.ForeignKey(Breaker, on_delete=models.SET_NULL, null=True)
-    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, null=True)
+    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, null=True) #TODO check if no longer needed
 
     def __str__(self):
         return f'CurrentEntry: {self.jbid} entering {self.img}'
@@ -993,3 +1048,22 @@ class FormField(models.Model):
 
     def __str__(self):
         return f'FormField {self.year} {self.form_type}: {self.field_name}'
+
+
+class UserEntry(models.Model):
+    '''
+    Model to track which users are next in line to take new reels
+    '''
+
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
+    reel_count = models.IntegerField(default = 0)
+    is_next = models.BooleanField(default = False)
+
+    def __str__(self):
+        jbid = User.objects.get(pk = user).username
+        string_OUT = '{jbid}: reel count {self.reel_count}'
+
+        if self.is_next:
+            return string_OUT + ', is next'
+        else:
+            return string_OUT
