@@ -113,7 +113,7 @@ class ImageFile(models.Model):
     img_file_name = models.CharField( max_length = 255 )
     img_folder_path = models.CharField( max_length = 255, blank = True, null = True )
     # img_reel_label = models.CharField( max_length = 255 ) # move to Reel model eventually
-    # img_reel_index = models.IntegerField( blank = True, null = True ) # move to Reel model eventually
+    img_reel = models.ForeignKey( Reel, on_delete=models.CASCADE, blank = True, null = False)
     img_position = models.IntegerField()
 
     # automatic create and update time stamps.
