@@ -60,10 +60,18 @@ class Reel(models.Model):
     # useful, but when to populate this?
     image_count = models.PositiveIntegerField(null = True)
 
-    # user info: set foreign key to auth user table?
-    # or would it be better to set it to the app-specific one?
-    # okay so I h
-    user = models.ForeignKey(User, on_delete=models.CASCADE)  # do I want this delete behvior?
+    # # user info: set foreign key to auth user table?
+    # # or would it be better to set it to the app-specific one?
+    # keyer_one = models.ForeignKey(
+    #     Keyer,
+    #     on_delete = models.CASCADE,
+    #     related_name = 'keyer_one'
+    # )  
+    # keyer_two = models.ForeignKey(
+    #     Keyer,
+    #     on_delete = models.CASCADE,
+    #     related_name = 'keyer_two'
+    # )  
 
     # need to modify view to update these
     # probably create a new class method in CodeImageView?
@@ -170,8 +178,8 @@ class ImageFile(models.Model):
         # path
         string_list.append( "path: {}".format( self.img_path ) )
 
-        # # reel
-        # string_list.append( "reel: {reel_label} ( {reel_index} )".format( reel_label = self.img_reel_label, reel_index = self.img_reel_index ) )
+        # reel
+        string_list.append( "reel: {reel_label} ( {reel_index} )".format( reel_label = self.img_reel_label, reel_index = self.img_reel_index ) )
 
         # position
         string_list.append( "position: {}".format( self.img_position ) )
@@ -1050,18 +1058,18 @@ class FormField(models.Model):
         return f'FormField {self.year} {self.form_type}: {self.field_name}'
 
 
-class UserEntry(models.Model):
+class Keyer(models.Model):
     '''
-    Model to track which users are next in line to take new reels
+    Model to track keyer work: who is next in line to take new reels?
     '''
 
     user = models.ForeignKey(User, on_delete = models.CASCADE)
+    jbid = models.CharField(max_length=255, default='jbid000')
     reel_count = models.IntegerField(default = 0)
     is_next = models.BooleanField(default = False)
 
     def __str__(self):
-        jbid = User.objects.get(pk = user).username
-        string_OUT = '{jbid}: reel count {self.reel_count}'
+        string_OUT = f'{self.jbid}: reel count {self.reel_count}'
 
         if self.is_next:
             return string_OUT + ', is next'

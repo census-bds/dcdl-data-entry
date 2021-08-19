@@ -18,16 +18,48 @@ from EntryApp.models import Breaker
 from EntryApp.models import CurrentEntry
 from EntryApp.models import ImageFile
 from EntryApp.models import Image
+from EntryApp.models import Keyer
 from EntryApp.models import FormField
 from EntryApp.models import OtherImage
 from EntryApp.models import Record
 from EntryApp.models import Sheet
-from EntryApp.models import UserEntry
 
 logger = logging.getLogger('EntryApp.load_db')
 
 
-def load_images(filepath, year, users=[], reel_label_IN = None, reel_index_IN = None ):
+def get_next_keyers():
+    '''
+    Looks in Keyer model to identify which two keyers to assign to new reel
+    Updates Keyer model to increment reel_count and is_next
+    '''
+
+    keyer_qs = Keyer.objects.filter(is_next = True)
+
+    # check that the length of this queryset is exactly 2
+    if len(keyer_qs) != 2:
+        print(f'keyer_qs has wrong length: expected 2, got {len(keyer_qs)}')
+
+
+    # find the keyers after this, set them to next
+    next_keyers = Keyer.objects.order_by('reel_count')[:2]
+
+    for k in next_keyers:
+        k.is_next = True
+        k.save()
+
+
+    # increment reel count for current keyers, set is_next to False
+    for k in keyer_qs:
+        k.reel_count += 1
+        k.is_next = False
+        k.save()
+
+    return [k.jbid for k in keyer_qs]
+
+#--- END get_next_keyers() ---#
+
+
+def load_images(filepath, year, keyers=[], reel_label_IN = None, reel_index_IN = None ):
     '''
     Loads images from a given reel into the DB, 1 row per entry-user. Expects .jpg images. 
 
@@ -35,7 +67,7 @@ def load_images(filepath, year, users=[], reel_label_IN = None, reel_index_IN = 
     - string filepath to images, e.g. /data/data/images/1960/a_1960_reel/
     - integer year (the decennial year to which images belong)
     Optional arguments:
-    - list of username strings (default all in data_entry group)
+    - list of username strings (will look up next by default)
     - file extension (default .jpg)
     - reel label (text string)
     - reel index (e.g. reel #2)
@@ -54,11 +86,13 @@ def load_images(filepath, year, users=[], reel_label_IN = None, reel_index_IN = 
     files = glob.glob(path + "*.jpg")
     print(files)
 
-    # if no list of users was provided, default to all in data_entry group
-    # TO DO: this needs to change
-    if not users:
-        g = Group.objects.get(name='data_entry')
-        users = [u.username for u in g.user_set.all()]
+    # if no list of users was provided, look up next in table
+    if not keyers:
+        keyers = get_next_keyers()
+
+    # check that there are exactly two keyers
+    assert len(keyers) == 2
+
 
     # init reel label and index
     file_reel_label = reel_label_IN
@@ -114,11 +148,11 @@ def load_images(filepath, year, users=[], reel_label_IN = None, reel_index_IN = 
 
         #print( "----> ImageFile: {image_file}".format( image_file = image_file_instance ) )
 
-        for u in users:
+        for k in keyers:
 
             img = Image.objects.create( 
                     image_file=image_file_instance, \
-                    jbid=u, \
+                    jbid=k, \
                     is_complete=False, \
                     year=year,
                     image_type=None, \
@@ -132,17 +166,6 @@ def load_images(filepath, year, users=[], reel_label_IN = None, reel_index_IN = 
     return
 
 #-- END function load_images() --#
-
-def find_next_users():
-    '''
-    Looks in the UserEntry model to find next two users for assignment
-
-    Takes: None
-    Returns: tuple of usernames(?)
-    '''
-
-    next_queryset = UserEntry.objects.filter(is_next=True)
-
 
 
 def load_reel(reel_name, year, users=[]):
