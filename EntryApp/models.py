@@ -29,7 +29,7 @@ FORM_CHOICES = [
 ]
 
 #=====================================================#
-# MODELS FOR DATA ENTRY
+# MODELS FOR TRACKING DATA ENTRY
 #=====================================================#
 
 # TODO: abstract parent model with?:
@@ -37,6 +37,25 @@ FORM_CHOICES = [
 #    last_modified = models.DateTimeField( auto_now = True )
 #    # tags! - django_taggit - not sure if you need or want tags.
 #    tags = TaggableManager( blank = True )
+
+class Keyer(models.Model):
+    '''
+    Model to track keyer work: who is next in line to take new reels?
+    '''
+
+    user = models.ForeignKey(User, on_delete = models.CASCADE)
+    jbid = models.CharField(max_length=255, default='jbid000')
+    reel_count = models.IntegerField(default = 0)
+    is_next = models.BooleanField(default = False)
+
+    def __str__(self):
+        string_OUT = f'{self.jbid}: reel count {self.reel_count}'
+
+        if self.is_next:
+            return string_OUT + ', is next'
+        else:
+            return string_OUT
+
 
 class Reel(models.Model):
     """
@@ -49,7 +68,7 @@ class Reel(models.Model):
 
     reel_name = models.CharField( max_length = 255, null = False)
     year = models.IntegerField(blank = True, null = False)
-    reel_folder_path = models.CharField( max_length = 255, blank = True, null = False)
+    reel_path = models.CharField( max_length = 255, null = False)
     reel_index = models.IntegerField( blank = True, null = True )
     reel_label = models.TextField()
 
@@ -57,31 +76,31 @@ class Reel(models.Model):
     create_date = models.DateTimeField( auto_now_add = True )
     last_modified = models.DateTimeField( auto_now = True )
 
-    # useful, but when to populate this?
+    # useful, but when to populate this? load_image?
     image_count = models.PositiveIntegerField(null = True)
 
-    # # user info: set foreign key to auth user table?
-    # # or would it be better to set it to the app-specific one?
-    # keyer_one = models.ForeignKey(
-    #     Keyer,
-    #     on_delete = models.CASCADE,
-    #     related_name = 'keyer_one'
-    # )  
-    # keyer_two = models.ForeignKey(
-    #     Keyer,
-    #     on_delete = models.CASCADE,
-    #     related_name = 'keyer_two'
-    # )  
+    # user info: set foreign key to auth user table?
+    # or would it be better to set it to the app-specific one?
+    keyer_one = models.ForeignKey(
+        Keyer,
+        on_delete = models.CASCADE,
+        related_name = 'keyer_one'
+    )  
+    keyer_two = models.ForeignKey(
+        Keyer,
+        on_delete = models.CASCADE,
+        related_name = 'keyer_two'
+    )  
 
-    # need to modify view to update these
-    # probably create a new class method in CodeImageView?
-    user_start_time = models.DateTimeField()
-    user_complete_time = models.DateTimeField()
+    # # need to modify view to update these
+    # # probably create a new class method in CodeImageView?
+    # user_start_time = models.DateTimeField()
+    # user_complete_time = models.DateTimeField()
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields = ['reel_name', 'year', 'user'],
+                fields = ['reel_path', 'year'],
                 name='unique_reel'
             )
         ]
@@ -233,6 +252,9 @@ class ImageFile(models.Model):
 
 #-- END model class ImageFile --#
 
+#=====================================================#
+# MODELS FOR DATA ENTRY
+#=====================================================#
 
 class Image(models.Model):
 
@@ -1057,21 +1079,3 @@ class FormField(models.Model):
     def __str__(self):
         return f'FormField {self.year} {self.form_type}: {self.field_name}'
 
-
-class Keyer(models.Model):
-    '''
-    Model to track keyer work: who is next in line to take new reels?
-    '''
-
-    user = models.ForeignKey(User, on_delete = models.CASCADE)
-    jbid = models.CharField(max_length=255, default='jbid000')
-    reel_count = models.IntegerField(default = 0)
-    is_next = models.BooleanField(default = False)
-
-    def __str__(self):
-        string_OUT = f'{self.jbid}: reel count {self.reel_count}'
-
-        if self.is_next:
-            return string_OUT + ', is next'
-        else:
-            return string_OUT

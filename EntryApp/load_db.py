@@ -22,6 +22,7 @@ from EntryApp.models import Keyer
 from EntryApp.models import FormField
 from EntryApp.models import OtherImage
 from EntryApp.models import Record
+from EntryApp.models import Reel
 from EntryApp.models import Sheet
 
 logger = logging.getLogger('EntryApp.load_db')
@@ -31,6 +32,9 @@ def get_next_keyers():
     '''
     Looks in Keyer model to identify which two keyers to assign to new reel
     Updates Keyer model to increment reel_count and is_next
+
+    Takes: None
+    Returns: Keyer queryset
     '''
 
     keyer_qs = Keyer.objects.filter(is_next = True)
@@ -39,7 +43,6 @@ def get_next_keyers():
     if len(keyer_qs) != 2:
         print(f'keyer_qs has wrong length: expected 2, got {len(keyer_qs)}')
 
-
     # find the keyers after this, set them to next
     next_keyers = Keyer.objects.order_by('reel_count')[:2]
 
@@ -47,69 +50,53 @@ def get_next_keyers():
         k.is_next = True
         k.save()
 
-
     # increment reel count for current keyers, set is_next to False
     for k in keyer_qs:
         k.reel_count += 1
         k.is_next = False
         k.save()
 
-    return [k.jbid for k in keyer_qs]
+    return keyer_qs 
 
 #--- END get_next_keyers() ---#
 
 
-def load_images(filepath, year, keyers=[], reel_label_IN = None, reel_index_IN = None ):
+def load_images(filepath, year, keyers=[]):
     '''
-    Loads images from a given reel into the DB, 1 row per entry-user. Expects .jpg images. 
+    Loads images from a given reel into ImageFile and Image models. 
+    Expects .jpg images. 
 
     Required arguments:
     - string filepath to images, e.g. /data/data/images/1960/a_1960_reel/
     - integer year (the decennial year to which images belong)
     Optional arguments:
-    - list of username strings (will look up next by default)
+    - list of keyer username strings (will look up next if none provided)
     - file extension (default .jpg)
-    - reel label (text string)
-    - reel index (e.g. reel #2)
     Returns: none
     '''
 
     # declare variables
-    file_reel_label = None
-    file_reel_index = None
     file_counter = None
     full_file_path = None
     image_file_qs = None
     image_file_count = None
     image_file = None
 
-    files = glob.glob(path + "*.jpg")
+    files = glob.glob(filepath + "*.jpg")
     print(files)
 
     # if no list of users was provided, look up next in table
     if not keyers:
-        keyers = get_next_keyers()
+        keyer_qs = get_next_keyers()
+        keyer_jbids = [k.jbid for k in keyer_qs]
 
     # check that there are exactly two keyers
-    assert len(keyers) == 2
+    if len(keyers) != 2:
+        print(keyers)
+        raise ValueError
 
-
-    # init reel label and index
-    file_reel_label = reel_label_IN
-    if ( ( file_reel_label is None ) or ( file_reel_label == "" ) ):
-
-        # no reel string passed in, use path.
-        file_reel_label = path
-
-    #-- END check to see if we have a reel string passed in --#
-
-    file_reel_index = reel_index_IN
-    if ( file_reel_index is None ):
-
-        # no reel string passed in, use path.
-        file_reel_index = 0
-
-    #-- END check to see if we have a reel index passed in --#
+    # get reel associated with this filepath and year
+    parent_reel = Reel.objects.filter(year=year).filter(reel_path=filepath).get()
 
     # loop over files in current path.
     file_counter = 0
@@ -126,10 +113,9 @@ def load_images(filepath, year, keyers=[], reel_label_IN = None, reel_index_IN =
             # make new.
             image_file_instance = ImageFile()
             image_file_instance.set_image_path( full_file_path )
-            image_file_instance.img_reel_label = file_reel_label
-            image_file_instance.img_reel_index = file_reel_index
             image_file_instance.img_position = file_counter
             image_file_instance.year = year
+            image_file_instance.img_reel = parent_reel
             image_file_instance.save()
             
 
@@ -168,19 +154,43 @@ def load_images(filepath, year, keyers=[], reel_label_IN = None, reel_index_IN =
 #-- END function load_images() --#
 
 
-def load_reel(reel_name, year, users=[]):
+def load_reel(reel_path, year, keyers=[]):
     '''
-    Wrapper method to load a group of reels from a given year
+    Wrapper method to load images from a reel
+    Used for csv bulk load
 
     Takes:
-    - string of reel directory names 
+    - list of string reel directory filepaths 
     - integer year to which the images belong
-      (e.g. ['1960_reel_0', '1960_reel_1', ...])
-    - optional l
+    - optional list of keyers to assign 
     Returns:
     - None
     '''
-    pass
+
+    # if no list of users was provided, look up next in table
+    if not keyers:
+        keyers = get_next_keyers()
+        print(keyers)
+
+    # check that there are exactly two keyers
+    if len(keyers) != 2:
+        print(keyers)
+        raise ValueError
+
+    _, path_head = os.path.split(reel_path)
+    
+    # add to Reel model 
+    this_reel = Reel.objects.get_or_create(
+        reel_path = reel_path,    
+        year = year,
+        reel_name = path_head,
+        keyer_one = keyers[0],
+        keyer_two = keyers[1]
+    )
+
+    # call load_images
+    keyer_jbids = [k.jbid for k in keyers]
+    load_images(reel_path, year, keyer_jbids)
 
 
 #-- END function load_reel() --#
@@ -261,7 +271,20 @@ def delete_model_data():
     '''
     Deletes all rows in specified tables
     '''
-    for m in [ImageFile, Image, Breaker, Sheet, Record, CurrentEntry, FormField, OtherImage]:
+
+    data_models = [
+        Breaker, \
+        CurrentEntry, \
+        FormField, \
+        ImageFile, \
+        Image, \
+        OtherImage, \
+        Record, \
+        Reel, \
+        Sheet,
+    ]
+
+    for m in data_models:
         m.objects.all().delete()
 
 
