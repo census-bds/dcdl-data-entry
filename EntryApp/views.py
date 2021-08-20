@@ -591,22 +591,6 @@ class CodeImage( LoginRequiredMixin, FormView ):
                 breaker_data['jbid'] = request_IN.user.username
                 breaker_data['timestamp'] = datetime.datetime.now()
 
-                # Example breaker_data contents:
-                # breaker_data: {
-                #     'state': 'md',
-                #     'county': 'pg',
-                #     'mcd': '1',
-                #     'tract': '1',
-                #     'place': '1',
-                #     'smsa': '1',
-                #     'enumeration_district': '1',
-                #     'id': <Breaker: Breaker 24 - file ID: 46 - file path: fake_IMG_0.jpg - year: 1980 - type: breaker from morga424>,
-                #     'img': <Image: 24 - file ID: 46 - file path: fake_IMG_0.jpg - year: 1980 - type: breaker>,
-                #     'year': 1980,
-                #     'jbid': <SimpleLazyObject: <User: morga424>>,
-                #     'timestamp': datetime.datetime(2021, 4, 23, 11, 12, 51, 508171)
-                # }
-
                 # remove "id" since it breaks qs.update().
                 if ( "id" in breaker_data ):
 

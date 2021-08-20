@@ -227,7 +227,7 @@ def load_reel(reel_path, year, keyers=[]):
 #-- END function load_reel() --#
 
 
-def create_1990_dummy_breakers(users):
+def create_1990_dummy_breakers(keyer_jbids):
     '''
     Create default breaker for 1990 for each user, plus associated dummy image
 
@@ -238,19 +238,30 @@ def create_1990_dummy_breakers(users):
     "dummy_1990_breaker_JBID."
 
     Takes:
-    - list of string usernames
+    - list of string jbids
     Returns: none
     '''
 
     # declare variables
+    dummy_breaker_reel_name = None
     dummy_breaker_file_name = None
     image_file_qs = None
     image_file_count = None
     image_file = None
 
-    if not users:
-        g = Group.objects.get(name='data_entry')
-        users = [u.username for u in g.user_set.all()]
+    if not keyer_jbids:
+        keyer_jbids = [k.jbid for k in Keyer.objects.all()]
+
+    # get or create reel for dummy breaker
+    dummy_reel, _ = Reel.objects.get_or_create(
+        reel_name = 'dummy_breaker_reel',
+        reel_path = '/data/data/images/dev_images/1990breaker/',
+        year = 1990,
+        image_count = Keyer.objects.all().count(),
+        keyer_one = Keyer.objects.filter(jbid = 'jbid123').get(), # sorry future me
+        keyer_two = Keyer.objects.filter(jbid = 'jbid123').get() # this will suck in prod when jbids don't match
+    )
+    
 
     # get ImageFile for breaker.
     dummy_breaker_file_name = "dummy_1990_breaker"
@@ -261,8 +272,7 @@ def create_1990_dummy_breakers(users):
         # make new.
         image_file_instance = ImageFile()
         image_file_instance.set_image_path( dummy_breaker_file_name )
-        image_file_instance.img_reel_label = dummy_breaker_file_name
-        image_file_instance.img_reel_index = 0
+        image_file_instance.img_reel = dummy_reel
         image_file_instance.img_position = 1
         image_file_instance.save()
 
@@ -281,11 +291,11 @@ def create_1990_dummy_breakers(users):
 
     #print( "----> ImageFile: {image_file}".format( image_file = image_file_instance ) )
 
-    for u in users:
+    for k in keyer_jbids:
 
         img = Image.objects.create(
             image_file = image_file_instance,
-            jbid=u,
+            jbid=k,
             is_complete=True,
             year=1990,
             image_type="breaker"
@@ -293,7 +303,7 @@ def create_1990_dummy_breakers(users):
 
         breaker = Breaker.objects.create(
             year=1990,
-            jbid=u,
+            jbid=k,
             img=img
         )
 
@@ -426,8 +436,11 @@ def refresh_db():
     '''
     delete_model_data()
     load_form_fields(settings.FORM_FIELDS_CSV)
-    load_images(settings.IMAGE_DIR, 1960, ['jbid123', 'jbid456'])
-    create_1990_dummy_breakers(['jbid123', 'jbid456'])
+    load_reels_from_csv('dev_reel_load_spec.csv')
+
+    keyer_jbids = [k.jbid for k in Keyer.objects.all()]
+
+    create_1990_dummy_breakers(keyer_jbids)
 
 
 def bulk_load_db():
@@ -436,5 +449,5 @@ def bulk_load_db():
     FOR PRODUCTION
     '''
     load_form_fields(settings.FORM_FIELDS_CSV)
-    load_images(settings.IMAGE_DIR, [])
+    load_reels_from_csv('dev_reel_load_spec.csv')
     create_1990_dummy_breakers([])
