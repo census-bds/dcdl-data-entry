@@ -1,5 +1,9 @@
-# django setttings for DCDL
+# DCDL-specific django files
 dcdl/settings.py
+form_fields.csv
+user_info.csv
+logs/
+static/
 
 # actual versions of user info and form field files
 dev_reel_load_spec.csv
