@@ -46,6 +46,7 @@ from EntryApp.models import Image
 from EntryApp.models import LongForm1990
 from EntryApp.models import OtherImage
 from EntryApp.models import Record
+from EntryApp.models import Reel
 from EntryApp.models import Sheet
 
 # EntryApp forms
@@ -244,9 +245,10 @@ def get_image_todo_qs( request ):
     current_username = current_user.username
 
     # get user image lists
+    # TODO: revise this so it's images left in this reel
     user_image_qs = Image.objects.filter( jbid = current_username )
     todo_image_qs = user_image_qs.filter( is_complete = False )
-    todo_image_qs = todo_image_qs.order_by( 'image_file__img_reel_label', 'image_file__img_reel_index', 'image_file__img_position', )
+    # todo_image_qs = todo_image_qs.order_by( 'image_file__img_reel_label', 'image_file__img_reel_index', 'image_file__img_position', )
 
     qs_OUT = todo_image_qs
 

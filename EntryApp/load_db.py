@@ -43,8 +43,33 @@ def get_next_keyers():
     if len(keyer_qs) != 2:
         print(f'keyer_qs has wrong length: expected 2, got {len(keyer_qs)}')
 
-    # find the keyers after this, set them to next
-    next_keyers = Keyer.objects.order_by('reel_count')[:2]
+        # handle cases where keyer queue is too short
+        # get keyers with the smallest number of reels assigned to them
+        # and set is_next to True
+        if len(keyer_qs) == 1:
+            other_keyer = Keyer.objects.filter(is_next = False).order_by('reel_count')[:1]
+            other_keyer.is_next = True
+            other_keyer.save()
+
+            # merge querysets
+            keyer_qs = keyer_qs | other_keyer
+            print(f'\tadded additional keyer to keyer_qs, good to go')
+
+        if len(keyer_qs) == 0:
+            keyer_qs = Keyer.objects.filter(is_next = False).order_by('reel_count')[:2]
+
+            for k in keyer_qs:
+                k.is_next = True
+                k.save()
+
+            print(f'\tadded two keyers to keyer_qs, good to go')
+
+        else:
+            print('too many keyers in queue!')
+            raise ValueError
+
+    # find the keyers after current pair, set them to next
+    next_keyers = Keyer.objects.filter(is_next=False).order_by('reel_count')[:2]
 
     for k in next_keyers:
         k.is_next = True
@@ -82,8 +107,10 @@ def load_images(filepath, year, keyers=[]):
     image_file_count = None
     image_file = None
 
+    # did you remember to specify the slash at the end of the filepath?
     files = glob.glob(filepath + "*.jpg")
-    print(files)
+    print(f'load_images() files on {filepath} are: {files}')
+
 
     # if no list of users was provided, look up next in table
     if not keyers:
@@ -148,6 +175,10 @@ def load_images(filepath, year, keyers=[]):
         #-- END loop over users for a given file --#
 
     #-- END loop over files in chosen folder --#
+
+    # set the number of images in reel to number of files
+    parent_reel.image_count = file_counter
+    parent_reel.save()
 
     return
 
@@ -267,9 +298,10 @@ def create_1990_dummy_breakers(users):
         )
 
 
-def delete_model_data():
+def delete_model_data(reset_keyers = True):
     '''
     Deletes all rows in specified tables
+    Optionally resets all keyer reel counts to 0
     '''
 
     data_models = [
@@ -286,6 +318,11 @@ def delete_model_data():
 
     for m in data_models:
         m.objects.all().delete()
+
+    if reset_keyers:
+        for k in Keyer.objects.all():
+            k.reel_count = 0
+            k.save()
 
 
 def create_image_fixture(path, users, out, ext="*.jpg"):
@@ -357,6 +394,29 @@ def load_form_fields(field_tbl_path, reload=True):
             logger.info(row)
             field = FormField(year = row[0], form_type=row[1], field_name=row[2])
             field.save()
+
+
+def load_reels_from_csv(reel_csv_path):
+    '''
+    Load images from a bunch of reels as specified in a csv
+
+    Takes: string path to reel_csv
+    Returns: None
+    '''
+
+    with open(reel_csv_path) as f:
+        csvreader = csv.reader(f)
+        next(csvreader) # skip header row
+    
+        for row in csvreader:
+            logger.info(row)
+
+            if len(row) > 2:
+                keyers = row[2:]
+            else:
+                keyers = []
+
+            load_reel(reel_path = row[0], year = row[1], keyers = keyers)
 
 
 def refresh_db():
