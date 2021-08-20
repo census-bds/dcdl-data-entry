@@ -139,7 +139,6 @@ class ImageFile(models.Model):
     img_path = models.CharField( max_length = 255, unique = True )
     img_file_name = models.CharField( max_length = 255 )
     img_folder_path = models.CharField( max_length = 255, blank = True, null = True )
-    # img_reel_label = models.CharField( max_length = 255 ) # move to Reel model eventually
     img_reel = models.ForeignKey( Reel, on_delete=models.CASCADE, blank = True, null = False)
     img_position = models.IntegerField()
 
@@ -198,7 +197,7 @@ class ImageFile(models.Model):
         string_list.append( "path: {}".format( self.img_path ) )
 
         # reel
-        string_list.append( "reel: {reel_label} ( {reel_index} )".format( reel_label = self.img_reel_label, reel_index = self.img_reel_index ) )
+        string_list.append( "reel: {reel_label}".format( reel_label = self.img_reel ) )
 
         # position
         string_list.append( "position: {}".format( self.img_position ) )
