@@ -10,6 +10,7 @@ user_info.csv
 EntryApp/migrations/00*
 
 # directories to ignore
+logs/
 static/
 temp/
 
