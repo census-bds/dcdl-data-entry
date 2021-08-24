@@ -43,6 +43,7 @@ from EntryApp.models import Breaker
 from EntryApp.models import CurrentEntry
 from EntryApp.models import FormField
 from EntryApp.models import Image
+from EntryApp.models import ImageFile
 from EntryApp.models import LongForm1990
 from EntryApp.models import OtherImage
 from EntryApp.models import Record
@@ -227,8 +228,13 @@ def get_request_data( request_IN ):
 def get_image_todo_qs( request ):
 
     '''
-    Helper function for BeginNewImageView
-    Look up next image for user to enter and put it in CurrentEntry
+    Helper function for IndexView
+    Looks up current reel info and image queryset 
+
+    Takes:
+    - request
+    Returns:
+    - queryset of images to complete
     '''
 
     # return reference
@@ -244,11 +250,15 @@ def get_image_todo_qs( request ):
     current_user = request.user
     current_username = current_user.username
 
+    # get list of images in this reel 
+    current_image_id = CurrentEntry.objects.get(jbid = current_username).img_id
+    current_imagefile = ImageFile.objects.get(image__id = current_image_id)
+    current_reel = Reel.objects.get(id = current_imagefile.img_reel_id)
+
     # get user image lists
-    # TODO: revise this so it's images left in this reel
     user_image_qs = Image.objects.filter( jbid = current_username )
     todo_image_qs = user_image_qs.filter( is_complete = False )
-    # todo_image_qs = todo_image_qs.order_by( 'image_file__img_reel_label', 'image_file__img_reel_index', 'image_file__img_position', )
+
 
     qs_OUT = todo_image_qs
 
@@ -397,6 +407,8 @@ class IndexView(LoginRequiredMixin, TemplateView):
         user_image_qs = Image.objects.filter( jbid = current_username )
         total_image_count = user_image_qs.count()
         context[ 'num_images' ] = total_image_count
+
+
 
         # todo
         todo_image_qs = get_image_todo_qs( request )
@@ -1974,13 +1986,15 @@ def logout_user(request):
     pass
 
 #------------------------------------------------------------------------------#
-# DUMMY VIEWS
+# EXAMPLE VIEWS
 #------------------------------------------------------------------------------#
 
-def test_crispy_formset_view(request, year):
+def test_crispy_formset_view(request, year, form_type):
     '''
     View for testing django crispy formsets
     '''
+
+    logger.info(f'test_crispy_formset_view() request: {request}')
 
     field_q = FormField.objects.filter(year=year).filter(form_type='short')
     fields = [f.field_name for f in list(field_q)]
@@ -2032,8 +2046,16 @@ def test_crispy_formset_view(request, year):
     )
     formset = TestCrispyFormset()
     helper = CrispyFormSetHelper(year=year)
+
+    ft = ''
+    if form_type == "long":
+        ft = form_type
+
     context = {
+        'year': year,
+        'form_type': ft,
         'formset': formset,
         'helper': helper
     }
+
     return render(request, 'EntryApp/test-crispy-formset.html', context)
