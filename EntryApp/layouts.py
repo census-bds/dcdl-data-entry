@@ -3,13 +3,38 @@ DEFINE LAYOUTS FOR DCDL DATA ENTRY
  Contains the layouts for each form for each year
 """
 
-from crispy_forms.layout import Submit, Layout
-from crispy_forms.bootstrap import Div, InlineRadios
+from crispy_forms.layout import Field
+from crispy_forms.layout import Layout
+from crispy_forms.layout import Submit
+from crispy_forms.bootstrap import Div 
+from crispy_forms.bootstrap import InlineRadios
 
 FORM_1960 = Layout(
     Div(
         Div(
-            Div('page_no', css_class='col-lg-1'),
+            Div('page_no', css_class='col-lg-1'), 
+            Div('line_no', css_class='col-lg-1'),
+            Div(InlineRadios('sample_key_gq'), css_class='col-lg-1'),
+            Div('last_name', css_class='col-lg-1'),
+            Div('first_name', css_class='col-lg-1'),
+            Div('middle_init', css_class='col-lg-1'),
+            Div(InlineRadios('relp_1960'), css_class='col-lg-1'),
+            Div('sex', css_class='col-lg-1'),
+            Div(InlineRadios('race_1960'), css_class='col-lg-1'),
+            Div(Div('birth_quarter', css_class='form-controls-inline'), css_class='col-lg-1'),
+            Div(InlineRadios('birth_decade'), css_class='col-lg-1'),
+            Div(InlineRadios('birth_year'), css_class='col-lg-1'),
+        css_class='table-bordered'
+        )
+    )
+)
+
+
+
+FORM_1960_CURRENT = Layout(
+    Div(
+        Div(
+            Field('page_no', css_class='col-lg-1'), 
             Div('line_no', css_class='col-lg-1'),
             Div(InlineRadios('sample_key_gq'), css_class='col-lg-1'),
             Div('last_name', css_class='col-lg-1'),
@@ -30,7 +55,7 @@ FORM_1960 = Layout(
             Div('apt_no', css_class='col-lg-1'),
             css_class='row'
         ),
-        css_class='table-bordered'
+        css_class='table-bordered form-inline'
     )
 )
 
@@ -92,7 +117,6 @@ FORM_1980 = Layout(
             Div('birth_year_hundreds', css_class='col-lg-2 col-md-2 col-sm-2'),
             Div('birth_year_tens', css_class='col-lg-2 col-md-2 col-sm-2'),
             Div('birth_year_ones', css_class='col-lg-2 col-md-2 col-sm-2'),
-            # css_class='row'
             css_class='col-lg-8 col-md-8 col-sm-8'
         ),
         Div(

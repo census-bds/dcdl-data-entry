@@ -52,6 +52,7 @@ from EntryApp.models import Sheet
 
 # EntryApp forms
 from EntryApp.forms import BaseBreakerFormSet
+from EntryApp.forms import BaseEmptyRecordFormSet
 from EntryApp.forms import BaseRecordFormSet
 from EntryApp.forms import BreakerForm
 from EntryApp.forms import CrispyFormSetHelper
@@ -2003,8 +2004,8 @@ def test_crispy_formset_view(request, year, form_type):
         Record,
         fields=fields,
         extra=2,
-        formset=BaseRecordFormSet,
-        widgets = {
+        formset=BaseEmptyRecordFormSet,
+                widgets = {
             'relp_1960': forms.RadioSelect,
             'relp_1970': forms.RadioSelect,
             'relp_1980': forms.RadioSelect,
@@ -2041,7 +2042,7 @@ def test_crispy_formset_view(request, year, form_type):
             'serial_no_11':forms.RadioSelect,
             'total_persons_hundreds': forms.RadioSelect,
             'total_persons_tens': forms.RadioSelect,
-            'total_persons_ones': forms.RadioSelect,
+            'total_persons_ones': forms.RadioSelect
         }
     )
     formset = TestCrispyFormset()
@@ -2049,7 +2050,7 @@ def test_crispy_formset_view(request, year, form_type):
 
     ft = ''
     if form_type == "long":
-        ft = form_type
+        ft = form_type + '_'
 
     context = {
         'year': year,
@@ -2059,3 +2060,16 @@ def test_crispy_formset_view(request, year, form_type):
     }
 
     return render(request, 'EntryApp/test-crispy-formset.html', context)
+
+
+def form_dev_view(request, year, form_type):
+    '''
+    Dummy view for messing with HTML/CSS hardcoded layout
+    '''
+
+    context = {
+        'year': year,
+        'form_type': form_type
+    }
+    
+    return render(request, 'EntryApp/form-dev.html', context)

@@ -93,4 +93,12 @@
     </form>
     <br>
     <br>
-{% endblock problem %}
+    <br>
+    <form action={% url 'EntryApp:form_dev_view' year=1960 form_type='short' %}>
+        {% csrf_token %}
+        <input type="submit" value="1960 form development">
+    </form>
+    <br>
+    <br>
+
+    {% endblock problem %}

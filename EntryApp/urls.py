@@ -7,5 +7,6 @@ urlpatterns = [
     path('', views.IndexView.as_view(), name='index'),
     path('report-problem/', views.report_problem, name='report_problem'),
     path('test-crispy-formset/<int:year>/<str:form_type>', views.test_crispy_formset_view, name='test_crispy_formset'),
-    path( 'code-image/', views.CodeImage.as_view(), name="code_image" )
+    path( 'code-image/', views.CodeImage.as_view(), name="code_image" ),
+    path('form-dev/<int:year>/<str:form_type>', views.form_dev_view, name='form_dev_view'),
 ]

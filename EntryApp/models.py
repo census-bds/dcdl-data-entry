@@ -1045,13 +1045,17 @@ class CurrentEntry(models.Model):
     Model to track current image and breaker for each user.
 
     This is basically a pointer: one row for each user, with foreign keys to
-    specify the 
+    link to data models
     '''
 
     img = models.ForeignKey(Image, on_delete=models.CASCADE)
     jbid = models.CharField(max_length=255, default='jbid000')
     breaker = models.ForeignKey(Breaker, on_delete=models.SET_NULL, null=True)
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, null=True) #TODO check if no longer needed
+
+    # # track reel and image file too.. 
+    # reel = models.ForeignKey(Reel, on_delete=models.CASCADE)
+    # imagefile = models.ForeignKey(ImageFile, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'CurrentEntry: {self.jbid} entering {self.img}'
