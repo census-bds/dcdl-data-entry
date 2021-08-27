@@ -16,8 +16,8 @@
 
         {% if next_image %}
     <p>
-        Next image ({{ num_todo }} remaining):
-        <br />
+        The current reel is from {{ next_image.year }}. Next image ({{ num_todo }} remaining):
+        <br/>
         <img src = "/images/{{ next_image.year }}/{{ next_image.image_file.img_file_name }}" style="width: 200px;" />
         <form action={% url 'EntryApp:code_image' %} method="post">
             {% csrf_token %}
