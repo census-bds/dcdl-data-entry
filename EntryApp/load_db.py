@@ -108,6 +108,9 @@ def load_images(filepath, year, keyers=[]):
     image_file = None
 
     # did you remember to specify the slash at the end of the filepath?
+    if filepath[-1] != "/":
+        filepath + '/'
+
     files = glob.glob(filepath + "*.jpg")
     print(f'load_images() files on {filepath} are: {files}')
 
