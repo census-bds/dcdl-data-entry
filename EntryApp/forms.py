@@ -200,10 +200,10 @@ class CrispyFormSetHelper(FormHelper):
     def __init__(self, year, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.form_method='POST'
-        self.form_class= 'form-inline'
+        self.form_class= ''
         # self.template = 'bootstrap/table_inline_formset.html' # this is nice but ignores custom layout
         self.label_class = 'sr-only'
-        self.layout = layouts.FORM_DICT[year]
+        self.layout = layouts.DEV_FORM_DICT[year]
         self.render_required_fields=True
         self.form_tag = False
 
@@ -221,7 +221,7 @@ class RecordFormHelper(FormHelper):
     def __init__(self, year, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.form_method='POST'
-        self.form_class='form-inline col-8'
+        self.form_class=''  
         self.label_class = 'sr-only'
         self.layout = layouts.FORM_DICT[year]
         self.render_required_fields=True

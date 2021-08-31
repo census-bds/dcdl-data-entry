@@ -1,16 +1,52 @@
 {% extends "base.html" %}
 
-<!-- <style>
-    textinput {
-        max-width: 100%;
-    }
-    .row {
-        display:flex;
-    }
-   
-</style> -->
 
 {% block header %}
+<style>
+    /* I don't know why this doesn't work in custom.css */
+    #form-row-div  {
+        flex-flow: row nowrap;
+        overflow-x: scroll;
+        align-items: flex-start;
+        gap: 25px;
+    }
+
+    .form-inline label {
+        justify-content:flex-start;
+    }
+
+    .control-label {
+      display: inline-block;
+      width:max-content;   /*auto Prevent labels from stacking above inputs in `.form-group` */
+    }
+
+    #form-1970-names-div {
+        display:block;
+    }
+
+    #form-1970-first-name-middle-init {
+        display:flex;
+        gap:25px;
+    }
+
+    #form-1970-age-block {
+        display:block;
+    }
+
+/* For inputs */
+
+    .numberinput-small {
+    width:60px;
+    }
+
+    .textinput-small {
+    width:60px;
+    }
+
+       
+</style>
+    
+
 <h2>Example {{ year }} {{ form_type }} form</h2>
 {% endblock header %}
 
@@ -25,7 +61,7 @@
         <script type="text/javascript">
                 var Viewer = OpenSeadragon({
                     id: "openseadragon1",
-                    prefixUrl: "/static/",
+                    prefixUrl: "/static/openseadragon_images/",
                     tileSources: {
                         type: 'image',
                         url: "/images/examples/example_{{ year }}_{{ form_type }}form.jpg"
@@ -36,10 +72,12 @@
     </div>
     
     <div class='col-lg-7 right-col'>
-        <div id='the_crispy_formset' class='container-fluid col-8'>
+        <div id='the_crispy_formset' class='container-fluid col-8' style="max-width: 100%;">
             This is the record entry form.
         </div>
-        {% crispy formset helper %}
+        <div class='flex-container'  style="margin-left: 50px;">
+            {% crispy formset helper %}
+        </div>
     </div>
 </div>
 </div>

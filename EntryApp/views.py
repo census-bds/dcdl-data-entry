@@ -2003,9 +2003,10 @@ def test_crispy_formset_view(request, year, form_type):
     TestCrispyFormset = modelformset_factory(
         Record,
         fields=fields,
-        extra=2,
+        extra=1,
         formset=BaseEmptyRecordFormSet,
                 widgets = {
+            'sample_key_gq': forms.RadioSelect,
             'relp_1960': forms.RadioSelect,
             'relp_1970': forms.RadioSelect,
             'relp_1980': forms.RadioSelect,
