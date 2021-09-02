@@ -4,7 +4,7 @@
     <h2>Sheet data entry</h2>
     <div id="breakerCheck">
         <p>
-            This sheet will be associated with the breaker image "{{breaker_instance.img.image_file.img_file_name}}": <img src = "/images/{{breaker_instance.img.image_file.img_file_name}}" style="width: 200px;" />
+            This sheet will be associated with the breaker image "{{ breaker_instance.img.image_file.img_file_name}}": <img src = "/images/{{ breaker_instance.year }}/{{breaker_instance.img.image_file.img_file_name}}" style="width: 200px;" />
             <ul>
                 <li>Breaker year: {{ breaker_instance.year }}</li>
                 <li>Breaker state: {{breaker_instance.state }}</li>

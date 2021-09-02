@@ -14,7 +14,7 @@ import os
 from pathlib import Path
 
 # set config denoting whether this is dev, test, or prod
-APP_INSTANCE = "" 
+APP_INSTANCE = "dev" 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '' 
+SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -45,15 +45,21 @@ LOGGING = {
             'filename': f'/data/data/user/django_user/{APP_INSTANCE}/logs/info.log',
             'formatter': 'verbose'
         },
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
     },
+    
     'loggers': {
         'root': {
-            'handlers': ['file'],
+            'handlers': ['file',],
             'level': 'INFO',
             'formatter': 'verbose'
         },
         'django': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console', 'file',],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': True,
         },
@@ -163,17 +169,17 @@ LOGIN_REDIRECT_URL = '/EntryApp/'
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/deepzoom/js/vendor/openseadragon/images/')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/') # where it puts the static files
 
 MEDIA_URL = '/images/' # this is the thing to change
 MEDIA_ROOT = '/data/data/images/dev_images'
 
+# where it looks for static files: everything inside these goes into STATIC_ROOT
 STATICFILES_DIRS = (
-    # os.path.join(BASE_DIR, 'boot'), 
-    '/data/data/user/django_user/dev/static/',
+    '/data/data/user/django_user/dev/static/images',  
 )
 
 # globals for loading data
-FORM_FIELDS_CSV = os.path.join(Path(__file__).parent.absolute(), 'form_fields.csv')
+FORM_FIELDS_CSV = os.path.join(Path(__file__).parent.parent.absolute(), 'form_fields.csv')
 IMAGE_DIR = '/data/data/images/dev_images'
-USER_INFO = os.path.join(Path(__file__).parent.absolute(), 'user_info.csv')
+USER_INFO = os.path.join(Path(__file__).parent.parent.absolute(), 'user_info.csv')

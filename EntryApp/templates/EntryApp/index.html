@@ -16,8 +16,8 @@
 
         {% if next_image %}
     <p>
-        Next image ({{ num_todo }} remaining):
-        <br />
+        The current reel is from {{ next_image.year }}. Next image ({{ num_todo }} remaining):
+        <br/>
         <img src = "/images/{{ next_image.year }}/{{ next_image.image_file.img_file_name }}" style="width: 200px;" />
         <form action={% url 'EntryApp:code_image' %} method="post">
             {% csrf_token %}
@@ -67,25 +67,38 @@
 {% block problem %}
     <p>Click the buttons below to view sample record entry pages for each year.</p>
     <br>
-    <form action={% url 'EntryApp:test_crispy_formset' 1960 %}>
+    <form action={% url 'EntryApp:test_crispy_formset' year=1960 form_type='short'%}>
         {% csrf_token %}
         <input type="submit" value="View 1960">
     </form>
     <br>
-    <form action={% url 'EntryApp:test_crispy_formset' 1970 %}>
+    <form action={% url 'EntryApp:test_crispy_formset' year=1970 form_type='short' %}>
         {% csrf_token %}
         <input type="submit" value="View 1970">
     </form>
     <br>
-    <form action={% url 'EntryApp:test_crispy_formset' 1980 %}>
+    <form action={% url 'EntryApp:test_crispy_formset' year=1980 form_type='short' %}>
         {% csrf_token %}
         <input type="submit" value="View 1980">
     </form>
     <br>
-    <form action={% url 'EntryApp:test_crispy_formset' 1990 %}>
+    <form action={% url 'EntryApp:test_crispy_formset' year=1990 form_type='short' %}>
         {% csrf_token %}
         <input type="submit" value="View 1990">
     </form>
     <br>
+    <form action={% url 'EntryApp:test_crispy_formset' year=1990 form_type='long' %}>
+        {% csrf_token %}
+        <input type="submit" value="View 1990 long form">
+    </form>
     <br>
-{% endblock problem %}
+    <br>
+    <br>
+    <form action={% url 'EntryApp:form_dev_view' year=1960 form_type='short' %}>
+        {% csrf_token %}
+        <input type="submit" value="1960 form development">
+    </form>
+    <br>
+    <br>
+
+    {% endblock problem %}

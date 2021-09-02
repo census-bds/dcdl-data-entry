@@ -43,13 +43,16 @@ from EntryApp.models import Breaker
 from EntryApp.models import CurrentEntry
 from EntryApp.models import FormField
 from EntryApp.models import Image
+from EntryApp.models import ImageFile
 from EntryApp.models import LongForm1990
 from EntryApp.models import OtherImage
 from EntryApp.models import Record
+from EntryApp.models import Reel
 from EntryApp.models import Sheet
 
 # EntryApp forms
 from EntryApp.forms import BaseBreakerFormSet
+from EntryApp.forms import BaseEmptyRecordFormSet
 from EntryApp.forms import BaseRecordFormSet
 from EntryApp.forms import BreakerForm
 from EntryApp.forms import CrispyFormSetHelper
@@ -226,8 +229,13 @@ def get_request_data( request_IN ):
 def get_image_todo_qs( request ):
 
     '''
-    Helper function for BeginNewImageView
-    Look up next image for user to enter and put it in CurrentEntry
+    Helper function for IndexView
+    Looks up current reel info and image queryset 
+
+    Takes:
+    - request
+    Returns:
+    - queryset of images to complete
     '''
 
     # return reference
@@ -243,10 +251,15 @@ def get_image_todo_qs( request ):
     current_user = request.user
     current_username = current_user.username
 
+    # get list of images in this reel 
+    current_image_id = CurrentEntry.objects.get(jbid = current_username).img_id
+    current_imagefile = ImageFile.objects.get(image__id = current_image_id)
+    current_reel = Reel.objects.get(id = current_imagefile.img_reel_id)
+
     # get user image lists
     user_image_qs = Image.objects.filter( jbid = current_username )
     todo_image_qs = user_image_qs.filter( is_complete = False )
-    todo_image_qs = todo_image_qs.order_by( 'image_file__img_reel_label', 'image_file__img_reel_index', 'image_file__img_position', )
+
 
     qs_OUT = todo_image_qs
 
@@ -395,6 +408,8 @@ class IndexView(LoginRequiredMixin, TemplateView):
         user_image_qs = Image.objects.filter( jbid = current_username )
         total_image_count = user_image_qs.count()
         context[ 'num_images' ] = total_image_count
+
+
 
         # todo
         todo_image_qs = get_image_todo_qs( request )
@@ -588,22 +603,6 @@ class CodeImage( LoginRequiredMixin, FormView ):
                 breaker_data['year'] = image_instance.year
                 breaker_data['jbid'] = request_IN.user.username
                 breaker_data['timestamp'] = datetime.datetime.now()
-
-                # Example breaker_data contents:
-                # breaker_data: {
-                #     'state': 'md',
-                #     'county': 'pg',
-                #     'mcd': '1',
-                #     'tract': '1',
-                #     'place': '1',
-                #     'smsa': '1',
-                #     'enumeration_district': '1',
-                #     'id': <Breaker: Breaker 24 - file ID: 46 - file path: fake_IMG_0.jpg - year: 1980 - type: breaker from morga424>,
-                #     'img': <Image: 24 - file ID: 46 - file path: fake_IMG_0.jpg - year: 1980 - type: breaker>,
-                #     'year': 1980,
-                #     'jbid': <SimpleLazyObject: <User: morga424>>,
-                #     'timestamp': datetime.datetime(2021, 4, 23, 11, 12, 51, 508171)
-                # }
 
                 # remove "id" since it breaks qs.update().
                 if ( "id" in breaker_data ):
@@ -1758,8 +1757,8 @@ class CodeImage( LoginRequiredMixin, FormView ):
                     error_list.extend( returned_error_list )
                 #-- END check if process_action errors. --#
 
-                # if the action is complete_image OR update_other_image, we return to the index
-                if my_action in [ACTION_COMPLETE_IMAGE, ACTION_UPDATE_OTHER_IMAGE, ]:
+                # if the action is complete_image, update_breaker_type, update_other_image, we return to the index
+                if my_action in [ACTION_COMPLETE_IMAGE, ACTION_UPDATE_OTHER_IMAGE, ACTION_UPDATE_BREAKER_TYPE]:
                     
                     return redirect(reverse("EntryApp:index"))
                 
@@ -1988,13 +1987,15 @@ def logout_user(request):
     pass
 
 #------------------------------------------------------------------------------#
-# DUMMY VIEWS
+# EXAMPLE VIEWS
 #------------------------------------------------------------------------------#
 
-def test_crispy_formset_view(request, year):
+def test_crispy_formset_view(request, year, form_type):
     '''
     View for testing django crispy formsets
     '''
+
+    logger.info(f'test_crispy_formset_view() request: {request}')
 
     field_q = FormField.objects.filter(year=year).filter(form_type='short')
     fields = [f.field_name for f in list(field_q)]
@@ -2003,8 +2004,8 @@ def test_crispy_formset_view(request, year):
         Record,
         fields=fields,
         extra=2,
-        formset=BaseRecordFormSet,
-        widgets = {
+        formset=BaseEmptyRecordFormSet,
+                widgets = {
             'relp_1960': forms.RadioSelect,
             'relp_1970': forms.RadioSelect,
             'relp_1980': forms.RadioSelect,
@@ -2041,13 +2042,34 @@ def test_crispy_formset_view(request, year):
             'serial_no_11':forms.RadioSelect,
             'total_persons_hundreds': forms.RadioSelect,
             'total_persons_tens': forms.RadioSelect,
-            'total_persons_ones': forms.RadioSelect,
+            'total_persons_ones': forms.RadioSelect
         }
     )
     formset = TestCrispyFormset()
     helper = CrispyFormSetHelper(year=year)
+
+    ft = ''
+    if form_type == "long":
+        ft = form_type + '_'
+
     context = {
+        'year': year,
+        'form_type': ft,
         'formset': formset,
         'helper': helper
     }
+
     return render(request, 'EntryApp/test-crispy-formset.html', context)
+
+
+def form_dev_view(request, year, form_type):
+    '''
+    Dummy view for messing with HTML/CSS hardcoded layout
+    '''
+
+    context = {
+        'year': year,
+        'form_type': form_type
+    }
+    
+    return render(request, 'EntryApp/form-dev.html', context)

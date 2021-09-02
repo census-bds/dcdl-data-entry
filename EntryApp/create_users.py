@@ -7,9 +7,11 @@ import pathlib
 import pandas as pd
 
 from django.conf import settings
-from django.contrib.auth.models import User, Group, Permission
+from django.contrib.auth.models import Group
+from django.contrib.auth.models import User
 from django.contrib.auth.hashers import make_password
 from EntryApp.models import Image
+from EntryApp.models import Keyer
 
 
 
@@ -42,13 +44,23 @@ def create_entry_users(jbids=['jbid123', 'jbid456'], pws=['dcdl1980', 'dcdl1980'
         raise ValueError
 
     while jbids:
-        user, _ = User.objects.get_or_create(
-            username=jbids.pop(),
+
+        this_jbid = jbids.pop()
+
+        this_user, _ = User.objects.get_or_create(
+            username=this_jbid,
             password=make_password(pws.pop())
         )
         group_id = Group.objects.get(name='data_entry').id
-        user.groups.add(group_id)
-        user.save()
+        this_user.groups.add(group_id)
+        this_user.save()
+
+        this_keyer, _ = Keyer.objects.get_or_create(
+            user = this_user,
+            jbid = this_jbid,
+            reel_count = 0,
+            is_next = False
+        )
 
 
 def add_entry_user(jbid, pw):
@@ -62,13 +74,20 @@ def add_entry_user(jbid, pw):
     - None
     '''
 
-    user, _ = User.objects.get_or_create(
+    this_user, _ = User.objects.get_or_create(
         username=jbid,
         password=make_password(pw)
     )
     group_id = Group.objects.get(name='data_entry').id
-    user.groups.add(group_id)
-    user.save()        
+    this_user.groups.add(group_id)
+    this_user.save()        
+
+    this_keyer, _ = Keyer.objects.get_or_create(
+        user = this_user,
+        jbid = jbid,
+        reel_count = 0,
+        is_next = False
+    )
 
 
 def bulk_load_entry_users(path=settings.USER_INFO):
@@ -83,3 +102,12 @@ def bulk_load_entry_users(path=settings.USER_INFO):
 
     df = pd.read_csv(path)
     df.apply(lambda x: add_entry_user(x.jbid, x.password), axis=1)
+
+    # set two keyers randomly to is_next if no one is next yet
+    if len(Keyer.objects.filter(is_next = True)) == 0:
+
+        keyers = Keyer.objects.all()[:2]
+        for k in keyers:
+            k.is_next = True
+            k.save()
+    

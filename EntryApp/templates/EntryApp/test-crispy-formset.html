@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-<style>
+<!-- <style>
     textinput {
         max-width: 100%;
     }
@@ -8,36 +8,36 @@
         display:flex;
     }
    
-</style>
+</style> -->
 
 {% block header %}
-<h2>Crispy form test page</h2>
+<h2>Example {{ year }} {{ form_type }} form</h2>
 {% endblock header %}
 
 {% block content %}
 
 {% load crispy_forms_tags %}
 <div class='flex-container'>
-<div class='row' >
-    <div class='col-lg-3'>
+<div class='row row-height' >
+    <div class='col-lg-5'>
         <div id="openseadragon1" style="width: 95%; height: 800px;"></div>
         <script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
         <script type="text/javascript">
                 var Viewer = OpenSeadragon({
                     id: "openseadragon1",
-                    prefixUrl: "/static/images/",
+                    prefixUrl: "/static/openseadragon_images/",
                     tileSources: {
                         type: 'image',
-                        url: "/images/fake_IMG_0.jpg"
+                        url: "/images/examples/example_{{ year }}_{{ form_type }}form.jpg"
                     },
                     buildPyramid: false
                 });
             </script>    
     </div>
     
-    <div class='col-lg-8'>
+    <div class='col-lg-7 right-col'>
         <div id='the_crispy_formset' class='container-fluid col-8'>
-            This is the crispy formset.
+            This is the record entry form.
         </div>
         {% crispy formset helper %}
     </div>

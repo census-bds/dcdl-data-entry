@@ -164,13 +164,21 @@ class ProblemForm(forms.Form):
 
 class BaseRecordFormSet(forms.BaseModelFormSet):
     '''
+    Subclass for RecordFormSet so that formset returns existing data
+    '''
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
+class BaseEmptyRecordFormSet(forms.BaseModelFormSet):
+    '''
     Subclass for RecordFormSet so that formset returns no existing data
     '''
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # self.queryset = Record.objects.none()
-
+        self.queryset =  Record.objects.none()
 
 class BaseBreakerFormSet(forms.BaseModelFormSet):
     '''
@@ -180,7 +188,6 @@ class BaseBreakerFormSet(forms.BaseModelFormSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         #self.queryset = Breaker.objects.none()
-
 
 
 class CrispyFormSetHelper(FormHelper):
@@ -193,12 +200,15 @@ class CrispyFormSetHelper(FormHelper):
     def __init__(self, year, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.form_method='POST'
-        self.form_class='form-inline col-8'
+        self.form_class= 'form-inline'
+        # self.template = 'bootstrap/table_inline_formset.html' # this is nice but ignores custom layout
         self.label_class = 'sr-only'
         self.layout = layouts.FORM_DICT[year]
         self.render_required_fields=True
-        # self.add_input(Submit("submit", "Submit"))
         self.form_tag = False
+
+        self.queryset = Record.objects.none()
+
 
 
 class RecordFormHelper(FormHelper):
