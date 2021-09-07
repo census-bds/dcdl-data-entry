@@ -122,17 +122,17 @@ FORM_1980 = Layout(
 
 FORM_1990 = Layout(
     Div(
-        Div('col_num', css_class='row col-lg-11 col-md-11 col-sm-11'),
-        Div('last_name', css_class='row col-lg-11 col-md-11 col-sm-11'),
+        Field('col_num'),
+        Field('last_name'),
         Div(
-            Div('first_name', css_class='col-lg-8 col-md-8 col-sm-8'),
-            Div('middle_init', css_class='col-lg-4 col-md-4 col-sm-4'),
-            css_class='row'
+            Field('first_name'),
+            Field('middle_init', css_class='textinput-small'),
+            css_id='form-1990-first-name-middle-init'
         ),
-        Div('sex', css_class='row'),
-        Div('race_1990', css_class='row'),
+        Div('sex', css_id='form-1990-sex-radios'),
+        Div('race_1990', css_id='form-1990-race-radios'),
         Div(
-            Div('age', css_class='row'),
+            Field('age', css_class='numberinput-small'),
             Div(
                 Div('age_hundreds', css_class='col-lg-3 col-md-3 col-sm-3'),
                 Div('age_tens', css_class='col-lg-3 col-md-3 col-sm-3'),
@@ -142,7 +142,7 @@ FORM_1990 = Layout(
             css_class='col-lg-6 col-md-6 col-sm-6'
         ),
         Div(
-            Div('exact_birth_year',
+            Field('exact_birth_year', css_class='numberinput-small'),
                 Div(
                     Div('birth_year_thousands', css_class='col-lg-3 col-md-3 col-sm-3'),
                     Div('birth_year_hundreds', css_class='col-lg-3 col-md-3 col-sm-3'),
@@ -151,20 +151,18 @@ FORM_1990 = Layout(
                     css_class='row'
                 ),
             css_class='col-lg-6 col-md-6 col-sm-6'
-            ),
         ),
-        Div('serial_no', css_class='row col-lg-11 col-md-11 col-sm-11'),
         Div(
+            Field('total_persons', css_class='numberinput-small'), 
             Div(
-                Div('total_persons', css_class='col-lg-3 col-md-3 col-sm-3'), 
-                Div('do_id', css_class='col-lg-9 col-md-9 col-sm-0'),
-                css_class="row"
-            ),
-            Div(
-                Div('total_persons_tens', css_class='col-lg-6 col-md-6 col-sm-6'),
-                Div('total_persons_ones', css_class='col-lg-6 col-md-6 col-sm-6'),
-                css_class='row col-lg-3 col-md-3 col-sm-3'
-            ),
+                Div('total_persons_tens', css_class='col-lg-3 col-md-3 col-sm-3'),
+                Div('total_persons_ones', css_class='col-lg-3 col-md-3 col-sm-3'),
+                css_class='row'
+            )
+        ),
+        Div(
+            Field('serial_no'),
+            Field('do_id'),
             Div(
                 Div('serial_no_1', css_class='col-lg-1 col-md-1 col-sm-1'),
                 Div('serial_no_2', css_class='col-lg-1 col-md-1 col-sm-1'),
@@ -177,11 +175,10 @@ FORM_1990 = Layout(
                 Div('serial_no_9', css_class='col-lg-1 col-md-1 col-sm-1'),
                 Div('serial_no_10', css_class='col-lg-1 col-md-1 col-sm-1'),
                 Div('serial_no_11', css_class='col-lg-1 col-md-1 col-sm-1'),
-                css_class="col-lg-9 col-md-9 col-sm-9"
-            ),
-            css_class="row"
+                css_class="row"
+            )
         ),
-        css_class='table-bordered col-lg-4 col-md-4 col-sm-4'
+        css_class='form-inline form-column'
     )
 )
 
