@@ -4,47 +4,103 @@
 <script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
 <style>
     /* I don't know why this doesn't work in custom.css */
-    #form-row-div  {
-        flex-flow: row nowrap;
-        overflow-x: scroll;
-        align-items: flex-start;
-        gap: 25px;
-    }
-
-    .form-inline label {
-        justify-content:flex-start;
-    }
-
-    #form-1970-names-div {
-        display:block;
-    }
-
-    #form-1970-first-name-middle-init {
-        display:flex;
-        gap:25px;
-    }
-
-    #form-1970-age-block {
-        display:block;
-    }
-
-/* For inputs */
-
-    .control-label {
-      display: inline-block;
-      width:max-content;   /*auto Prevent labels from stacking above inputs in `.form-group` */
-    }
-
-    .numberinput-small {
-    width:60px;
-    }
-
-    .textinput-small {
-    width:60px;
-    }
-
-       
-</style>
+    
+        #form-row-div  {
+            flex-flow: row nowrap;
+            overflow-x: scroll;
+            align-items: flex-start;
+            gap: 25px;
+        }
+    
+        .form-inline label {
+            justify-content:flex-start;
+        }
+    
+        .control-label {
+          display: inline-block;
+          width:max-content;   /*auto Prevent labels from stacking above inputs in `.form-group` */
+          font-weight:bold;
+        }
+    
+        .form-column {
+            max-width: 300px;
+    
+        }
+    
+        .control-group {
+            margin-bottom: 10px;
+        }
+    
+        /* For inputs */
+    
+        .numberinput-small {
+        width:60px;
+        }
+    
+        .textinput-small {
+        width:60px;
+        }
+    
+    
+    
+      /* 1970 */
+    
+        #form-1970-names-div {
+            display:block;
+        }
+    
+        #form-1970-first-name-middle-init {
+            display:flex;
+            gap:25px;
+        }
+    
+        #form-1970-age-block {
+            display:block;
+        }
+    
+    /* 1980 */
+    
+        #form-1980-first-name-middle-init {
+            display:flex;
+            gap:25px;
+        }
+    
+        #form-1980-sex-radios {
+            display:flex;
+            margin-right:200px;
+        }
+    
+        #form-1980-race-radios {
+            margin-right: 200px;
+        }
+    
+        #form-1980-birth-year-radios {
+            margin-right:100px;
+        }
+    
+        #form-1980-age-block {
+            display: flex;
+            gap:25px;
+        }
+    
+    
+    /* 1990 */
+    
+        #form-1990-first-name-middle-init {
+            display:flex;
+            gap:25px;
+        }
+    
+        #form-1990-sex-radios {
+            display:flex;
+            margin-right:200px;
+        }
+    
+        #form-1990-race-radios {
+            margin-right: 200px;
+        }
+           
+    </style>
 {% endblock end_of_head_tag %}
 
 {% block header %}

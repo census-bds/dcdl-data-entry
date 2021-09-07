@@ -185,8 +185,8 @@ FORM_1990 = Layout(
 LONG_FORM_1990 = Layout(
     Div(
         Div(
-            Div('serial_no', css_class='col-lg-1 col-md-1 col-sm-1'),
-            Div('person_no', css_class='col-lg-1 col-md-1 col-sm-1'),
+            Field('serial_no'),
+            Field('person_no'),
             css_class='row'
         ),
         Div('employer', css_class='row'),
@@ -194,7 +194,7 @@ LONG_FORM_1990 = Layout(
         Div('industry_category', css_class='row'),
         Div('occupation', css_class='row'),
         Div('occupation_detail', css_class='row'),
-        css_class = 'table-bordered'
+        css_class = 'form-inline form-column'
     )
 )
 

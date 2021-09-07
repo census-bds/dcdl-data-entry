@@ -2,10 +2,11 @@
 
 <p class = "longform_info">
     <h2>1990 long form data entry</h2>
-    <div id='longform-entry'>
-        <p>
-            Enter data from the 1990 long form below.
-        </p>
+</p>
+    <p>
+        Enter data from the 1990 long form below.
+    </p>
+        <div id='longform-entry'>
         <form method="GET">
             {% csrf_token %}
             {% crispy longform_form helper %}

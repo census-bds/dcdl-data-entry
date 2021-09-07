@@ -56,6 +56,7 @@ from EntryApp.forms import BaseEmptyRecordFormSet
 from EntryApp.forms import BaseRecordFormSet
 from EntryApp.forms import BreakerForm
 from EntryApp.forms import CrispyFormSetHelper
+from EntryApp.forms import CrispyLongFormHelper
 from EntryApp.forms import ImageForm
 from EntryApp.forms import ImageTypeForm
 from EntryApp.forms import ImageYearForm
@@ -1997,57 +1998,85 @@ def test_crispy_formset_view(request, year, form_type):
 
     logger.info(f'test_crispy_formset_view() request: {request}')
 
-    field_q = FormField.objects.filter(year=year).filter(form_type='short')
-    fields = [f.field_name for f in list(field_q)]
+    fields = get_form_fields(year, form_type) 
     logger.info(f'crispy formset fields are {fields}')
-    TestCrispyFormset = modelformset_factory(
-        Record,
-        fields=fields,
-        extra=1,
-        formset=BaseEmptyRecordFormSet,
-                widgets = {
-            'sample_key_gq': forms.RadioSelect,
-            'relp_1960': forms.RadioSelect,
-            'relp_1970': forms.RadioSelect,
-            'relp_1980': forms.RadioSelect,
-            'relp_1990': forms.RadioSelect,
-            'sex': forms.RadioSelect,
-            'race_1960': forms.RadioSelect,
-            'race_1970': forms.RadioSelect,
-            'race_1980': forms.RadioSelect,
-            'race_1990': forms.RadioSelect,
-            'birth_quarter': forms.RadioSelect,
-            'birth_decade': forms.RadioSelect,
-            'birth_year': forms.RadioSelect,
-            'marital_status': forms.RadioSelect,
-            'age_hundreds': forms.RadioSelect,
-            'age_tens': forms.RadioSelect,
-            'age_ones': forms.RadioSelect,
-            'birth_year_thousands': forms.RadioSelect,
-            'birth_year_hundreds': forms.RadioSelect,
-            'birth_year_tens': forms.RadioSelect,
-            'birth_year_ones': forms.RadioSelect,
-            'block_1': forms.RadioSelect,
-            'block_2': forms.RadioSelect,
-            'block_3': forms.RadioSelect,
-            'serial_no_1':forms.RadioSelect,
-            'serial_no_2':forms.RadioSelect,
-            'serial_no_3':forms.RadioSelect,
-            'serial_no_4':forms.RadioSelect,
-            'serial_no_5':forms.RadioSelect,
-            'serial_no_6':forms.RadioSelect,
-            'serial_no_7':forms.RadioSelect,
-            'serial_no_8':forms.RadioSelect,
-            'serial_no_9':forms.RadioSelect,
-            'serial_no_10':forms.RadioSelect,
-            'serial_no_11':forms.RadioSelect,
-            'total_persons_hundreds': forms.RadioSelect,
-            'total_persons_tens': forms.RadioSelect,
-            'total_persons_ones': forms.RadioSelect
-        }
-    )
-    formset = TestCrispyFormset()
-    helper = CrispyFormSetHelper(year=year)
+    field_widgets = {f: choices.FORM_WIDGETS[f] for f in fields if f in choices.FORM_WIDGETS}
+
+
+    # different layout helpers depending on form type
+    if form_type == "short":
+
+        TestCrispyForm = modelform_factory(
+            Record,
+            fields = fields,
+            widgets = field_widgets
+        )
+        form = TestCrispyForm()
+        helper = CrispyFormSetHelper(year=year)
+    
+    elif form_type == "long":
+
+        TestCrispyForm = modelform_factory(
+            LongForm1990,
+            fields = fields,
+            widgets = field_widgets
+        )
+        form = TestCrispyForm()
+        helper = CrispyLongFormHelper(year=year)
+    
+    else:
+        logger.warn(f"test_crispy_formset_view(): unknown form_type is {form_type}")
+        raise ValueError
+
+    # TestCrispyFormset = modelformset_factory(
+    #     Record,
+    #     fields=fields,
+    #     extra=1,
+    #     formset=BaseEmptyRecordFormSet,
+    #     widgets = {
+    #         'sample_key_gq': forms.RadioSelect,
+    #         'relp_1960': forms.RadioSelect,
+    #         'relp_1970': forms.RadioSelect,
+    #         'relp_1980': forms.RadioSelect,
+    #         'relp_1990': forms.RadioSelect,
+    #         'sex': forms.RadioSelect,
+    #         'race_1960': forms.RadioSelect,
+    #         'race_1970': forms.RadioSelect,
+    #         'race_1980': forms.RadioSelect,
+    #         'race_1990': forms.RadioSelect,
+    #         'birth_quarter': forms.RadioSelect,
+    #         'birth_decade': forms.RadioSelect,
+    #         'birth_year': forms.RadioSelect,
+    #         'marital_status': forms.RadioSelect,
+    #         'age_hundreds': forms.RadioSelect,
+    #         'age_tens': forms.RadioSelect,
+    #         'age_ones': forms.RadioSelect,
+    #         'birth_year_thousands': forms.RadioSelect,
+    #         'birth_year_hundreds': forms.RadioSelect,
+    #         'birth_year_tens': forms.RadioSelect,
+    #         'birth_year_ones': forms.RadioSelect,
+    #         'block_1': forms.RadioSelect,
+    #         'block_2': forms.RadioSelect,
+    #         'block_3': forms.RadioSelect,
+    #         'serial_no_1':forms.RadioSelect,
+    #         'serial_no_2':forms.RadioSelect,
+    #         'serial_no_3':forms.RadioSelect,
+    #         'serial_no_4':forms.RadioSelect,
+    #         'serial_no_5':forms.RadioSelect,
+    #         'serial_no_6':forms.RadioSelect,
+    #         'serial_no_7':forms.RadioSelect,
+    #         'serial_no_8':forms.RadioSelect,
+    #         'serial_no_9':forms.RadioSelect,
+    #         'serial_no_10':forms.RadioSelect,
+    #         'serial_no_11':forms.RadioSelect,
+    #         'total_persons_hundreds': forms.RadioSelect,
+    #         'total_persons_tens': forms.RadioSelect,
+    #         'total_persons_ones': forms.RadioSelect
+    #     }
+    # )
+    # formset = TestCrispyFormset()
+
+
 
     ft = ''
     if form_type == "long":
@@ -2056,7 +2085,7 @@ def test_crispy_formset_view(request, year, form_type):
     context = {
         'year': year,
         'form_type': ft,
-        'formset': formset,
+        'formset': form,
         'helper': helper
     }
 
