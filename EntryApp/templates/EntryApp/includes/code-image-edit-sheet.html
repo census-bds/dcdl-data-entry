@@ -1,6 +1,6 @@
 {% load crispy_forms_tags %}
 
-<p class = "sheet_info">
+<div class = "sheet_info">
     <h2>Sheet data entry</h2>
     <div id="breakerCheck">
         <p>
@@ -12,10 +12,13 @@
             </ul>
         </p>
     </div>
+
     <div id='sheetEntry'>
         <p>
             Select which kind of sheet this is and how many individual records it contains.
         </p>
+    </div>
+    <div>
         <form method="GET">
             {% csrf_token %}
             {{ sheet_form.as_p }}
@@ -30,13 +33,14 @@
             <input type="submit" value="Submit">
         </form>
     </div>
-    </div>
-    <div id="recordList">
+
+    
+<div id="recordList">
     <p>
     {% include "EntryApp/includes/code-image-record-list.html" %}
     </p>    
 </div>
-<div class="row" id="image-complete">
+<div class="row" id="image-complete" style="margin-left: 10px;">
     <form method="POST">
         {% csrf_token %}
         <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
@@ -45,7 +49,7 @@
     </form>
 </div>
 <div class="row" id="record-entry">
-    <div class="flex-container">
+    <div class="flex-container" style="margin-left: 50px;">
     {% if record_form %}
     <p>
         Record form goes here.
@@ -53,10 +57,13 @@
     <form method="POST">
         {% csrf_token %}
         {% crispy record_form helper %}
+
         <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
         <input type="hidden" name="{{ param_names.PARAM_NAME_SHEET_ID }}" value="{{ sheet_instance.id }}" />
         <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_record" />
+        
         <input type="submit" value="Submit"> 
+
         {% if record_instance %}
         <input type="hidden" name="{{ param_names.PARAM_NAME_RECORD_ID }}" value="{{ record_instance.id }}">
         {% endif %}

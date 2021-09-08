@@ -190,27 +190,6 @@ class BaseBreakerFormSet(forms.BaseModelFormSet):
         #self.queryset = Breaker.objects.none()
 
 
-class CrispyFormSetHelper(FormHelper):
-    '''
-    Custom FormHelper for Record formset layout
-
-    This FormHelper applies CSS styling and defines layout.
-    The layout comes from the year and form specified in __init__
-    '''
-    def __init__(self, year, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.form_method='POST'
-        self.form_class= 'form-inline'
-        # self.template = 'bootstrap/table_inline_formset.html' # this is nice but ignores custom layout
-        self.label_class = 'sr-only'
-        self.layout = layouts.FORM_DICT[year]
-        self.render_required_fields=True
-        self.form_tag = False
-
-        self.queryset = Record.objects.none()
-
-
-
 class RecordFormHelper(FormHelper):
     '''
     Custom FormHelper for Record form layout
@@ -221,7 +200,7 @@ class RecordFormHelper(FormHelper):
     def __init__(self, year, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.form_method='POST'
-        self.form_class='form-inline col-8'
+        self.form_class=''  
         self.label_class = 'sr-only'
         self.layout = layouts.FORM_DICT[year]
         self.render_required_fields=True
@@ -234,6 +213,36 @@ class LongFormHelper(RecordFormHelper):
 
     Subclasses the record form helper
     '''
+    def __init__(self, year, *args, **kwargs):
+        super().__init__(year, *args, **kwargs)
+        self.layout = layouts.LONG_FORM_1990
+
+
+class CrispyFormSetHelper(FormHelper):
+    '''
+    Custom FormHelper for Record formset layout
+
+    This FormHelper applies CSS styling and defines layout.
+    The layout comes from the year and form specified in __init__
+    '''
+    def __init__(self, year, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.form_method='POST'
+        self.form_class= ''
+        self.layout = layouts.DEV_FORM_DICT[year]
+        self.render_required_fields=True
+        self.form_tag = False
+
+        self.queryset = Record.objects.none()
+
+
+class CrispyLongFormHelper(CrispyFormSetHelper):
+    '''
+    Custom form helper for 1990 special form layout
+
+    Subclasses CrispyFormSetHelper because it's used in the same spot
+    '''
+
     def __init__(self, year, *args, **kwargs):
         super().__init__(year, *args, **kwargs)
         self.layout = layouts.LONG_FORM_1990
