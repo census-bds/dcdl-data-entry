@@ -176,7 +176,7 @@ MEDIA_ROOT = '/data/data/images/dev_images'
 
 # where it looks for static files: everything inside these goes into STATIC_ROOT
 STATICFILES_DIRS = (
-    '/data/data/user/django_user/dev/static/images',  
+    '/data/data/user/django_user/dev/static/openseadragon_images',  
 )
 
 # globals for loading data

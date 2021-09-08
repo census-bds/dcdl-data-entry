@@ -201,9 +201,15 @@ def load_reel(reel_path, year, keyers=[]):
     - None
     '''
 
+    
+
     # if no list of users was provided, look up next in table
-    if not keyers:
+    if keyers:
+        keyer_jbids = keyers
+
+    else:
         keyers = get_next_keyers()
+        keyer_jbids = [k.jbid for k in keyers]
         print(keyers)
 
     # check that there are exactly two keyers
@@ -218,12 +224,12 @@ def load_reel(reel_path, year, keyers=[]):
         reel_path = reel_path,    
         year = year,
         reel_name = path_head,
-        keyer_one = keyers[0],
-        keyer_two = keyers[1]
+        keyer_one = Keyer.objects.get(jbid=keyers[0]),
+        keyer_two = Keyer.objects.get(jbid=keyers[1])
     )
 
     # call load_images
-    keyer_jbids = [k.jbid for k in keyers]
+
     load_images(reel_path, year, keyer_jbids)
 
 
