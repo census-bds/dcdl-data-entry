@@ -1,12 +1,15 @@
 {% load crispy_forms_tags %}
 
-<p class = "longform_info">
-    <h2>1990 long form data entry</h2>
-</p>
-    <p>
+<div id = "longform_info">
+    <div>
+        <h2>1990 long form data entry</h2>
+    </div>
+
+    <div>
         Enter data from the 1990 long form below.
-    </p>
-        <div id='longform-entry'>
+    </div>
+    
+    <div id='longform-entry' style="margin-left: 20px;">
         <form method="GET">
             {% csrf_token %}
             {% crispy longform_form helper %}
@@ -17,5 +20,6 @@
 {% endif %}
             <input type="submit" value="Submit">
         </form>
+    
     </div>
-    </div>
+</div>

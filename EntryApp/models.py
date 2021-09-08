@@ -608,7 +608,7 @@ class OtherImage(models.Model):
     img = models.ForeignKey(Image, on_delete=models.CASCADE)
     jbid = models.CharField(max_length=20, default='jbid000')
     year = models.PositiveIntegerField(choices=choices.YEAR_CHOICES)
-    description = models.TextField(max_length=500)
+    description = models.TextField(max_length=500, verbose_name='')
 
     # automatic create and update time stamps.
     create_date = models.DateTimeField( auto_now_add = True )
