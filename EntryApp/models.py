@@ -1048,20 +1048,26 @@ class CurrentEntry(models.Model):
     link to data models
     '''
 
-    img = models.ForeignKey(Image, on_delete=models.CASCADE)
     jbid = models.CharField(max_length=255, default='jbid000')
-    breaker = models.ForeignKey(Breaker, on_delete=models.SET_NULL, null=True)
-    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, null=True) #TODO check if no longer needed
+    keyer = models.ForeignKey(Keyer, on_delete=models.CASCADE)
 
-    # # track reel and image file too.. 
-    # reel = models.ForeignKey(Reel, on_delete=models.CASCADE)
-    # imagefile = models.ForeignKey(ImageFile, on_delete=models.CASCADE)
+    img = models.ForeignKey(Image, on_delete=models.CASCADE)
+    breaker = models.ForeignKey(Breaker, on_delete=models.SET_NULL, null=True)
+    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, null=True) 
+
+    # track reel and image file too.. 
+    reel = models.ForeignKey(Reel, on_delete=models.CASCADE)
+    imagefile = models.ForeignKey(ImageFile, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'CurrentEntry: {self.jbid} entering {self.img}'
 
     def print_breaker_img(self):
         return f'CurrentEntry breaker img is {self.breaker_img}'
+
+    def get_current_reel(self):
+        current_reel = self.img_image_file_image_reel
+        return ''
 
 
 class FormField(models.Model):

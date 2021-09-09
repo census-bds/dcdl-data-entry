@@ -10,8 +10,10 @@ from .models import CurrentEntry
 from .models import FormField
 from .models import Image
 from .models import ImageFile
+from .models import Keyer
 from .models import OtherImage
 from .models import Record
+from .models import Reel
 from .models import Sheet
 
 
@@ -30,11 +32,12 @@ export_to_csv.short_description = "Export selected to csv"
 
 
 admin.site.register(Breaker)
-admin.site.register( CurrentEntry )
-admin.site.register( FormField )
 admin.site.register(OtherImage)
 admin.site.register(Record)
 admin.site.register(Sheet)
+
+admin.site.register( CurrentEntry )
+admin.site.register( FormField )
 
 admin.site.add_action(export_to_csv, 'export_to_csv')
 
@@ -65,6 +68,7 @@ class Image_ImageFileInline( admin.TabularInline ):
 
 #-- END class Image_ImageFileInline --#
 
+@admin.register(ImageFile)
 class ImageFileAdmin( admin.ModelAdmin ):
 
     fieldsets = [
@@ -115,9 +119,8 @@ class ImageFileAdmin( admin.ModelAdmin ):
 
 #-- END ImageFileAdmin admin class --#
 
-#admin.site.register( ImageFile )
-admin.site.register( ImageFile, ImageFileAdmin )
 
+@admin.register(Image)
 class ImageAdmin( admin.ModelAdmin ):
 
     # ajax-based autocomplete
@@ -172,5 +175,43 @@ class ImageAdmin( admin.ModelAdmin ):
 
 #-- END ImageAdmin admin class --#
 
-#admin.site.register(Image)
-admin.site.register( Image, ImageAdmin )
+# Keyer inline, with current reel displayed
+@admin.register(Keyer)
+class KeyerAdmin( admin.ModelAdmin ):
+
+    list_display = (
+        'id',
+        'jbid',
+        'reel_count',
+    )
+
+
+# Reel inline
+@admin.register(Reel)
+class ReelAdmin( admin.ModelAdmin ):
+
+    list_display = (
+        'id',
+        'reel_path',
+        'year',
+        'image_count',
+        'get_keyer_one',
+        'get_keyer_two',
+    )
+
+    list_display_links = [
+        'id',
+        'reel_path',
+        'get_keyer_one',
+        'get_keyer_two'
+    ]
+
+    # method to print jbid for keyer
+    def get_keyer_one(self, obj):
+        return obj.keyer_one.jbid
+
+    # method to print jbid for keyer
+    def get_keyer_two(self, obj):
+        return obj.keyer_two.jbid
+
+
