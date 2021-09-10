@@ -46,15 +46,10 @@ class Keyer(models.Model):
     user = models.ForeignKey(User, on_delete = models.CASCADE)
     jbid = models.CharField(max_length=255, default='jbid000')
     reel_count = models.IntegerField(default = 0)
-    is_next = models.BooleanField(default = False)
 
     def __str__(self):
         string_OUT = f'{self.jbid}: reel count {self.reel_count}'
-
-        if self.is_next:
-            return string_OUT + ', is next'
-        else:
-            return string_OUT
+        return string_OUT
 
 
 class Reel(models.Model):
@@ -66,10 +61,10 @@ class Reel(models.Model):
     Problem: I probably need two rows for each reel, one per user
     """
 
-    reel_name = models.CharField( max_length = 255, null = False)
+    reel_name = models.CharField(max_length = 255, null = False)
     year = models.IntegerField(blank = True, null = False)
-    reel_path = models.CharField( max_length = 255, null = False)
-    reel_index = models.IntegerField( blank = True, null = True )
+    reel_path = models.CharField(max_length = 255, null = False)
+    reel_index = models.IntegerField(blank = True, null = True )
     reel_label = models.TextField()
 
     # automatic create and update time stamps.
@@ -78,18 +73,21 @@ class Reel(models.Model):
 
     # useful, but when to populate this? load_image?
     image_count = models.PositiveIntegerField(null = True)
+    keyer_count = models.PositiveIntegerField(null = False, default = 0)
 
     # user info: set foreign key to auth user table?
     # or would it be better to set it to the app-specific one?
     keyer_one = models.ForeignKey(
         Keyer,
         on_delete = models.CASCADE,
-        related_name = 'keyer_one'
+        related_name = 'keyer_one',
+        null = True
     )  
     keyer_two = models.ForeignKey(
         Keyer,
         on_delete = models.CASCADE,
-        related_name = 'keyer_two'
+        related_name = 'keyer_two',
+        null = True
     )  
 
     # # need to modify view to update these

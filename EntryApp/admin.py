@@ -11,6 +11,7 @@ from .models import FormField
 from .models import Image
 from .models import ImageFile
 from .models import Keyer
+from .models import LongForm1990
 from .models import OtherImage
 from .models import Record
 from .models import Reel
@@ -32,6 +33,7 @@ export_to_csv.short_description = "Export selected to csv"
 
 
 admin.site.register(Breaker)
+admin.site.register(LongForm1990)
 admin.site.register(OtherImage)
 admin.site.register(Record)
 admin.site.register(Sheet)

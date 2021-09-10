@@ -58,8 +58,7 @@ def create_entry_users(jbids=['jbid123', 'jbid456'], pws=['dcdl1980', 'dcdl1980'
         this_keyer, _ = Keyer.objects.get_or_create(
             user = this_user,
             jbid = this_jbid,
-            reel_count = 0,
-            is_next = False
+            reel_count = 0
         )
 
 
@@ -85,8 +84,7 @@ def add_entry_user(jbid, pw):
     this_keyer, _ = Keyer.objects.get_or_create(
         user = this_user,
         jbid = jbid,
-        reel_count = 0,
-        is_next = False
+        reel_count = 0
     )
 
 
@@ -101,13 +99,4 @@ def bulk_load_entry_users(path=settings.USER_INFO):
     '''
 
     df = pd.read_csv(path)
-    df.apply(lambda x: add_entry_user(x.jbid, x.password), axis=1)
-
-    # set two keyers randomly to is_next if no one is next yet
-    if len(Keyer.objects.filter(is_next = True)) == 0:
-
-        keyers = Keyer.objects.all()[:2]
-        for k in keyers:
-            k.is_next = True
-            k.save()
-    
+    df.apply(lambda x: add_entry_user(x.jbid, x.password), axis=1)    
