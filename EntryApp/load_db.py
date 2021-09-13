@@ -28,63 +28,6 @@ from EntryApp.models import Sheet
 logger = logging.getLogger('EntryApp.load_db')
 
 
-def get_next_keyers():
-    '''
-    Looks in Keyer model to identify which two keyers to assign to new reel
-    Updates Keyer model to increment reel_count and is_next
-
-    Takes: None
-    Returns: Keyer queryset
-    '''
-
-    keyer_qs = Keyer.objects.filter(is_next = True)
-
-    # check that the length of this queryset is exactly 2
-    if len(keyer_qs) != 2:
-        print(f'keyer_qs has wrong length: expected 2, got {len(keyer_qs)}')
-
-        # handle cases where keyer queue is too short
-        # get keyers with the smallest number of reels assigned to them
-        # and set is_next to True
-        if len(keyer_qs) == 1:
-            other_keyer = Keyer.objects.filter(is_next = False).order_by('reel_count')[:1]
-            other_keyer.is_next = True
-            other_keyer.save()
-
-            # merge querysets
-            keyer_qs = keyer_qs | other_keyer
-            print(f'\tadded additional keyer to keyer_qs, good to go')
-
-        if len(keyer_qs) == 0:
-            keyer_qs = Keyer.objects.filter(is_next = False).order_by('reel_count')[:2]
-
-            for k in keyer_qs:
-                k.is_next = True
-                k.save()
-
-            print(f'\tadded two keyers to keyer_qs, good to go')
-
-        else:
-            print('too many keyers in queue!')
-            raise ValueError
-
-    # find the keyers after current pair, set them to next
-    next_keyers = Keyer.objects.filter(is_next=False).order_by('reel_count')[:2]
-
-    for k in next_keyers:
-        k.is_next = True
-        k.save()
-
-    # increment reel count for current keyers, set is_next to False
-    for k in keyer_qs:
-        k.reel_count += 1
-        k.is_next = False
-        k.save()
-
-    return keyer_qs 
-
-#--- END get_next_keyers() ---#
-
 
 def load_reel(reel_path, year):
     '''

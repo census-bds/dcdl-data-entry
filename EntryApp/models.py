@@ -509,7 +509,6 @@ class Sheet(models.Model):
     problem = models.BooleanField(default=False)
 
     # for entry
-    # form_type = models.CharField(max_length=200, choices=choices.FORM_CHOICES)
     num_records = models.PositiveIntegerField(
         verbose_name = 'Number of records',
         null=True

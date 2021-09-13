@@ -44,6 +44,7 @@ from EntryApp.models import CurrentEntry
 from EntryApp.models import FormField
 from EntryApp.models import Image
 from EntryApp.models import ImageFile
+from EntryApp.models import Keyer
 from EntryApp.models import LongForm1990
 from EntryApp.models import OtherImage
 from EntryApp.models import Record
@@ -319,8 +320,8 @@ def seed_current_entry(request):
     # declare variables
     current_qs = None
     current_count = None
-    an_image = None
-    a_breaker = None
+    this_image = None
+    this_breaker = None
     current = None
 
     # got a current for current user?
@@ -328,15 +329,24 @@ def seed_current_entry(request):
     current_count = current_qs.count()
     if ( current_count == 0 ):
 
-        # these will be overwritten, I think, so values don't matter
         logger.info(f'seed_current_entry inserting into CurrentEntry')
-        an_image = Image.objects.all()[0]
-        a_breaker = Breaker.objects.create(jbid=request.user, img=an_image)
-        current = CurrentEntry.objects.create(jbid=request.user, \
-                                            img=an_image, \
-                                            breaker = a_breaker, \
-                                            sheet = None)
-        a_breaker.delete() # delete temp breaker from Breaker model
+        
+        # these will be overwritten so arbitrarily inserting 1990 dummy breaker
+        this_reel = Reel.objects.get(reel_name='dummy_breaker_reel')
+        this_image_file = ImageFile.objects.get(img_reel = this_reel)
+        this_image = Image.objects.filter(image_file = this_image_file).get(jbid=request.user)        
+        this_breaker = Breaker.objects.filter(jbid=request.user).get(img=this_image)
+
+        # now create current
+        current = CurrentEntry.objects.create(
+            jbid=request.user, 
+            keyer = Keyer.objects.get(jbid=request.user), 
+            img=this_image, 
+            breaker = this_breaker, 
+            sheet = None,
+            imagefile = this_image_file,
+            reel = this_reel
+        )
 
     #-- END check to see if we need to create current for new user. --#
 
