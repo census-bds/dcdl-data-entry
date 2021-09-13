@@ -90,6 +90,10 @@ class Reel(models.Model):
         null = True
     )  
 
+    # is this helpful?
+    is_complete_keyer_one = models.BooleanField(null=False, default=False)
+    is_complete_keyer_two = models.BooleanField(null=False, default=False)
+
     # # need to modify view to update these
     # # probably create a new class method in CodeImageView?
     # user_start_time = models.DateTimeField()
@@ -1054,7 +1058,7 @@ class CurrentEntry(models.Model):
 
     # track reel and image file too.. 
     reel = models.ForeignKey(Reel, on_delete=models.CASCADE)
-    imagefile = models.ForeignKey(ImageFile, on_delete=models.CASCADE)
+    image_file = models.ForeignKey(ImageFile, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'CurrentEntry: {self.jbid} entering {self.img}'

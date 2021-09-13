@@ -214,89 +214,6 @@ def load_imagefiles(reel_path, year):
 #-- END function load_imagefiles() --#
 
 
-def assign_reel(keyer, assignment = {'reel_path':'', 'keyer_slot':''}):
-    '''
-    Assigns a keyer the images from a given reel by loading  image info
-     into Image model for a keyer. 
-
-    Required arguments:
-    - keyer 
-    Optional argument: dict with two fields 
-    - string reel filepath
-    - integer (1, 2) indicating which keyer slot should be assigned
-    Returns: none
-    '''
-
-    this_reel = None
-
-    # if reel specified, get that reel and assign keyer to specified slot
-    if assignment:
-        this_reel = Reel.objects.get(filepath = assignment['reel_path'])
-        setattr(this_reel, assignment['keyer_slot'], keyer)
-
-        # consider incrementing keyer count?
-        this_reel.keyer_count += 1
-        this_reel.save()
-
-    # if not, get reel and assign keyer to open slot
-    else:
-
-        # - take the ones that have 0 or 1 keyer assigned
-        # - exclude the 1990 dummy breaker reel
-        # - prefer those that have 1 assigned
-        # - prefer smaller IDs
-        reel_qs = Reel.objects.filter(keyer_count__lt = 2)
-        reel_qs = reel_qs.exclude(reel_name = 'dummy_breaker_reel')
-
-        if len(reel_qs) == 0:
-            print(f'assign_images() found no reels to assign')
-            return
-
-        this_reel = reel_qs.order_by('-keyer_count').order_by('id')[0]
-        
-        # set the keyer
-        if this_reel.keyer_one ==  None:
-            this_reel.keyer_one = keyer
-
-        elif this_reel.keyer_two == None:
-            this_reel.keyer_two = keyer
-
-        else:
-            print(f'assign_images() reel has a keyer issue')
-            print(f'/t keyer one is {this_reel.keyer_one}')
-            print(f'/t keyer two is {this_reel.keyer_two}')
-            raise ValueError
-
-        # increment keyer count
-        this_reel.keyer_count += 1
-        this_reel.save()
-
-    # now, get year and associated image files 
-    year = this_reel.year
-    imagefile_qs = ImageFile.objects.filter(img_reel_id = this_reel)
-
-    # loop through and create Image instance w/this keyer 
-    for image_file_instance in imagefile_qs:
-
-        img = Image.objects.create( 
-                image_file=image_file_instance, \
-                jbid=keyer.jbid, \
-                is_complete=False, \
-                year=year,
-                image_type=None, \
-                problem=False
-        )
-
-    #-- END loop over images in the reel --#
-
-    return
-
-#-- END function load_images() --#
-
-
-
-
-
 def delete_model_data(reset_keyers = True):
     '''
     Deletes all rows in specified tables
@@ -373,7 +290,7 @@ def create_image_fixture(path, users, out, ext="*.jpg"):
         json.dump(image, json_file)
 
 
-def load_form_fields(field_tbl_path, reload=True):
+def load_form_fields(field_tbl_path=settings.FORM_FIELDS_CSV, reload=True):
     '''
     Load the formfield table into the DB (1 row at a time)
 
@@ -423,8 +340,8 @@ def refresh_db():
     load_reels_from_csv('dev_reel_load_spec.csv')
     create_1990_dummy_breakers()
 
-    for k in Keyer.objects.all():
-        assign_reel(k, {})
+    # for k in Keyer.objects.all():
+    #     assign_reel(k, {})
 
 
 def bulk_load_db():
