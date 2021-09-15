@@ -28,6 +28,75 @@ from EntryApp.models import Sheet
 logger = logging.getLogger('EntryApp.load_db')
 
 
+def load_imagefiles(reel_path, year):
+    '''
+    Loads images from a given reel into ImageFile model.
+    Expects .jpg images.
+
+    Takes:
+    - reel filepath
+    - year
+    Returns: None
+    '''
+
+    # declare variables
+    file_counter = None
+    full_file_path = None
+    image_file_qs = None
+    image_file_count = None
+    image_file = None
+
+
+    files = glob.glob(reel_path + "*.jpg")
+    print(f'load_imagefiles() files on {reel_path} are: {files}')
+
+    # get reel associated with this filepath and year
+    parent_reel = Reel.objects.filter(year=year).filter(reel_path=reel_path).get()
+
+    # loop over files in current path.
+    file_counter = 0
+    for full_file_path in files:
+
+        file_counter += 1
+
+        # create ImageFile?
+        image_file_qs = ImageFile.objects.filter( img_path = full_file_path )
+        image_file_count = image_file_qs.count()
+        if ( image_file_count == 0 ):
+
+
+            # make new.
+            image_file_instance = ImageFile()
+            image_file_instance.set_image_path( full_file_path )
+            image_file_instance.img_position = file_counter
+            image_file_instance.year = year
+            image_file_instance.img_reel = parent_reel
+            image_file_instance.save()
+            
+
+        elif ( image_file_count == 1 ):
+
+            # load existing
+            image_file_instance = image_file_qs.get()
+
+        else:
+
+            # more than 1? Oh dear...
+            print( "ERROR - more than one ImageFile for path {image_path} - punting for now.".format( image_path = file_path ) )
+            image_file_instance = None
+
+        #-- END check to see if we already have instance for this file path. --#
+
+        #print( "----> ImageFile: {image_file}".format( image_file = image_file_instance ) )
+
+    # set the number of images in reel to number of files
+    parent_reel.image_count = file_counter
+    parent_reel.save()
+
+    return
+
+#-- END function load_imagefiles() --#
+
 
 def load_reel(reel_path, year):
     '''
@@ -142,76 +211,6 @@ def create_1990_dummy_breakers(keyer_jbids=[]):
         )
 
 #-- END function create_1990_dummy_breakers() --#
-
-
-def load_imagefiles(reel_path, year):
-    '''
-    Loads images from a given reel into ImageFile model.
-    Expects .jpg images.
-
-    Takes:
-    - reel filepath
-    - year
-    Returns: None
-    '''
-
-    # declare variables
-    file_counter = None
-    full_file_path = None
-    image_file_qs = None
-    image_file_count = None
-    image_file = None
-
-
-    files = glob.glob(reel_path + "*.jpg")
-    print(f'load_imagefiles() files on {reel_path} are: {files}')
-
-    # get reel associated with this filepath and year
-    parent_reel = Reel.objects.filter(year=year).filter(reel_path=reel_path).get()
-
-    # loop over files in current path.
-    file_counter = 0
-    for full_file_path in files:
-
-        file_counter += 1
-
-        # create ImageFile?
-        image_file_qs = ImageFile.objects.filter( img_path = full_file_path )
-        image_file_count = image_file_qs.count()
-        if ( image_file_count == 0 ):
-
-
-            # make new.
-            image_file_instance = ImageFile()
-            image_file_instance.set_image_path( full_file_path )
-            image_file_instance.img_position = file_counter
-            image_file_instance.year = year
-            image_file_instance.img_reel = parent_reel
-            image_file_instance.save()
-            
-
-        elif ( image_file_count == 1 ):
-
-            # load existing
-            image_file_instance = image_file_qs.get()
-
-        else:
-
-            # more than 1? Oh dear...
-            print( "ERROR - more than one ImageFile for path {image_path} - punting for now.".format( image_path = file_path ) )
-            image_file_instance = None
-
-        #-- END check to see if we already have instance for this file path. --#
-
-        #print( "----> ImageFile: {image_file}".format( image_file = image_file_instance ) )
-
-    # set the number of images in reel to number of files
-    parent_reel.image_count = file_counter
-    parent_reel.save()
-
-    return
-
-#-- END function load_imagefiles() --#
 
 
 def delete_model_data(reset_keyers = True):
