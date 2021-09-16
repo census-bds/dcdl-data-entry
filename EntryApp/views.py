@@ -44,6 +44,7 @@ from EntryApp.models import CurrentEntry
 from EntryApp.models import FormField
 from EntryApp.models import Image
 from EntryApp.models import ImageFile
+from EntryApp.models import Keyer
 from EntryApp.models import LongForm1990
 from EntryApp.models import OtherImage
 from EntryApp.models import Record
@@ -168,10 +169,11 @@ def get_form_fields( year, form_type ):
         logger.info(f'Invalid argument for get_fields: {year} {form_type}')
         return []
 
+
 def get_next_image(request):
 
     '''
-    Helper function for BeginNewImageView
+    Helper function
     Look up next image for user to enter and put it in CurrentEntry
     '''
 
@@ -184,7 +186,7 @@ def get_next_image(request):
     current_user = request.user
     current_username = current_user.username
 
-    # get user TODO image lists
+    # get user to-do image lists
     todo_image_qs = get_image_todo_qs( request )
     todo_image_count = todo_image_qs.count()
     next_image = todo_image_qs.first()
@@ -231,7 +233,7 @@ def get_image_todo_qs( request ):
 
     '''
     Helper function for IndexView
-    Looks up current reel info and image queryset 
+    Looks up current reel info and associated image queryset 
 
     Takes:
     - request
@@ -253,14 +255,12 @@ def get_image_todo_qs( request ):
     current_username = current_user.username
 
     # get list of images in this reel 
-    current_image_id = CurrentEntry.objects.get(jbid = current_username).img_id
-    current_imagefile = ImageFile.objects.get(image__id = current_image_id)
-    current_reel = Reel.objects.get(id = current_imagefile.img_reel_id)
-
-    # get user image lists
-    user_image_qs = Image.objects.filter( jbid = current_username )
+    current_reel = CurrentEntry.objects.get(jbid = current_username).reel
+    reel_image_qs = Image.objects.filter(image_file__img_reel = current_reel)
+    user_image_qs = reel_image_qs.filter(jbid = current_username)
     todo_image_qs = user_image_qs.filter( is_complete = False )
 
+    logger.info(f'get_image_todo_qs() image_qs length {len(reel_image_qs)}, user_image_qs length {len(user_image_qs)}')
 
     qs_OUT = todo_image_qs
 
@@ -309,38 +309,157 @@ def initialize_context( request_IN, dict_IN = None ):
 #-- END function initialize_context() --#
 
 
+def assign_reel(keyer):
+    '''
+    Helper fn to assign a keyer the images from a given reel by loading image
+     info into Image model for a keyer. This method populates the Image model.
+
+    Required arguments:
+    - keyer 
+    Returns: 
+    - assigned reel object
+    '''
+
+    this_reel = None
+
+    # - take the ones that have 0 or 1 keyer assigned
+    # - exclude the 1990 dummy breaker reel
+    reel_qs = Reel.objects.filter(keyer_count__lt = 2)
+    reel_qs = reel_qs.exclude(reel_name = 'dummy_breaker_reel')
+
+    # do we have any reels to assign?
+    if len(reel_qs) == 0:
+        print(f'assign_images() found no reels to assign')
+        return
+
+    # prefer to assign reels that have 1 keyer over those that have none
+    # then assign reels with lower IDs (i.e. those loaded earlier) over higher
+    # take the one at the top
+    this_reel = reel_qs.order_by('-keyer_count').order_by('id')[0]
+    
+    # set the keyer
+    if this_reel.keyer_one ==  None:
+        this_reel.keyer_one = keyer
+
+    elif this_reel.keyer_two == None:
+        this_reel.keyer_two = keyer
+
+    else:
+        print(f'assign_images() reel has a keyer issue')
+        print(f'/t keyer one is {this_reel.keyer_one}')
+        print(f'/t keyer two is {this_reel.keyer_two}')
+        raise ValueError
+
+    # increment reel keyer count
+    this_reel.keyer_count += 1
+    this_reel.save()
+
+    # also increment keyer reel count
+    keyer.reel_count += 1
+    keyer.save()
+
+    # now, get year and associated image files 
+    year = this_reel.year
+    image_file_qs = ImageFile.objects.filter(img_reel_id = this_reel)
+
+    # loop through and create Image instance w/this keyer 
+    for image_file_instance in image_file_qs:
+
+        img = Image.objects.create( 
+                image_file=image_file_instance, \
+                jbid=keyer.jbid, \
+                is_complete=False, \
+                year=year,
+                image_type=None, \
+                problem=False
+        )
+
+    #-- END loop over images in the reel --#
+
+    return this_reel
+
+#-- END function assign_reel() --#
+
+
 def seed_current_entry(request):
 
     '''
-    Helper function for BeginNewImageView: Put dummy data into current entry
+    Helper function: Put dummy data into current entry
      table. It should only be called for the first image for each user.
     '''
 
     # declare variables
     current_qs = None
     current_count = None
-    an_image = None
-    a_breaker = None
+    this_image = None
+    this_breaker = None
     current = None
+
+    logger.info(f'seed_current_entry() user is {request.user}')
 
     # got a current for current user?
     current_qs = CurrentEntry.objects.filter(jbid=request.user)
     current_count = current_qs.count()
+    this_keyer = Keyer.objects.get(jbid=request.user)
+
     if ( current_count == 0 ):
 
-        # these will be overwritten, I think, so values don't matter
-        logger.info(f'seed_current_entry inserting into CurrentEntry')
-        an_image = Image.objects.all()[0]
-        a_breaker = Breaker.objects.create(jbid=request.user, img=an_image)
-        current = CurrentEntry.objects.create(jbid=request.user, \
-                                            img=an_image, \
-                                            breaker = a_breaker, \
-                                            sheet = None)
-        a_breaker.delete() # delete temp breaker from Breaker model
+        this_reel = assign_reel(this_keyer)
+        first_imagefile = ImageFile.objects.filter(img_reel = this_reel)[0]
+        first_image = Image.objects.get(
+            jbid = this_keyer.jbid,
+            image_file = first_imagefile
+        )
+        
+        #  populate Current Entry
+        current = CurrentEntry(
+            keyer = this_keyer,
+            jbid = this_keyer.jbid,
+            reel = this_reel,
+            image_file = first_imagefile,
+            img = first_image,
+        )
+        current.save()
 
     #-- END check to see if we need to create current for new user. --#
 
 #-- END function seed_current_entry() --#
+
+
+def get_next_reel(request):
+    '''
+    Helper function to put next reel in queue for a keyer. This method 
+     populates CurrentEntry whenever needed
+
+    - marks the existing reel in CurrentEntry (if there is one) complete
+    for that keyer
+    - queries DB for a new reel for that keyer
+    - saves that reel in CurrentEntry for that keyer
+    '''
+
+    me = 'get_next_reel()'
+    current = CurrentEntry.objects.get(jbid=request.user)
+    this_keyer = Keyer.objects.get(jbid = request.user)
+
+    # is there a reel in CurrentEntry?
+    if current.reel:
+
+        old_reel = current.reel
+        
+        # which keyer is this? mark old reel complete
+        if old_reel.keyer_one__jbid == request.user:
+            old_reel.is_complete_keyer_one = True
+        
+        elif old_reel.keyer_two == request.user:
+            old_reel.is_complete_keyer_two = True
+
+        else:
+            logger.warn(f"{me}: {request.user} is not assigned to either keyer slot in this reel")
+            raise ValueError
+
+    # now assign the reel and update things
+    this_reel = assign_reel(this_keyer)
+
 
 
 #==============================================================================#
@@ -368,6 +487,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
     #-- END method get() --#
 
+
     def process_request( self, request ):
 
         # return reference
@@ -392,25 +512,29 @@ class IndexView(LoginRequiredMixin, TemplateView):
         next_image = None
         context = None
 
+        logger.info(f'user info:\n \t {request.user}')
+
         # init
         recent_image_limit = 5
         seed_current_entry( request ) # this ensures there's a value in CurrentEntry
         get_next_image( request )
         context = initialize_context( request )
 
-
         # get current username
-        logger.info(f'user info:\n \t {request.user}')
         current_user = request.user
         current_username = current_user.username
         context[ "user" ] = current_user
 
         # get user image lists
-        user_image_qs = Image.objects.filter( jbid = current_username )
+        current_reel = CurrentEntry.objects.get(jbid = current_username).reel
+        image_qs = Image.objects.filter(image_file__img_reel = current_reel)
+        user_image_qs = image_qs.filter(jbid = current_username)
         total_image_count = user_image_qs.count()
         context[ 'num_images' ] = total_image_count
 
+        logger.info(f'{me}: current reel is {current_reel}')
 
+        # TODO: add logic for when they finish entering a reel
 
         # todo
         todo_image_qs = get_image_todo_qs( request )

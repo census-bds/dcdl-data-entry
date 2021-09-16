@@ -46,15 +46,10 @@ class Keyer(models.Model):
     user = models.ForeignKey(User, on_delete = models.CASCADE)
     jbid = models.CharField(max_length=255, default='jbid000')
     reel_count = models.IntegerField(default = 0)
-    is_next = models.BooleanField(default = False)
 
     def __str__(self):
         string_OUT = f'{self.jbid}: reel count {self.reel_count}'
-
-        if self.is_next:
-            return string_OUT + ', is next'
-        else:
-            return string_OUT
+        return string_OUT
 
 
 class Reel(models.Model):
@@ -66,10 +61,10 @@ class Reel(models.Model):
     Problem: I probably need two rows for each reel, one per user
     """
 
-    reel_name = models.CharField( max_length = 255, null = False)
+    reel_name = models.CharField(max_length = 255, null = False)
     year = models.IntegerField(blank = True, null = False)
-    reel_path = models.CharField( max_length = 255, null = False)
-    reel_index = models.IntegerField( blank = True, null = True )
+    reel_path = models.CharField(max_length = 255, null = False)
+    reel_index = models.IntegerField(blank = True, null = True )
     reel_label = models.TextField()
 
     # automatic create and update time stamps.
@@ -78,19 +73,26 @@ class Reel(models.Model):
 
     # useful, but when to populate this? load_image?
     image_count = models.PositiveIntegerField(null = True)
+    keyer_count = models.PositiveIntegerField(null = False, default = 0)
 
     # user info: set foreign key to auth user table?
     # or would it be better to set it to the app-specific one?
     keyer_one = models.ForeignKey(
         Keyer,
         on_delete = models.CASCADE,
-        related_name = 'keyer_one'
+        related_name = 'keyer_one',
+        null = True
     )  
     keyer_two = models.ForeignKey(
         Keyer,
         on_delete = models.CASCADE,
-        related_name = 'keyer_two'
+        related_name = 'keyer_two',
+        null = True
     )  
+
+    # is this helpful?
+    is_complete_keyer_one = models.BooleanField(null=False, default=False)
+    is_complete_keyer_two = models.BooleanField(null=False, default=False)
 
     # # need to modify view to update these
     # # probably create a new class method in CodeImageView?
@@ -511,7 +513,6 @@ class Sheet(models.Model):
     problem = models.BooleanField(default=False)
 
     # for entry
-    # form_type = models.CharField(max_length=200, choices=choices.FORM_CHOICES)
     num_records = models.PositiveIntegerField(
         verbose_name = 'Number of records',
         null=True
@@ -1048,20 +1049,26 @@ class CurrentEntry(models.Model):
     link to data models
     '''
 
-    img = models.ForeignKey(Image, on_delete=models.CASCADE)
     jbid = models.CharField(max_length=255, default='jbid000')
-    breaker = models.ForeignKey(Breaker, on_delete=models.SET_NULL, null=True)
-    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, null=True) #TODO check if no longer needed
+    keyer = models.ForeignKey(Keyer, on_delete=models.CASCADE)
 
-    # # track reel and image file too.. 
-    # reel = models.ForeignKey(Reel, on_delete=models.CASCADE)
-    # imagefile = models.ForeignKey(ImageFile, on_delete=models.CASCADE)
+    img = models.ForeignKey(Image, on_delete=models.CASCADE)
+    breaker = models.ForeignKey(Breaker, on_delete=models.SET_NULL, null=True)
+    sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, null=True) 
+
+    # track reel and image file too.. 
+    reel = models.ForeignKey(Reel, on_delete=models.CASCADE)
+    image_file = models.ForeignKey(ImageFile, on_delete=models.CASCADE)
 
     def __str__(self):
         return f'CurrentEntry: {self.jbid} entering {self.img}'
 
     def print_breaker_img(self):
         return f'CurrentEntry breaker img is {self.breaker_img}'
+
+    def get_current_reel(self):
+        current_reel = self.img_image_file_image_reel
+        return ''
 
 
 class FormField(models.Model):

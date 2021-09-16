@@ -28,76 +28,15 @@ from EntryApp.models import Sheet
 logger = logging.getLogger('EntryApp.load_db')
 
 
-def get_next_keyers():
+def load_imagefiles(reel_path, year):
     '''
-    Looks in Keyer model to identify which two keyers to assign to new reel
-    Updates Keyer model to increment reel_count and is_next
+    Loads images from a given reel into ImageFile model.
+    Expects .jpg images.
 
-    Takes: None
-    Returns: Keyer queryset
-    '''
-
-    keyer_qs = Keyer.objects.filter(is_next = True)
-
-    # check that the length of this queryset is exactly 2
-    if len(keyer_qs) != 2:
-        print(f'keyer_qs has wrong length: expected 2, got {len(keyer_qs)}')
-
-        # handle cases where keyer queue is too short
-        # get keyers with the smallest number of reels assigned to them
-        # and set is_next to True
-        if len(keyer_qs) == 1:
-            other_keyer = Keyer.objects.filter(is_next = False).order_by('reel_count')[:1]
-            other_keyer.is_next = True
-            other_keyer.save()
-
-            # merge querysets
-            keyer_qs = keyer_qs | other_keyer
-            print(f'\tadded additional keyer to keyer_qs, good to go')
-
-        if len(keyer_qs) == 0:
-            keyer_qs = Keyer.objects.filter(is_next = False).order_by('reel_count')[:2]
-
-            for k in keyer_qs:
-                k.is_next = True
-                k.save()
-
-            print(f'\tadded two keyers to keyer_qs, good to go')
-
-        else:
-            print('too many keyers in queue!')
-            raise ValueError
-
-    # find the keyers after current pair, set them to next
-    next_keyers = Keyer.objects.filter(is_next=False).order_by('reel_count')[:2]
-
-    for k in next_keyers:
-        k.is_next = True
-        k.save()
-
-    # increment reel count for current keyers, set is_next to False
-    for k in keyer_qs:
-        k.reel_count += 1
-        k.is_next = False
-        k.save()
-
-    return keyer_qs 
-
-#--- END get_next_keyers() ---#
-
-
-def load_images(filepath, year, keyers=[]):
-    '''
-    Loads images from a given reel into ImageFile and Image models. 
-    Expects .jpg images. 
-
-    Required arguments:
-    - string filepath to images, e.g. /data/data/images/1960/a_1960_reel/
-    - integer year (the decennial year to which images belong)
-    Optional arguments:
-    - list of keyer username strings (will look up next if none provided)
-    - file extension (default .jpg)
-    Returns: none
+    Takes:
+    - reel filepath
+    - year
+    Returns: None
     '''
 
     # declare variables
@@ -107,26 +46,12 @@ def load_images(filepath, year, keyers=[]):
     image_file_count = None
     image_file = None
 
-    # did you remember to specify the slash at the end of the filepath?
-    if filepath[-1] != "/":
-        filepath + '/'
 
-    files = glob.glob(filepath + "*.jpg")
-    print(f'load_images() files on {filepath} are: {files}')
-
-
-    # if no list of users was provided, look up next in table
-    if not keyers:
-        keyer_qs = get_next_keyers()
-        keyer_jbids = [k.jbid for k in keyer_qs]
-
-    # check that there are exactly two keyers
-    if len(keyers) != 2:
-        print(keyers)
-        raise ValueError
+    files = glob.glob(reel_path + "*.jpg")
+    print(f'load_imagefiles() files on {reel_path} are: {files}')
 
     # get reel associated with this filepath and year
-    parent_reel = Reel.objects.filter(year=year).filter(reel_path=filepath).get()
+    parent_reel = Reel.objects.filter(year=year).filter(reel_path=reel_path).get()
 
     # loop over files in current path.
     file_counter = 0
@@ -164,79 +89,46 @@ def load_images(filepath, year, keyers=[]):
 
         #print( "----> ImageFile: {image_file}".format( image_file = image_file_instance ) )
 
-        for k in keyers:
-
-            img = Image.objects.create( 
-                    image_file=image_file_instance, \
-                    jbid=k, \
-                    is_complete=False, \
-                    year=year,
-                    image_type=None, \
-                    problem=False
-            )
-
-        #-- END loop over users for a given file --#
-
-    #-- END loop over files in chosen folder --#
-
     # set the number of images in reel to number of files
     parent_reel.image_count = file_counter
     parent_reel.save()
 
     return
 
-#-- END function load_images() --#
+#-- END function load_imagefiles() --#
 
 
-def load_reel(reel_path, year, keyers=[]):
+def load_reel(reel_path, year):
     '''
-    Wrapper method to load images from a reel
+    Wrapper method to load a reel into the DB
     Used for csv bulk load
 
     Takes:
     - list of string reel directory filepaths 
     - integer year to which the images belong
-    - optional list of keyers to assign 
     Returns:
     - None
     '''
 
-    
-
-    # if no list of users was provided, look up next in table
-    if keyers:
-        keyer_jbids = keyers
-
-    else:
-        keyers = get_next_keyers()
-        keyer_jbids = [k.jbid for k in keyers]
-        print(keyers)
-
-    # check that there are exactly two keyers
-    if len(keyers) != 2:
-        print(keyers)
-        raise ValueError
-
     _, path_head = os.path.split(reel_path)
     
     # add to Reel model 
-    this_reel = Reel.objects.get_or_create(
+    this_reel, _ = Reel.objects.get_or_create(
         reel_path = reel_path,    
         year = year,
-        reel_name = path_head,
-        keyer_one = Keyer.objects.get(jbid=keyers[0]),
-        keyer_two = Keyer.objects.get(jbid=keyers[1])
+        reel_name = path_head
     )
 
-    # call load_images
+    # call load_imagefiles
+    load_imagefiles(reel_path, year)
 
-    load_images(reel_path, year, keyer_jbids)
+    return
 
 
 #-- END function load_reel() --#
 
 
-def create_1990_dummy_breakers(keyer_jbids):
+def create_1990_dummy_breakers(keyer_jbids=[]):
     '''
     Create default breaker for 1990 for each user, plus associated dummy image
 
@@ -246,8 +138,13 @@ def create_1990_dummy_breakers(keyer_jbids):
     Dummy images can be identified using the filename pattern
     "dummy_1990_breaker_JBID."
 
+    If you're loading the DB for the first time, there's no need to specify 
+    jbids because the default is to use all keyers. If instead you have added a
+    new user, you wil need to add a dummy breaker for that user, so you will
+    need to specify their jbid.
+
     Takes:
-    - list of string jbids
+    - optional list of string jbids (if adding users)
     Returns: none
     '''
 
@@ -266,12 +163,9 @@ def create_1990_dummy_breakers(keyer_jbids):
         reel_name = 'dummy_breaker_reel',
         reel_path = '/data/data/images/dev_images/1990breaker/',
         year = 1990,
-        image_count = Keyer.objects.all().count(),
-        keyer_one = Keyer.objects.filter(jbid = 'jbid123').get(), # sorry future me
-        keyer_two = Keyer.objects.filter(jbid = 'jbid123').get() # this will suck in prod when jbids don't match
+        image_count = 1
     )
     
-
     # get ImageFile for breaker.
     dummy_breaker_file_name = "dummy_1990_breaker"
     image_file_qs = ImageFile.objects.filter( img_path = dummy_breaker_file_name )
@@ -315,6 +209,8 @@ def create_1990_dummy_breakers(keyer_jbids):
             jbid=k,
             img=img
         )
+
+#-- END function create_1990_dummy_breakers() --#
 
 
 def delete_model_data(reset_keyers = True):
@@ -393,7 +289,7 @@ def create_image_fixture(path, users, out, ext="*.jpg"):
         json.dump(image, json_file)
 
 
-def load_form_fields(field_tbl_path, reload=True):
+def load_form_fields(field_tbl_path=settings.FORM_FIELDS_CSV, reload=True):
     '''
     Load the formfield table into the DB (1 row at a time)
 
@@ -430,12 +326,7 @@ def load_reels_from_csv(reel_csv_path):
         for row in csvreader:
             logger.info(row)
 
-            if len(row) > 2:
-                keyers = row[2:]
-            else:
-                keyers = []
-
-            load_reel(reel_path = row[0], year = row[1], keyers = keyers)
+            load_reel(reel_path = row[0], year = row[1])
 
 
 def refresh_db():
@@ -446,10 +337,10 @@ def refresh_db():
     delete_model_data()
     load_form_fields(settings.FORM_FIELDS_CSV)
     load_reels_from_csv('dev_reel_load_spec.csv')
+    create_1990_dummy_breakers()
 
-    keyer_jbids = [k.jbid for k in Keyer.objects.all()]
-
-    create_1990_dummy_breakers(keyer_jbids)
+    # for k in Keyer.objects.all():
+    #     assign_reel(k, {})
 
 
 def bulk_load_db():
