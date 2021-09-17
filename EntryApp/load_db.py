@@ -111,6 +111,9 @@ def load_reel(reel_path, year):
     '''
 
     _, path_head = os.path.split(reel_path)
+
+    print(f'os.path.split is {os.path.split(reel_path)}')
+    print(f'path_head is {path_head}')
     
     # add to Reel model 
     this_reel, _ = Reel.objects.get_or_create(
@@ -123,7 +126,6 @@ def load_reel(reel_path, year):
     load_imagefiles(reel_path, year)
 
     return
-
 
 #-- END function load_reel() --#
 
@@ -336,7 +338,7 @@ def refresh_db():
     '''
     delete_model_data()
     load_form_fields(settings.FORM_FIELDS_CSV)
-    load_reels_from_csv('dev_reel_load_spec.csv')
+    load_reels_from_csv(settings.DEFAULT_REEL_LOAD_SPEC)
     create_1990_dummy_breakers()
 
     # for k in Keyer.objects.all():
@@ -349,5 +351,5 @@ def bulk_load_db():
     FOR PRODUCTION
     '''
     load_form_fields(settings.FORM_FIELDS_CSV)
-    load_reels_from_csv('dev_reel_load_spec.csv')
+    load_reels_from_csv(settings.DEFAULT_REEL_LOAD_SPEC)
     create_1990_dummy_breakers([])

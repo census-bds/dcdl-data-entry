@@ -39,7 +39,7 @@ def add_entry_user(jbid, pw):
     - None
     '''
 
-    this_user, _ = User.objects.create_user(
+    this_user = User.objects.create_user(
         username=jbid,
         password=pw
     )
