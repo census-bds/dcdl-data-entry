@@ -47,7 +47,7 @@ def load_imagefiles(reel_path, year):
     image_file = None
 
 
-    files = glob.glob(reel_path + "*.jpg")
+    files = glob.glob(reel_path + "/*.jpg")
     print(f'load_imagefiles() files on {reel_path} are: {files}')
 
     # get reel associated with this filepath and year

@@ -120,6 +120,7 @@ BIRTH_DECADE_CHOICES = [
     ('1960', '196-')
 ]
 
+
 BIRTH_CENTURY_CHOICES = [
     ('8', '8'),
     ('9', '9'),

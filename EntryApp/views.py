@@ -1473,6 +1473,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
         # send image info to template.
         context_OUT[ "img" ] = image_IN
+        context_OUT[ "reel_name" ] = image_IN.image_file.img_reel.reel_name
         context_OUT[ "slug" ] = image_IN.image_file.img_file_name
 
         # does image have related objects?
@@ -2029,6 +2030,7 @@ def report_problem(request):
                     'EntryApp/report-problem.html',
                     {
                         'image': image_instance,
+                        'reel_name': image_instance.image_file.img_reel.reel_name,
                         'slug': image_instance.image_file.image_file_name,
                         'form': ProblemForm()
                     }
@@ -2089,6 +2091,7 @@ def report_problem(request):
                 'EntryApp/report-problem.html',
                 {
                     'image': current.img,
+                    'reel_name': current.reel.reel_name,
                     'slug': current.img.image_file.image_file_name,
                     'form': ProblemForm()
                 }
