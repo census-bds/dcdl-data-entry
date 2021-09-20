@@ -7,6 +7,7 @@ TO DO:
 
 # python imports
 import datetime
+import json
 import logging
 import re
 
@@ -118,6 +119,7 @@ PARAM_NAMES[ "PARAM_NAME_YEAR" ] = PARAM_NAME_YEAR
 
 # actions
 ACTION_COMPLETE_IMAGE = "complete_image"
+ACTION_EDIT_RECORD = "edit_record"
 ACTION_UPDATE_BREAKER_TYPE = "update_breaker_type"
 ACTION_UPDATE_IMAGE = "update_image"
 ACTION_UPDATE_LONGFORM = "update_longform"
@@ -126,6 +128,7 @@ ACTION_UPDATE_SHEET_TYPE = "update_sheet_type"
 ACTION_UPDATE_RECORD = "update_record"
 VALID_ACTIONS = []
 VALID_ACTIONS.append( ACTION_COMPLETE_IMAGE )
+VALID_ACTIONS.append( ACTION_EDIT_RECORD )
 VALID_ACTIONS.append( ACTION_UPDATE_BREAKER_TYPE )
 VALID_ACTIONS.append( ACTION_UPDATE_IMAGE )
 VALID_ACTIONS.append( ACTION_UPDATE_LONGFORM )
@@ -1134,6 +1137,39 @@ class CodeImage( LoginRequiredMixin, FormView ):
     #-- END method action_update_other_image() --#
 
 
+    def action_edit_record( self, request_IN, context_IN ):
+        '''
+        Action to re-populate form blankly
+        '''
+
+        # mini-init
+        me = "CodeImageView.action_edit_record"
+        error_list_OUT = list()
+        formset = None
+        helper = None
+        record_instance = None
+
+        # got request?
+        if ( request_IN is not None ):
+
+            # get inputs
+            inputs_IN = get_request_data( request_IN )
+
+            # removed stuff here
+
+        else:
+
+            # no inputs?
+            error_message = "In {method}(): No inputs passed in. What is going on?".format( method = me )
+            error_list_OUT.append( error_message )
+
+        #-- END check if inputs. --#
+
+        return error_list_OUT
+
+    #-- END method action_edit_record() --#
+
+
 
     def action_update_record( self, request_IN, context_IN ):
         '''
@@ -1215,7 +1251,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
                 logger.warning("{me}: no sheet instance passed in context".format(me = me))
 
             # return the record form instance + layout helper in context?
-            context_IN[ CONTEXT_RECORD_INSTANCE ] = record_instance
+            # context_IN[ CONTEXT_RECORD_INSTANCE ] = record_instance
             
 
         else:
@@ -1577,7 +1613,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         return context_OUT
 
 
-    def prepare_record_context( self, image_IN, context_IN ):
+    def prepare_record_context( self, image_IN, context_IN, request_inputs):
 
         me = 'CodeImageView.prepare_record_context'
 
@@ -1588,13 +1624,13 @@ class CodeImage( LoginRequiredMixin, FormView ):
         parent_sheet = image_IN.sheet_set.get()  
 
         # look up associated record(s)
-        record_qs = parent_sheet.record_set.all()
+        record_qs = parent_sheet.record_set.all().order_by('line_no')
         record_count = record_qs.count()
 
         # DEBUG
         logger.info(f'{me}: record_count is {record_count}')
         logger.info(f'{me}: context_IN is {context_IN}')
-
+        # logger.info(f'{me}: context_IN is {json.dumps(context_IN, indent=4, sort_keys=True)}')
 
         # set up form.
         record_fields = get_form_fields( parent_sheet.year, 'short' ) #TODO: THIS SHOULD NOT BE HARD-CODED
@@ -1603,20 +1639,42 @@ class CodeImage( LoginRequiredMixin, FormView ):
         RecordForm = modelform_factory(Record, fields = record_fields, widgets = field_widgets)
         helper = RecordFormHelper(year=parent_sheet.year)
 
+        # get the action from context
+        my_action = request_inputs.get(PARAM_NAME_ACTION, None)
+        record_id = request_inputs.get(PARAM_NAME_RECORD_ID, None)
+
+        logger.info(f'prepare_record_context my_action is {my_action}')
+
+        # if my_action == ACTION_EDIT_RECORD:
+        #     record_id = context_IN.get(PARAM_NAME_RECORD_ID, None)
+            # pull record ID and put it into the context in the same place as action
+            # OR change signature of this method so it takes the request
+
+
         if CONTEXT_RECORD_INSTANCE in context_IN.keys():
             record_instance = context_IN[ CONTEXT_RECORD_INSTANCE ]
+
+        elif my_action == ACTION_EDIT_RECORD:
+            record_instance = Record.objects.get(id=record_id)            
+
         else:
             record_instance = None
-        logger.info(f"{me}(): record_instance is {record_instance}")
 
-        if record_instance:
+        logger.info(f"{me}(): record_instance has id {record_id}, {record_instance}")
+
+        # did we get a record id?
+        if record_instance and my_action == ACTION_EDIT_RECORD:
+
+            # yes, this is where we render the form for editing, so all
+            # edit form work goes here and stays inside this conditional
             form = RecordForm(instance = record_instance)
+            context_OUT[ CONTEXT_RECORD_INSTANCE ] = record_instance
+    
         else:
             form = RecordForm()
 
         context_OUT[ CONTEXT_RECORD_FORM ] = form
         context_OUT[ CONTEXT_RECORD_FORMSET_HELPER ] = helper
-        context_OUT[ CONTEXT_RECORD_INSTANCE ] = record_instance
         context_OUT[ CONTEXT_RECORD_LIST ] = record_qs
 
 
@@ -1627,7 +1685,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
     #-- END method prepare_record_context() --#
 
 
-    def prepare_sheet_context( self, image_IN, context_IN ):
+    def prepare_sheet_context( self, image_IN, context_IN, request_inputs ):
 
         # return reference
         context_OUT = None
@@ -1664,7 +1722,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         #     - pull in records, sorted by row ID, and then output list with
         #         edit link next to each.
         if this_sheet:
-            context_OUT = self.prepare_record_context( image_IN, context_OUT )
+            context_OUT = self.prepare_record_context( image_IN, context_OUT, request_inputs )
 
         # logger.info(f'{me}: context_OUT is {context_OUT}')
 
@@ -1724,6 +1782,11 @@ class CodeImage( LoginRequiredMixin, FormView ):
                         
                         # mark image as complete
                         action_error_list = self.action_complete_image( request_IN, context_IN ) 
+
+                    if ( my_action == ACTION_EDIT_RECORD ):
+                        
+                        # edit the record (from the table of entered records)
+                        action_error_list = self.action_edit_record( request_IN, context_IN ) 
                     
                     elif ( my_action == ACTION_UPDATE_IMAGE ):
 
@@ -1852,11 +1915,12 @@ class CodeImage( LoginRequiredMixin, FormView ):
         return_template_name = self.template_name
         context = initialize_context( request )
         error_list = list()
-        seed_current_entry( request ) # this ensures there's a value in CurrentEntry
-        get_next_image( request )
 
         # get request inputs (get or post)
         request_inputs = get_request_data( request )
+
+        # if you need request_inputs in a prepare_context method, pass request_inputs in
+        # please don't mess with the context
 
         # get current user info
         logger.info(f'{me} user info:\n \t {request.user}')
@@ -1921,7 +1985,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
             elif ( current_image_type == choices.IMAGE_TYPE_SHEET ):
 
                 # prepare sheet context (which also prepares record context)
-                context = self.prepare_sheet_context( current_image, context )
+                context = self.prepare_sheet_context( current_image, context, request_inputs )
                 # logger.info(f'CodeImage prepare_sheet_context context is {context}')
 
             elif ( current_image_type == choices.IMAGE_TYPE_OTHER ):
