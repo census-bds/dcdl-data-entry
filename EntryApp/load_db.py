@@ -331,6 +331,63 @@ def load_reels_from_csv(reel_csv_path):
             load_reel(reel_path = row[0], year = row[1])
 
 
+def assign_reel_to_keyer(this_reel, keyer, keyer_position):
+    '''
+    Assign a keyer the images from a specified reel by loading image
+     info into Image model for a keyer. This method populates the Image model.
+    Designed to be used from the django shell.
+
+    Required arguments:
+    - reel instance
+    - keyer instance 
+    - integer 1 or 2 denoting keyer position
+    Returns: 
+    - None
+    '''
+
+    # set the keyer
+    if keyer_position == 1:
+        this_reel.keyer_one = keyer
+
+    elif keyer_position == 2:
+        this_reel.keyer_two = keyer
+
+    else:
+        print(f'assign_reel_to_keyer() got wrong number for keyer position')
+        raise ValueError
+
+    # increment reel keyer count
+    this_reel.keyer_count += 1
+    this_reel.save()
+
+    # also increment keyer reel count
+    keyer.reel_count += 1
+    keyer.save()
+
+    # now, get year and associated image files 
+    year = this_reel.year
+    image_file_qs = ImageFile.objects.filter(img_reel_id = this_reel)
+
+    # loop through and create Image instance w/this keyer 
+    for image_file_instance in image_file_qs:
+
+        img = Image.objects.create( 
+                image_file=image_file_instance, \
+                jbid=keyer.jbid, \
+                is_complete=False, \
+                year=year,
+                image_type=None, \
+                problem=False
+        )
+
+    #-- END loop over images in the reel --#
+
+    return 
+
+#-- END assign_reel_to_keyer() method --#
+
+
+
 def refresh_db():
     '''
     INTENDED FOR DEV ONLY

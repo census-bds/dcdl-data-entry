@@ -25,6 +25,12 @@
             <input type="submit" value="Code Image">
         </form>
     </p>
+        {% elif make_next_reel_button_appear %}
+            <form method="post">
+                {% csrf_token %}
+                <input type='hidden' name='load_next_reel' value="True"/>
+                <input type="submit" value="Load next reel">
+            </form>
         {% endif %}
 
     {% else %}

@@ -323,16 +323,19 @@ def assign_reel(keyer):
     - assigned reel object
     '''
 
+    me = 'assign_reel()'
     this_reel = None
 
     # - take the ones that have 0 or 1 keyer assigned
     # - exclude the 1990 dummy breaker reel
+    # - exclude ones already assigned to this keyer
     reel_qs = Reel.objects.filter(keyer_count__lt = 2)
     reel_qs = reel_qs.exclude(reel_name = 'dummy_breaker_reel')
+    reel_qs = reel_qs.exclude(Q(keyer_one = keyer) | Q(keyer_two = keyer))
 
     # do we have any reels to assign?
     if len(reel_qs) == 0:
-        print(f'assign_images() found no reels to assign')
+        logger.info(f'{me}: found no reels to assign')
         return
 
     # prefer to assign reels that have 1 keyer over those that have none
@@ -368,7 +371,7 @@ def assign_reel(keyer):
     # loop through and create Image instance w/this keyer 
     for image_file_instance in image_file_qs:
 
-        img = Image.objects.create( 
+        img, created = Image.objects.get_or_create( 
                 image_file=image_file_instance, \
                 jbid=keyer.jbid, \
                 is_complete=False, \
@@ -376,6 +379,9 @@ def assign_reel(keyer):
                 image_type=None, \
                 problem=False
         )
+
+    if not created:
+        logger.info(f"{me}: images already existed, weird")
 
     #-- END loop over images in the reel --#
 
@@ -405,9 +411,22 @@ def seed_current_entry(request):
     current_count = current_qs.count()
     this_keyer = Keyer.objects.get(jbid=request.user)
 
+    # if this user doesn't have a row in CurrentEntry, we need to do stuff
     if ( current_count == 0 ):
 
-        this_reel = assign_reel(this_keyer)
+        # does this keyer have any reels assigned?
+        reel_qs = Reel.objects.filter(Q(keyer_one = this_keyer) | Q(keyer_two = this_keyer))
+
+        # if not, assign a reel
+        if reel_qs.count() == 0:
+            this_reel = assign_reel(this_keyer)
+        
+        # if so, go get one of those reels
+        # prioritize reels that were loaded first...? 
+        else:
+            this_reel = reel_qs.order_by('id')[0]
+        
+
         first_imagefile = ImageFile.objects.filter(img_reel = this_reel)[0]
         first_image = Image.objects.get(
             jbid = this_keyer.jbid,
@@ -423,6 +442,8 @@ def seed_current_entry(request):
             img = first_image,
         )
         current.save()
+
+
 
     #-- END check to see if we need to create current for new user. --#
 
@@ -444,25 +465,34 @@ def get_next_reel(request):
     current = CurrentEntry.objects.get(jbid=request.user)
     this_keyer = Keyer.objects.get(jbid = request.user)
 
-    # is there a reel in CurrentEntry?
+    logger.info(f"{me}: loading new reel for {request.user}")
+
+    # is there a reel in CurrentEntry? mark complete if so
     if current.reel:
 
         old_reel = current.reel
+
+        logger.info(f"{me}: replacing {old_reel}")
         
         # which keyer is this? mark old reel complete
-        if old_reel.keyer_one__jbid == request.user:
+        if old_reel.keyer_one.jbid == request.user.username:
             old_reel.is_complete_keyer_one = True
         
-        elif old_reel.keyer_two == request.user:
+        elif old_reel.keyer_two.jbid == request.user.username:
             old_reel.is_complete_keyer_two = True
 
         else:
             logger.warn(f"{me}: {request.user} is not assigned to either keyer slot in this reel")
             raise ValueError
 
-    # now assign the reel and update things
+    # if not, assign the reel:
+    #   priority goes to reels with one other keyer assigned
+    #   then to reels with lower IDs 
     this_reel = assign_reel(this_keyer)
 
+    # then update CurrentEntry
+    current.reel = this_reel
+    current.save()
 
 
 #==============================================================================#
@@ -489,6 +519,15 @@ class IndexView(LoginRequiredMixin, TemplateView):
         return response_OUT
 
     #-- END method get() --#
+
+
+    def post(self, request):
+
+        # call get_next_reel
+        get_next_reel(request)
+
+        # reload page with get request, and proceed
+        return redirect(reverse("EntryApp:index"))
 
 
     def process_request( self, request ):
@@ -537,8 +576,6 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
         logger.info(f'{me}: current reel is {current_reel}')
 
-        # TODO: add logic for when they finish entering a reel
-
         # todo
         todo_image_qs = get_image_todo_qs( request )
         todo_image_count = todo_image_qs.count()
@@ -565,6 +602,10 @@ class IndexView(LoginRequiredMixin, TemplateView):
         recent_image_qs = recent_image_qs[ : recent_image_limit ]
         recent_image_list = list( recent_image_qs )
         context[ 'recent_image_list' ] = recent_image_list
+
+        # check if all images in reel are completed
+        if completed_count == current_reel.image_count:
+            context[ 'make_next_reel_button_appear' ] = True
 
         # render response
         response_OUT = render( request, 'EntryApp/index.html', context )
@@ -1644,11 +1685,6 @@ class CodeImage( LoginRequiredMixin, FormView ):
         record_id = request_inputs.get(PARAM_NAME_RECORD_ID, None)
 
         logger.info(f'prepare_record_context my_action is {my_action}')
-
-        # if my_action == ACTION_EDIT_RECORD:
-        #     record_id = context_IN.get(PARAM_NAME_RECORD_ID, None)
-            # pull record ID and put it into the context in the same place as action
-            # OR change signature of this method so it takes the request
 
 
         if CONTEXT_RECORD_INSTANCE in context_IN.keys():

@@ -561,7 +561,7 @@ class LongForm1990(models.Model):
     employer = models.CharField(
         null=True,
         max_length=255,
-        verbose_name="28a. Name of company, business, or other employer"
+        verbose_name="28a. For whom did ... work?"
     )
     industry = models.CharField(
         max_length=255,
@@ -579,12 +579,12 @@ class LongForm1990(models.Model):
     occupation = models.CharField(
         max_length=255,
         null=True,
-        verbose_name="29a. What kind of work was this person doing?"
+        verbose_name="29a. What kind of work was ... doing?"
     )
     occupation_detail = models.CharField(
         max_length=255,
         null=True,
-        verbose_name="29b. What were this person's most important activities or duties?"
+        verbose_name="29b. What were ...'s most important activities or duties?"
     )
 
     def __str__(self):
