@@ -17,12 +17,12 @@
                         <td>{{ record.first_name }}</td>
                         <td>{{ record.middle_init }}</td>
                         <td>
-                            <form>
+                            <form method="POST">
                                 {% csrf_token %}
                                 <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
                                 <input type="hidden" name="{{ param_names.PARAM_NAME_SHEET_ID }}" value="{{ sheet_instance.id }}" />
                                 <input type="hidden" name="{{ param_names.PARAM_NAME_RECORD_ID }}" value="{{ record.id }}" />
-                                <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_record" />
+                                <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="edit_record" />
                                 <input type="submit" value="Edit">
                             </form>
                         </td>

@@ -18,7 +18,7 @@
     <p>
         The current reel is from {{ next_image.year }}. Next image ({{ num_todo }} remaining):
         <br/>
-        <img src = "/images/{{ next_image.year }}/{{ next_image.image_file.img_file_name }}" style="width: 200px;" />
+        <img src = "/images/{{next_image.year}}/{{ next_image.image_file.img_reel.reel_name }}/{{ next_image.image_file.img_file_name }}" style="width: 200px;" />
         <form action={% url 'EntryApp:code_image' %} method="post">
             {% csrf_token %}
             <input type="hidden" name="image_id" value="{{ next_image.id }}" />
@@ -45,7 +45,7 @@
             </tr>
     {% for recent_image in recent_image_list %}
             <tr>
-                <td><img src = "/images/{{recent_image.year}}/{{ recent_image.image_file.img_file_name }}" style="width: 200px;" /></td>
+                <td><img src = "/images/{{recent_image.year}}/{{ recent_image.image_file.img_reel.reel_name }}/{{ recent_image.image_file.img_file_name }}" style="width: 200px;" /></td>
                 <td>{{ recent_image.year }}</td>
                 <td>{{ recent_image.image_type }}</td>
                 <td>{{ recent_image.is_complete }}</td>
@@ -90,18 +90,6 @@
     <form action={% url 'EntryApp:test_crispy_formset' year=1990 form_type='long' %}>
         {% csrf_token %}
         <input type="submit" value="View 1990 long form">
-    </form>
-    <br>
-    <br>
-    <br>
-    <form action={% url 'EntryApp:form_dev_view' year=1960 form_type='short' %}>
-        {% csrf_token %}
-        <input type="submit" value="1960 form development">
-    </form>
-    <br>
-    <form action={% url 'EntryApp:form_dev_view' year=1970 form_type='short' %}>
-        {% csrf_token %}
-        <input type="submit" value="1970 form development">
     </form>
     <br>
     <br>

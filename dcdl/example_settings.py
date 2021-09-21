@@ -183,3 +183,4 @@ STATICFILES_DIRS = (
 FORM_FIELDS_CSV = os.path.join(Path(__file__).parent.parent.absolute(), 'form_fields.csv')
 IMAGE_DIR = '/data/data/images/dev_images'
 USER_INFO = os.path.join(Path(__file__).parent.parent.absolute(), 'user_info.csv')
+DEFAULT_REEL_LOAD_SPEC = ""
