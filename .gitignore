@@ -1,8 +1,13 @@
 # django setttings for DCDL
 dcdl/settings.py
 
+# startup shell script for cron
+start_app.sh
+
 # actual versions of user info and form field files
 dev_reel_load_spec.csv
+test_reel_load_spec.csv
+prod_reel_load_spec.csv
 form_fields.csv
 user_info.csv
 
