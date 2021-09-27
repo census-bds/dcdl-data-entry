@@ -100,7 +100,7 @@ BIRTH_QUARTER_CHOICES = [
     ('Jan-Mar', 'Jan-Mar'),
     ('Apr-June', 'Apr-June'),
     ('July-Sept', 'July-Sept'),
-    ('Oct-Dec', 'Jan-Mar'),
+    ('Oct-Dec', 'Oct-Dec'),
 ]
 
 SINGLE_DIGIT_CHOICES = [(str(x), str(x)) for x in list(range(0,10))]
