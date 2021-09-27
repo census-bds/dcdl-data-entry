@@ -210,10 +210,22 @@ class ReelAdmin( admin.ModelAdmin ):
 
     # method to print jbid for keyer
     def get_keyer_one(self, obj):
-        return obj.keyer_one.jbid
+
+        keyer_one_jbid = obj.keyer_one.jbid
+
+        if keyer_one_jbid:
+            return keyer_one_jbid
+        else:
+            return ''
 
     # method to print jbid for keyer
     def get_keyer_two(self, obj):
-        return obj.keyer_two.jbid
+
+        keyer_two_jbid = obj.keyer_two.jbid
+
+        if keyer_two_jbid:
+            return keyer_two_jbid
+        else:
+            return ''
 
 
