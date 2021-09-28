@@ -5,8 +5,14 @@ from django.forms import modelformset_factory
 
 from http import HTTPStatus
 
-from EntryApp.models import Image, Breaker, CurrentEntry, Sheet
-from EntryApp.forms import ImageForm, BreakerForm, SheetForm, BaseBreakerFormSet
+from EntryApp.models import Image 
+from EntryApp.models import Breaker
+from EntryApp.models import CurrentEntry
+from EntryApp.models import Sheet
+from EntryApp.forms import ImageForm, 
+from EntryApp.forms import BreakerForm
+from EntryApp.forms import SheetForm
+from EntryApp.forms import BaseBreakerFormSet
 
 import EntryApp.tests.test_utils as utils
 
@@ -30,7 +36,11 @@ class IndexViewTests(TestCase):
         self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
         response = self.client.get(reverse('EntryApp:index'))
         self.assertEqual(response.status_code, HTTPStatus.OK)
-    
+
+    def test_seed_current_entry(self):
+        ''' Test that CurrentEntry has values after keyer logs in'''
+        pass
+
 
 class BeginNewImageTests(TestCase):
 
