@@ -513,8 +513,9 @@ class Sheet(models.Model):
     problem = models.BooleanField(default=False)
 
     # for entry
-    num_records = models.IntegerField(
+    num_records = models.CharField(
         verbose_name = 'Number of records',
+        max_length = 255,
         null = True,
         blank = True
     )
@@ -819,24 +820,25 @@ class Record(models.Model):
         choices = choices.RACE_CHOICES_1990,
         verbose_name = "Race"
     )
-    exact_birth_year = models.IntegerField(
-        null = True,
-        blank = True,
-        verbose_name='Year of birth'
-    )
-    exact_birth_month = models.CharField(
+    exact_birth_year = models.CharField(
+        verbose_name = 'Year of birth',
         max_length = 255,
         null = True,
-        blank = True,
-        verbose_name = 'Month of birth'
+        blank = True
+    )
+    exact_birth_month = models.CharField(
+        verbose_name = 'Month of birth',
+        max_length = 255,
+        null = True,
+        blank = True
     )
     birth_year = models.CharField(
+        verbose_name = "Specific year of birth",
         max_length = 255,
         blank = True,
         default = choices.SINGLE_DIGIT_CHOICES[0],
         null = True,
-        choices = choices.SINGLE_DIGIT_CHOICES,
-        verbose_name = "Specific year of birth"
+        choices = choices.SINGLE_DIGIT_CHOICES
     )
     birth_quarter = models.CharField(
         max_length = 255,
@@ -875,7 +877,8 @@ class Record(models.Model):
         verbose_name = 'Occupation'
     )
 
-    total_persons = models.IntegerField(
+    total_persons = models.CharField(
+        max_length = 255,
         null = True,
         blank = True 
     )
