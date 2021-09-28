@@ -154,8 +154,14 @@ class ProblemForm(forms.Form):
     Define form where users can record a problem with a data entry task
     '''
 
-    problem = forms.BooleanField(label="Check here to indicate bad data")
-    description = forms.CharField(widget=forms.Textarea, required=False)
+    problem = forms.BooleanField(
+        label = "Check here to indicate there's a problem with entered data",
+        required = False
+    )
+    description = forms.CharField(
+        widget = forms.Textarea,
+        required = False
+    )
 
 
 #================================#

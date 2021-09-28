@@ -2125,14 +2125,16 @@ def report_problem(request):
             logger.info(f'report_problem GET request for {image_id}')
             logger.info(f"report_problem referred from {request.META['HTTP_REFERER']}")
             flagged_view = parse_http_referral(request.META['HTTP_REFERER'])
+            
             return render(
                     request, \
                     'EntryApp/report-problem.html',
                     {
                         'image': image_instance,
+                        'form': ProblemForm(),
                         'reel_name': image_instance.image_file.img_reel.reel_name,
-                        'slug': image_instance.image_file.image_file_name,
-                        'form': ProblemForm()
+                        'slug': image_instance.image_file.img_file_name,
+                        'year': image_instance.year
                     }
             )
         else:
@@ -2151,37 +2153,22 @@ def report_problem(request):
     elif request.method == "POST":
 
         form = request.POST
-        problem_image = current.img
-        logger.info(f'report_problem POST request for {current.img.img_path}')
-        logger.info(f'report_problem problem_image pk is {problem_image.pk}')
+        problem_image_id = current.img_id
+        problem_image = Image.objects.get(id=problem_image_id)
+        logger.info(f'report_problem POST request for file {problem_image.image_file.img_file_name}')
+        logger.info(f'report_problem problem_image id is {problem_image.id}')
 
         # do I need to figure out what kind of image it is?
         try:
+        
+            problem_image = Image.objects.get(id = problem_image.id)
 
             # flag the problem at the image level
             is_problem = True if 'problem' in form.keys() else False
 
-            if problem_image.is_complete:
-                defaults = {
-                    'problem': is_problem,
-                    'prob_description': form['description'],
-                    'flagged_view': flagged_view
-                }
-
-            else:
-                defaults = {
-                    'is_complete': True,
-                    'problem': is_problem,
-                    'prob_description': form['description'],
-                    'flagged_view': flagged_view
-                }
-
-            problem_image, updated = Image.objects.update_or_create(
-                jbid = request.user,
-                pk = problem_image.pk,
-                defaults = defaults
-            )
-
+            problem_image.problem = is_problem
+            problem_image.save()
+            
             return redirect(reverse('EntryApp:index'))
 
         except Exception as e:
@@ -2191,9 +2178,10 @@ def report_problem(request):
                 'EntryApp/report-problem.html',
                 {
                     'image': current.img,
+                    'form': ProblemForm(),
                     'reel_name': current.reel.reel_name,
-                    'slug': current.img.image_file.image_file_name,
-                    'form': ProblemForm()
+                    'slug': current.img.image_file.img_file_name,
+                    'year': problem_image.year
                 }
         )
 
@@ -2255,56 +2243,6 @@ def test_crispy_formset_view(request, year, form_type):
         logger.warn(f"test_crispy_formset_view(): unknown form_type is {form_type}")
         raise ValueError
 
-    # TestCrispyFormset = modelformset_factory(
-    #     Record,
-    #     fields=fields,
-    #     extra=1,
-    #     formset=BaseEmptyRecordFormSet,
-    #     widgets = {
-    #         'sample_key_gq': forms.RadioSelect,
-    #         'relp_1960': forms.RadioSelect,
-    #         'relp_1970': forms.RadioSelect,
-    #         'relp_1980': forms.RadioSelect,
-    #         'relp_1990': forms.RadioSelect,
-    #         'sex': forms.RadioSelect,
-    #         'race_1960': forms.RadioSelect,
-    #         'race_1970': forms.RadioSelect,
-    #         'race_1980': forms.RadioSelect,
-    #         'race_1990': forms.RadioSelect,
-    #         'birth_quarter': forms.RadioSelect,
-    #         'birth_decade': forms.RadioSelect,
-    #         'birth_year': forms.RadioSelect,
-    #         'marital_status': forms.RadioSelect,
-    #         'age_hundreds': forms.RadioSelect,
-    #         'age_tens': forms.RadioSelect,
-    #         'age_ones': forms.RadioSelect,
-    #         'birth_year_thousands': forms.RadioSelect,
-    #         'birth_year_hundreds': forms.RadioSelect,
-    #         'birth_year_tens': forms.RadioSelect,
-    #         'birth_year_ones': forms.RadioSelect,
-    #         'block_1': forms.RadioSelect,
-    #         'block_2': forms.RadioSelect,
-    #         'block_3': forms.RadioSelect,
-    #         'serial_no_1':forms.RadioSelect,
-    #         'serial_no_2':forms.RadioSelect,
-    #         'serial_no_3':forms.RadioSelect,
-    #         'serial_no_4':forms.RadioSelect,
-    #         'serial_no_5':forms.RadioSelect,
-    #         'serial_no_6':forms.RadioSelect,
-    #         'serial_no_7':forms.RadioSelect,
-    #         'serial_no_8':forms.RadioSelect,
-    #         'serial_no_9':forms.RadioSelect,
-    #         'serial_no_10':forms.RadioSelect,
-    #         'serial_no_11':forms.RadioSelect,
-    #         'total_persons_hundreds': forms.RadioSelect,
-    #         'total_persons_tens': forms.RadioSelect,
-    #         'total_persons_ones': forms.RadioSelect
-    #     }
-    # )
-    # formset = TestCrispyFormset()
-
-
-
     ft = ''
     if form_type == "long":
         ft = form_type + '_'
@@ -2317,16 +2255,3 @@ def test_crispy_formset_view(request, year, form_type):
     }
 
     return render(request, 'EntryApp/test-crispy-formset.html', context)
-
-
-def form_dev_view(request, year, form_type):
-    '''
-    Dummy view for messing with HTML/CSS hardcoded layout
-    '''
-
-    context = {
-        'year': year,
-        'form_type': form_type
-    }
-    
-    return render(request, 'EntryApp/form-dev.html', context)
