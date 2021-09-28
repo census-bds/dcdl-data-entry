@@ -13,6 +13,7 @@
         {% load static %}
         <link rel="stylesheet" href="{% static "EntryApp/EntryApp.css" %}" />
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">        
+        
         <link rel="stylesheet" href="{% static "EntryApp/custom.css" %}" />
         {% block end_of_head_tag %}
         {% endblock end_of_head_tag %}
@@ -32,10 +33,18 @@
         <div id="problem">
             {% block problem %}
             <div id="report-problem">
-                <form action={% url 'EntryApp:report_problem' %}>
+                {% if img.id %}
+                    <form action={% url 'EntryApp:report_problem' %} value=img.id>
                     {% csrf_token %}
-                    <input type="submit" value="Report a problem">
-                </form>
+                        <input type='hidden' name="{{ param_names.PARAM_NAME_IMAGE_ID}}" value="{{ img.id }}">
+                        <input type="submit" value="Report a problem">
+                    </form>
+                {% else %}
+                    <form action={% url 'EntryApp:report_problem' %}>
+                    {% csrf_token %}
+                        <input type="submit" value="Report a problem">
+                    </form>
+                {% endif %}
             </div>
             {% endblock problem %}
         </div>
