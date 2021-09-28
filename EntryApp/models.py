@@ -557,13 +557,15 @@ class LongForm1990(models.Model):
     create_date = models.DateTimeField( auto_now_add = True )
     last_modified = models.DateTimeField( auto_now = True )
     
-    serial_no = models.IntegerField(
+    serial_no = models.CharField(
         verbose_name = "Household serial number",
+        max_length = 255,
         null = True,
         blank = True 
     )
-    person_no = models.IntegerField(
+    person_no = models.CharField(
         verbose_name="Person number",
+        max_length = 255,
         null = True,
         blank = True
     )
@@ -697,21 +699,27 @@ class Record(models.Model):
         )
 
     # fields that appear in some year-forms but not all
-    page_no = models.IntegerField(
+    page_no = models.CharField(
+        verbose_name = "Page number",
+        max_length = 255,
         null = True,
         blank = True
     )
-    person_no = models.IntegerField(
+    person_no = models.CharField(
             verbose_name = "Person number",
+            max_length = 255,
             null = True,
+            blank = True
         )
-    serial_no = models.IntegerField(
+    serial_no = models.CharField(
         verbose_name = "Serial number",
+        max_length = 255,
         null = True,
         blank = True
     )
-    do_id = models.IntegerField(
+    do_id = models.CharField(
         verbose_name = "DO ID",
+        max_length = 255,
         null = True,
         blank = True
     )
