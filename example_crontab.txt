@@ -3,4 +3,4 @@ HOME=/
 EMAIL="cecile.m.murray@census.gov"
 # Start postgres and start the test app every weekday at 8:30AM
 @reboot /data/data/postgresql/start_pgsql.sh >> /data/data/postgresql/cronlog.out
-@reboot /apps/django/dcdl_test/start_app.sh >> /apps/django/dcdl_test/logs/app.out 
+@reboot /apps/django/dcdl_test/start_app.sh 'test' >> /apps/django/dcdl_test/logs/app.out 
