@@ -22,6 +22,7 @@ FORM_1960 = Layout(
         Field('last_name'),
         Field('first_name'),
         Field('middle_init', css_class='textinput-small'),
+        Field('suffix', css_class='textinput-small'),
         Field(InlineRadios('relp_1960')),
         Field('sex'),
         Field(InlineRadios('race_1960')),
@@ -45,6 +46,7 @@ FORM_1970 = Layout(
             Div(
                 Field('first_name'),
                 Field('middle_init', css_class='textinput-small'),
+                Field('suffix', css_class='textinput-small'),
                 css_id="form-1970-first-name-middle-init"
             ),
             css_id='form-1970-names-div'
@@ -75,6 +77,7 @@ FORM_1980 = Layout(
         Div(
             Field('first_name'),
             Field('middle_init', css_class='textinput-small'),
+            Field('suffix', css_class='textinput-small'),
             css_id='form-1980-first-name-middle-init'
         ),
         Div(InlineRadios('sex'), css_id='form-1980-sex-radios'),
@@ -127,6 +130,7 @@ FORM_1990 = Layout(
         Div(
             Field('first_name'),
             Field('middle_init', css_class='textinput-small'),
+            Field('suffix', css_class='textinput-small'),
             css_id='form-1990-first-name-middle-init'
         ),
         Div('sex', css_id='form-1990-sex-radios'),

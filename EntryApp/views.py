@@ -1357,8 +1357,6 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
             logger.info(f'Sheet form is{form}')
 
-            current_reel = CurrentEntry.objects.get(jbid=request.user)
-
             # 1990 never has breakers, so assign the default dummy
             if image_instance.year == 1990:
                 # this breaker gets created for each user during data loading
