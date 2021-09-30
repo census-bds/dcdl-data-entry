@@ -686,6 +686,11 @@ class Record(models.Model):
         null = True,
         blank = True
     )
+    suffix = models.CharField(
+        max_length = 255,
+        null = True,
+        blank = True
+    )
     age = models.CharField(
         max_length = 255,
         null = True,

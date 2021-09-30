@@ -48,7 +48,7 @@ class ImageTypeForm(forms.Form):
     """
     Form where user records the form type to which an image belongs
     """
-
+    
     image_type = forms.MultipleChoiceField(
                      widget=forms.RadioSelect,
                      choices=choices.IMAGE_TYPE_CHOICES,
