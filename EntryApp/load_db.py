@@ -98,7 +98,7 @@ def load_imagefiles(reel_path, year):
 #-- END function load_imagefiles() --#
 
 
-def load_reel(reel_path, year):
+def load_reel(reel_path, year, state):
     '''
     Wrapper method to load a reel into the DB
     Used for csv bulk load
@@ -106,6 +106,7 @@ def load_reel(reel_path, year):
     Takes:
     - list of string reel directory filepaths 
     - integer year to which the images belong
+    - string state abbreviation (postal code)
     Returns:
     - None
     '''
@@ -119,7 +120,8 @@ def load_reel(reel_path, year):
     this_reel, _ = Reel.objects.get_or_create(
         reel_path = reel_path,    
         year = year,
-        reel_name = path_head
+        reel_name = path_head,
+        state = state
     )
 
     # call load_imagefiles
@@ -165,6 +167,7 @@ def create_1990_dummy_breakers(keyer_jbids=[]):
         reel_name = 'dummy_breaker_reel',
         reel_path = '/data/data/images/dev_images/1990breaker/',
         year = 1990,
+        state = 'DC',
         image_count = 1
     )
     
@@ -209,7 +212,8 @@ def create_1990_dummy_breakers(keyer_jbids=[]):
         breaker = Breaker.objects.create(
             year=1990,
             jbid=k,
-            img=img
+            img=img,
+            state="AL"
         )
 
 #-- END function create_1990_dummy_breakers() --#
@@ -328,7 +332,7 @@ def load_reels_from_csv(reel_csv_path):
         for row in csvreader:
             logger.info(row)
 
-            load_reel(reel_path = row[0], year = row[1])
+            load_reel(reel_path = row[0], year = row[1], state = row[2])
 
 
 def assign_reel_to_keyer(this_reel, keyer, keyer_position):
