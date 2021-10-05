@@ -65,7 +65,7 @@ class Reel(models.Model):
     reel_name = models.CharField(max_length = 255, null = False)
     year = models.IntegerField(blank = True, null = False)
     reel_path = models.CharField(max_length = 255, null = False)
-    state = models.CharField(max_length = 255, null = False, default = "('ZZ', 'ZZ')")    
+    state = models.CharField(max_length = 255, null = False, default = "--")    
 
     # optional extra metadata
     reel_index = models.IntegerField(blank = True, null = True )
