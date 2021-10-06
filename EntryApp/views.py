@@ -743,6 +743,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
             # get inputs
             inputs_IN = get_request_data( request_IN )
 
+            # get current reel for year and state info
+            current = CurrentEntry.objects.get(jbid = request_IN.user.username)
+            current_reel = Reel.objects.get(id = current.reel_id)
+
             # get image for ID (TODO: check for image ID)
             image_id = inputs_IN.get( PARAM_NAME_IMAGE_ID, None )
             image_instance = Image.objects.get( pk = image_id )
@@ -769,9 +773,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
                 # prepare data to use to create/update Breaker.
                 breaker_data = formset.cleaned_data[0]
                 breaker_data['img'] = image_instance
-                breaker_data['year'] = image_instance.year
                 breaker_data['jbid'] = request_IN.user.username
                 breaker_data['timestamp'] = datetime.datetime.now()
+                breaker_data['state'] = current_reel.state
+                breaker_data['year'] = current_reel.year
 
                 # remove "id" since it breaks qs.update().
                 if ( "id" in breaker_data ):

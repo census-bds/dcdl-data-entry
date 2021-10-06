@@ -17,7 +17,7 @@ IMAGE_TYPE_SHEET = "sheet"
 IMAGE_TYPE_OTHER = "other"
 IMAGE_TYPE_CHOICES = [
     ( IMAGE_TYPE_BREAKER, "Breaker" ),
-    ( IMAGE_TYPE_LONGFORM, "1990 Long Form" ),
+    # ( IMAGE_TYPE_LONGFORM, "1990 Long Form" ),
     ( IMAGE_TYPE_SHEET, "Sheet" ),
     ( IMAGE_TYPE_OTHER, "Other"),
 ]
@@ -34,7 +34,7 @@ STATE_LIST = [
                 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', \
                 'MI', 'MN', 'MS', 'MO',	'MT', 'NE',	'NV', 'NH',	'NJ', 'NM',	'NY', \
                 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'PR', 'RI', 'SC', 'SD', 'TN', \
-                'TX', 'UT',	'VT', 'VA',	'WA', 'WV',	'WI', 'WY',
+                'TX', 'UT',	'VT', 'VA',	'WA', 'WV',	'WI', 'WY', None, '--',
             ]
 STATE_CHOICES = [(x, x,) for x in STATE_LIST]
 
@@ -89,11 +89,13 @@ SAMPLE_GQ_CHOICES = [
     ('C', 'C'),
     ('D', 'D'),
     ('GQ', 'GQ'),
+    ('blank', 'Blank'),
 ]
 
 SEX_CHOICES = [
     ('male', 'Male'),
     ('female', 'Female'),
+    ('blank', 'Blank'),
 ]
 
 BIRTH_QUARTER_CHOICES = [
@@ -101,9 +103,10 @@ BIRTH_QUARTER_CHOICES = [
     ('Apr-June', 'Apr-June'),
     ('July-Sept', 'July-Sept'),
     ('Oct-Dec', 'Oct-Dec'),
+    ('blank', 'Blank'),
 ]
 
-SINGLE_DIGIT_CHOICES = [(str(x), str(x)) for x in list(range(0,10))]
+SINGLE_DIGIT_CHOICES = [(str(x), str(x)) for x in list(range(0,10))] + [('blank', '-')]
 
 BIRTH_DECADE_CHOICES = [
     ('1850', '185-'),
@@ -117,17 +120,20 @@ BIRTH_DECADE_CHOICES = [
     ('1930', '193-'),
     ('1940', '194-'),
     ('1950', '195-'),
-    ('1960', '196-')
+    ('1960', '196-'),
+    ('blank', 'Blank'),
 ]
 
 
 BIRTH_CENTURY_CHOICES = [
     ('8', '8'),
     ('9', '9'),
+    ('blank', 'Blank'),
 ]
 
 BIRTH_MILLENIUM_CHOICES = [
-    ('1', '1')
+    ('1', '1'),
+    ('blank', 'Blank'),
 ]
 
 MARITAL_STATUS_CHOICES = [
@@ -135,7 +141,8 @@ MARITAL_STATUS_CHOICES = [
     ('Widowed', 'Widowed'),
     ('Divorced', 'Divorced'),
     ('Separated', 'Separated'),
-    ('Never married', 'Never married')
+    ('Never married', 'Never married'),
+    ('blank', 'Blank'),
 ]
 
 INDUSTRY_CHOICES = [
@@ -144,6 +151,7 @@ INDUSTRY_CHOICES = [
     ('Retail trade', 'Retail trade'),
     ('Other (agriculture, construction, service, government, etc.)', \
         'Other (agriculture, construction, service, government, etc.)'),
+    ('blank', 'Blank'),
 ]
 
 RELP_CHOICES_1960 = [
@@ -154,6 +162,7 @@ RELP_CHOICES_1960 = [
             ('roomer/boarder', 'Roomer, boarder, lodger'),
             ('patient/inmate', 'Patient or inmate'),
             ('other', 'Other not related to head'),
+            ('blank', 'Blank'),
     ]
 
 
@@ -165,6 +174,7 @@ RELP_CHOICES_1970 = [
             ('roomer/boarder', 'Roomer, boarder, lodger'),
             ('patient/inmate', 'Patient or inmate'),
             ('other', 'Other not related to head'),
+            ('blank', 'Blank'),
     ]
 
 RELP_CHOICES_1980 = [
@@ -177,6 +187,7 @@ RELP_CHOICES_1980 = [
             ('partner/roommate', 'Partner, roommate'),
             ('paid_employee', 'Paid employee'),
             ('other', 'Other nonrelative'),
+            ('blank', 'Blank'),
     ]
 
 RELP_CHOICES_1990 = [
@@ -191,6 +202,7 @@ RELP_CHOICES_1990 = [
             ('housemate/roommate', 'Housemate, roommate'),
             ('unmarried_partner', 'Unmarried partner'),
             ('other', 'Other nonrelative'),
+            ('blank', 'Blank'),
     ]
 
 RELP_CHOICES = {
@@ -210,6 +222,7 @@ RACE_CHOICES_1960 = [
     ('Chinese', 'Chinese'),
     ('Filipino', 'Filipino'),
     ('Other', 'Other'),
+    ('blank', 'Blank'),
 ]
 
 RACE_CHOICES_1970 = [
@@ -222,6 +235,7 @@ RACE_CHOICES_1970 = [
     ('Hawaiian', 'Hawaiian'),
     ('Korean', 'Korean'),
     ('Other', 'Other'),
+    ('blank', 'Blank'),
 ]
 
 RACE_CHOICES_1980 = [
@@ -240,6 +254,7 @@ RACE_CHOICES_1980 = [
     ('Eskimo', 'Eskimo'),
     ('Aleut', 'Aleut'),
     ('Other', 'Other'),
+    ('blank', 'Blank'),
 ]
 
 RACE_CHOICES_1990 = [
@@ -258,4 +273,5 @@ RACE_CHOICES_1990 = [
     ('Guamanian', 'Guamanian'),
     ('Vietnamese', 'Vietnamese'),
     ('Other API', 'Other API'),
+    ('blank', 'Blank'),
 ]
