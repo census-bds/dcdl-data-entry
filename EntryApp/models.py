@@ -664,25 +664,23 @@ class Record(models.Model):
 
     # required to uniquely identify the record
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE)
-    page_num = models.PositiveSmallIntegerField(
-        verbose_name = 'Page number',
-        null = True,
-        blank = True
-    )
+    jbid = models.CharField(
+        max_length = 255,
+        default = 'jbid000'
+    ) 
+
+    # need one or the other of these
     line_no = models.IntegerField(
         verbose_name = 'Line number',
         null = True,
         blank = True
     )
-    col_num = models.IntegerField(
+    col_no = models.IntegerField(
         verbose_name = 'Column number',
         null = True,
         blank = True
     )
-    jbid = models.CharField(
-        max_length = 255,
-        default = 'jbid000'
-    ) 
+
 
     # fields common among all year-forms
     first_name = models.CharField(
