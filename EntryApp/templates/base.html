@@ -21,7 +21,11 @@
     <body>
         <div id="header">
 
-{% include "EntryApp/includes/render_page_status_message_list.html" %}
+            <div align='center'>
+                <p style="color:red">Disclosure Prohibited, Confidential, Title 13 U.S.C. </p>
+            </div>
+
+            {% include "EntryApp/includes/render_page_status_message_list.html" %}
 
             {% block header %}
             {% endblock header %}
