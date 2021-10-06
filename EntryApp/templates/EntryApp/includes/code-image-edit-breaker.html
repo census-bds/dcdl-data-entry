@@ -1,3 +1,4 @@
+{% load crispy_forms_tags %}
 <div id="edit_breaker">
 
     <div id = "breaker_info">
@@ -8,7 +9,7 @@
             {{ breaker_formset.management_form }}
             <table>
                 {% csrf_token %}
-                {{ breaker_formset }}
+                {% crispy breaker_formset breaker_helper %}
             </table>
             <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
             <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_breaker_type" />

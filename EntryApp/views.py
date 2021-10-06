@@ -1,8 +1,5 @@
 """
 VIEWS FOR DCDL DATA ENTRY
-
-TO DO:
--integrate openseadragon info into views
 """
 
 # python imports
@@ -57,6 +54,7 @@ from EntryApp.forms import BaseBreakerFormSet
 from EntryApp.forms import BaseEmptyRecordFormSet
 from EntryApp.forms import BaseRecordFormSet
 from EntryApp.forms import BreakerForm
+from EntryApp.forms import BreakerFormHelper
 from EntryApp.forms import CrispyFormSetHelper
 from EntryApp.forms import CrispyLongFormHelper
 from EntryApp.forms import ImageForm
@@ -81,6 +79,7 @@ import EntryApp.choices as choices
 # standard context names
 CONTEXT_BREAKER_INSTANCE = "breaker_instance"
 CONTEXT_BREAKER_FORMSET = "breaker_formset"
+CONTEXT_BREAKER_FORM_HELPER = "breaker_helper"
 CONTEXT_FORM_HELPER = "helper"
 CONTEXT_LONGFORM_INSTANCE = "longform_instance"
 CONTEXT_LONGFORM_FORM = "longform_form"
@@ -723,6 +722,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         field_query = None
         breaker_fields = None
         BreakerFormSet = None
+        BreakerFormSetHelper = None
         formset = None
         cleaned_data = None
         cleaned_data_count = None
@@ -760,6 +760,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
             BreakerFormSet = modelformset_factory( Breaker, fields = breaker_fields, formset = BaseBreakerFormSet )
             formset = BreakerFormSet( inputs_IN, request_IN.FILES )
+            helper = BreakerFormHelper(year=image_instance.year)
 
             # get data from request
             cleaned_data = formset.cleaned_data
@@ -831,6 +832,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
             # return the breaker instance in context?
             context_IN[ CONTEXT_BREAKER_INSTANCE ] = breaker_instance
+            context_IN[ CONTEXT_BREAKER_FORM_HELPER ] = helper
 
         else:
 
@@ -1534,10 +1536,18 @@ class CodeImage( LoginRequiredMixin, FormView ):
         logger.info( f'{me}: FormField query length was {len(field_qs)}' )
         breaker_fields = [f.field_name for f in list(field_qs)]
 
-        BreakerFormSet = modelformset_factory( Breaker, fields = breaker_fields, formset = BaseBreakerFormSet, extra = formset_extra_count )
+        BreakerFormSet = modelformset_factory(
+            Breaker,
+            fields = breaker_fields,
+            formset = BaseBreakerFormSet,
+            extra = formset_extra_count
+        )
         formset = BreakerFormSet( queryset = breaker_qs )
+        helper = BreakerFormHelper(year = image_IN.year)
+        
 
         context_OUT[ CONTEXT_BREAKER_FORMSET ] = formset
+        context_OUT[ CONTEXT_BREAKER_FORM_HELPER ] = helper
 
         return context_OUT
 

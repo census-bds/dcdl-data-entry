@@ -195,6 +195,20 @@ class BaseBreakerFormSet(forms.BaseModelFormSet):
         super().__init__(*args, **kwargs)
         #self.queryset = Breaker.objects.none()
 
+#================================#
+# FORM HELPERS
+#================================#
+
+class BreakerFormHelper(FormHelper):
+    '''
+    Custom FormHelper to control order of breaker fields
+    '''
+    def __init__(self, year, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.form_method = 'POST'
+        self.form_class = ''
+        self.layout = layouts.BREAKER_FORM_DICT[year]
+
 
 class RecordFormHelper(FormHelper):
     '''

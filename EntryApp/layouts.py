@@ -11,7 +11,7 @@ from crispy_forms.bootstrap import InlineRadios
 
 
 #================================#
-# CURRENT LAYOUTS
+# RECORD LAYOUTS
 #================================#
 
 FORM_1960 = Layout(
@@ -72,7 +72,7 @@ FORM_1970 = Layout(
 
 FORM_1980 = Layout(
    Div(
-        Field('col_num'),
+        Field('col_no'),
         Field('last_name'),
         Div(
             Field('first_name'),
@@ -125,7 +125,7 @@ FORM_1980 = Layout(
 
 FORM_1990 = Layout(
     Div(
-        Field('col_num'),
+        Field('col_no'),
         Field('last_name'),
         Div(
             Field('first_name'),
@@ -211,18 +211,12 @@ FORM_DICT = {
     }
 
 #================================#
-# LAYOUTS IN DEVELOPMENT
+# RECORD LAYOUTS IN DEVELOPMENT
 #================================#
 
-
 CRISPY_FORM_1960 = FORM_1960
-
 CRISPY_FORM_1970 = FORM_1970
-
-
 CRISPY_FORM_1980 = FORM_1980
-
-
 CRISPY_FORM_1990 = FORM_1990
 
 
@@ -231,4 +225,40 @@ DEV_FORM_DICT = {
     1970: CRISPY_FORM_1970,
     1980: CRISPY_FORM_1980,
     1990: CRISPY_FORM_1990,
+}
+
+#================================#
+# BREAKER LAYOUTS
+#================================#
+
+BREAKER_FORM_1980 = Layout(
+    Div(
+        Field('enumeration_district'),
+        Field('county'),
+        Field('mcd'),
+        Field('place'),
+        Field('tract'),
+        Field('smsa'),
+        css_class = 'form-inline form-column'
+    )
+)
+
+BREAKER_FORM_1970 = Layout(
+    Div(
+        Field('county'),
+        Field('enumeration_district'),
+        css_class = 'form-inline'
+    )
+)
+
+BREAKER_FORM_1960 = Layout(
+    Div(
+        Field('enumeration_district')
+    )
+)
+
+BREAKER_FORM_DICT = {
+    1980: BREAKER_FORM_1980,
+    1970: BREAKER_FORM_1970,
+    1960: BREAKER_FORM_1960
 }
