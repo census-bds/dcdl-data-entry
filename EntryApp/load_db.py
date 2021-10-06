@@ -391,6 +391,48 @@ def assign_reel_to_keyer(this_reel, keyer, keyer_position):
 #-- END assign_reel_to_keyer() method --#
 
 
+def remove_reel_from_keyer(this_reel, this_keyer, keyer_position, delete_img = True):
+    '''
+    MOSTLY FOR DEV: BE CAREFUL, THIS DELETES DATA
+    De-assigns a keyer from a reel and optionally deletes associated Images
+    Takes:
+    - reel object
+    - keyer object
+    - integer keyer position (1 or 2)
+    - optional boolean: True will delete associated Images, False will preserve them
+    '''
+
+    # remove keyer from position and decrement keyer count
+    if keyer_position == 1:
+        this_reel.keyer_one_id = None
+    elif keyer_position == 2:
+        this_reel.keyer_two_id = None
+    else:
+        print("load_db.remove_reel_from_keyer() got unknown keyer position")
+    
+    this_reel.keyer_count += -1
+    this_reel.save()
+
+    # decrement keyer
+    this_keyer.reel_count += -1
+    this_keyer.save()
+
+    # delete images if specified 
+    if delete_img:
+
+        year = this_reel.year
+        image_file_qs = ImageFile.objects.filter(img_reel_id = this_reel)
+
+        # loop through and create Image instance w/this keyer 
+        for image_file_instance in image_file_qs:            
+            image_qs = Image.objects.filter(image_file =  image_file_instance)
+            image = image_qs.filter(jbid = this_keyer.jbid).get()
+            image.delete()
+
+    return
+
+#-- END remove_reel_from_keyer() method --#
+
 
 def refresh_db():
     '''
@@ -401,9 +443,6 @@ def refresh_db():
     load_form_fields(settings.FORM_FIELDS_CSV)
     load_reels_from_csv(settings.DEFAULT_REEL_LOAD_SPEC)
     create_1990_dummy_breakers()
-
-    # for k in Keyer.objects.all():
-    #     assign_reel(k, {})
 
 
 def bulk_load_db():
