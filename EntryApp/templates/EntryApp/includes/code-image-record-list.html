@@ -4,7 +4,11 @@
         <div>
             <div id="record-table-header">
                 <tr>
-                    <th>Line number</th>
+                    {% if img.year <= 1970 %}
+                        <th>Line number</th>
+                    {% else %}
+                        <th>Column number</th>
+                    {% endif %}                
                     <th>Last name</th>
                     <th>First name</th>
                     <th>Middle initial</th>
@@ -12,7 +16,11 @@
                 </tr>
                 {% for record in record_list %}
                     <tr>
-                        <td>{{ record.line_no }}</td>
+                        {% if img.year <= 1970 %}
+                            <td>{{ record.line_no }}</td>
+                        {% else %}
+                            <td>{{ record.col_no }}</td>
+                        {% endif %}                
                         <td>{{ record.last_name }}</td>
                         <td>{{ record.first_name }}</td>
                         <td>{{ record.middle_init }}</td>
