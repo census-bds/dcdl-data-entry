@@ -892,7 +892,7 @@ class Record(models.Model):
 
     age_hundreds = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -900,7 +900,7 @@ class Record(models.Model):
     )
     age_tens = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -908,7 +908,7 @@ class Record(models.Model):
     )
     age_ones = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -917,7 +917,7 @@ class Record(models.Model):
 
     birth_year_thousands = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -925,7 +925,7 @@ class Record(models.Model):
     )
     birth_year_hundreds = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -933,7 +933,7 @@ class Record(models.Model):
     )
     birth_year_tens = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -941,7 +941,7 @@ class Record(models.Model):
     )
     birth_year_ones = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -950,7 +950,7 @@ class Record(models.Model):
 
     block_1 = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -958,7 +958,7 @@ class Record(models.Model):
     )
     block_2 = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -966,7 +966,7 @@ class Record(models.Model):
     )
     block_3 = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -976,7 +976,7 @@ class Record(models.Model):
 
     serial_no_1 = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -984,7 +984,7 @@ class Record(models.Model):
     )
     serial_no_2 = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -992,7 +992,7 @@ class Record(models.Model):
     )
     serial_no_2 = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -1000,7 +1000,7 @@ class Record(models.Model):
     )
     serial_no_3 = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -1008,7 +1008,7 @@ class Record(models.Model):
     )
     serial_no_4 = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -1016,7 +1016,7 @@ class Record(models.Model):
     )
     serial_no_5 = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -1024,7 +1024,7 @@ class Record(models.Model):
     )
     serial_no_6 = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -1032,7 +1032,7 @@ class Record(models.Model):
     )
     serial_no_7 = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -1040,7 +1040,7 @@ class Record(models.Model):
     )
     serial_no_8 = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -1048,7 +1048,7 @@ class Record(models.Model):
     )
     serial_no_9 = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -1056,7 +1056,7 @@ class Record(models.Model):
     )
     serial_no_10 = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -1064,7 +1064,7 @@ class Record(models.Model):
     )
     serial_no_11 = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -1073,7 +1073,7 @@ class Record(models.Model):
 
     total_persons_hundreds = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -1081,7 +1081,7 @@ class Record(models.Model):
     )
     total_persons_tens = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
@@ -1089,7 +1089,7 @@ class Record(models.Model):
     )
     total_persons_ones = models.CharField(
         null = True,
-        blank = True,
+        blank = False,
         max_length = 255,
         verbose_name = "",
         choices = choices.SINGLE_DIGIT_CHOICES,
