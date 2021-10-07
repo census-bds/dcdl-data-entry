@@ -4,6 +4,7 @@ DEFINE LAYOUTS FOR DCDL DATA ENTRY
 """
 
 from crispy_forms.layout import Field
+from crispy_forms.layout import HTML
 from crispy_forms.layout import Layout
 from crispy_forms.layout import Submit
 from crispy_forms.bootstrap import Div 
@@ -42,11 +43,14 @@ FORM_1960 = Layout(
 FORM_1970 = Layout(
     Div(
         Div(
-            Field('last_name'),
+            Div(
+                Field('last_name'),
+                Field('suffix', css_class='textinput-small'),
+                css_id='form-1970-last-name-suffix'
+            ),
             Div(
                 Field('first_name'),
                 Field('middle_init', css_class='textinput-small'),
-                Field('suffix', css_class='textinput-small'),
                 css_id="form-1970-first-name-middle-init"
             ),
             css_id='form-1970-names-div'
@@ -63,8 +67,20 @@ FORM_1970 = Layout(
         Field('birth_quarter'),
         Field('birth_decade'),
         Field('birth_year'),
-        Field('serial_no'),
-        Field('block'),
+        Div(
+        HTML("<p><b>Block</b></p><br>"),
+            Field('block_1'),
+            Field('block_2'),
+            Field('block_3'),
+            css_id="form-1970-block-radios"
+        ),
+        Div(
+            HTML("<p><b>Serial no</b></p><br>"),
+            Field('serial_no_1'),
+            Field('serial_no_2'),
+            Field('serial_no_3'),
+            css_id='form-1970-serial-radios'
+        ),
         css_id = 'form-row-div',
         css_class='form-inline form-inline-nowrap',
     )
