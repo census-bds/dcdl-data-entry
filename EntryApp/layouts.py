@@ -42,6 +42,7 @@ FORM_1960 = Layout(
 
 FORM_1970 = Layout(
     Div(
+        Field('line_no', css_class='textinput-small'),
         Div(
             Div(
                 Field('last_name'),
