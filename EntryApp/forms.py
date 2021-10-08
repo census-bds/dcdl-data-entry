@@ -25,42 +25,6 @@ from EntryApp.models import CurrentEntry
 # FORMS FOR DATA ENTRY
 #================================#
 
-class ImageYearForm(forms.Form):
-
-    """
-    Form where user records the year to which an image belongs
-    """
-
-    year = forms.MultipleChoiceField(
-                widget=forms.RadioSelect,
-                choices=choices.YEAR_CHOICES,
-                label='Year'
-            )
-
-    # TO DO
-    def form_valid(self, form):
-        return True
-
-#-- END form ImageYearForm --#
-
-class ImageTypeForm(forms.Form):
-
-    """
-    Form where user records the form type to which an image belongs
-    """
-    
-    image_type = forms.MultipleChoiceField(
-                     widget=forms.RadioSelect,
-                     choices=choices.IMAGE_TYPE_CHOICES,
-                     label='Image type'
-                 )
-
-    # TO DO
-    def form_valid(self, form):
-        return True
-
-#-- END form ImageTypeForm --#
-
 
 class ImageForm(forms.ModelForm):
     """
@@ -75,17 +39,20 @@ class ImageForm(forms.ModelForm):
         }
 
 
-class BreakerForm(forms.ModelForm):
-    """
-    Class defining form where breaker data are entered
-    NOTE: fields get dynamically defined in views.py based on which year it is
-    """
-    class Meta:
-        model = Breaker
-        fields = ['state']
+    def __init__(self, year, reel_name, *args, **kwargs):
+        super(ImageForm, self).__init__(*args, **kwargs)
+        
+        if year == 1990 and reel_name[6] == '6':
+            choice_list = ('longform', '1990 long form')
+        
+        elif year == 1990 and reel_name[6] != '6':
+            choices_list = [c for c in choices.IMAGE_TYPE_CHOICES if c != ('breaker', 'Breaker')]
+        
+        elif year < 1990:
+            choices_list = choices.IMAGE_TYPE_CHOICES
 
-    def form_valid(self):
-        return True
+        self.fields.get('image_type').choices = choices_list
+
 
 
 class SheetForm(forms.ModelForm):
@@ -96,6 +63,7 @@ class SheetForm(forms.ModelForm):
     class Meta:
         model = Sheet
         fields = ['num_records']
+
 
 class LongForm1990Form(forms.ModelForm):
     """
@@ -185,6 +153,7 @@ class BaseEmptyRecordFormSet(forms.BaseModelFormSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.queryset =  Record.objects.none()
+
 
 class BaseBreakerFormSet(forms.BaseModelFormSet):
     '''

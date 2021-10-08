@@ -53,13 +53,9 @@ from EntryApp.models import Sheet
 from EntryApp.forms import BaseBreakerFormSet
 from EntryApp.forms import BaseEmptyRecordFormSet
 from EntryApp.forms import BaseRecordFormSet
-from EntryApp.forms import BreakerForm
-from EntryApp.forms import BreakerFormHelper
 from EntryApp.forms import CrispyFormSetHelper
 from EntryApp.forms import CrispyLongFormHelper
 from EntryApp.forms import ImageForm
-from EntryApp.forms import ImageTypeForm
-from EntryApp.forms import ImageYearForm
 from EntryApp.forms import LongForm1990Form
 from EntryApp.forms import LongFormHelper
 from EntryApp.forms import OtherImageForm
@@ -94,6 +90,7 @@ CONTEXT_RECORD_FORMSET_HELPER = "helper"
 CONTEXT_RECORD_LIST = "record_list"
 CONTEXT_SHEET_INSTANCE = "sheet_instance"
 CONTEXT_SHEET_FORM = "sheet_form"
+CONTEXT_USERNAME = "username"
 
 # input parameter names
 PARAM_NAME_ACTION = "action"
@@ -305,6 +302,7 @@ def initialize_context( request_IN, dict_IN = None ):
     # retrieve things from current
     current = CurrentEntry.objects.get( jbid = request_IN.user )
     dict_OUT[ CONTEXT_BREAKER_INSTANCE ] = current.breaker
+    dict_OUT[ CONTEXT_USERNAME ] = request_IN.user.username 
 
     return dict_OUT
 
@@ -1218,7 +1216,6 @@ class CodeImage( LoginRequiredMixin, FormView ):
     #-- END method action_edit_record() --#
 
 
-
     def action_update_record( self, request_IN, context_IN ):
         '''
         Accepts form inputs. Updates record from those inputs.
@@ -1586,8 +1583,15 @@ class CodeImage( LoginRequiredMixin, FormView ):
             image_form_values[ PARAM_NAME_YEAR ] = image_IN.year
             image_form_values[ PARAM_NAME_IMAGE_TYPE ] = image_IN.image_type
 
+            # look up reel name
+            username = context_IN[ CONTEXT_USERNAME ]
+            current = CurrentEntry.objects.get(jbid = username)
+            reel_name = current.reel.reel_name 
+
             # create image form(s).
-            image_form = ImageForm( image_form_values )
+            image_form = ImageForm( image_IN.year, reel_name, image_form_values )
+
+            # logger.info(f"{me}(): dir(image_form) is {image_form")
 
             # send them to template.
             context_OUT[ "image_form" ] = image_form
