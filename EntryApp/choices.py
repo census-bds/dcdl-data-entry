@@ -17,7 +17,6 @@ IMAGE_TYPE_SHEET = "sheet"
 IMAGE_TYPE_OTHER = "other"
 IMAGE_TYPE_CHOICES = [
     ( IMAGE_TYPE_BREAKER, "Breaker" ),
-    # ( IMAGE_TYPE_LONGFORM, "1990 Long Form" ),
     ( IMAGE_TYPE_SHEET, "Sheet" ),
     ( IMAGE_TYPE_OTHER, "Other"),
 ]
