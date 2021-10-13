@@ -3,7 +3,11 @@ from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.forms import modelformset_factory
 
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from selenium.webdriver.chrome.webdriver import WebDriver
+
 from http import HTTPStatus
+
 
 from EntryApp.models import Breaker
 from EntryApp.models import CurrentEntry
@@ -73,19 +77,20 @@ class IndexViewTests(TestCase):
         self.assertTrue(html_snippet in str(response.content))
 
     
+    def test_next_thumbnail_present(self):
+        ''' Test that the thumbnail of next image is present '''
+        pass
+
+
+    def test_recent_image_queue_present(self):
+        ''' Test that the recent image queue is present '''
+        pass
+
+
     def test_get_next_image(self):
         ''' Test that the next image in queue is as expected '''
         pass
 
-    
-    def test_current_entry(self):
-        ''' Test that the state of current entry is as expected '''
-        pass
-    
-    
-    def test_recent_image_queue_present(self):
-        ''' Test that the recent image queue is present '''
-        pass
 
 
 class CodeImageTests(TestCase):
@@ -108,9 +113,21 @@ class CodeImageTests(TestCase):
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
 
+    def test_image_is_present(self):
+        ''' Test that openseadragon found an image '''
+        pass
+
+
     def test_a_sheet_form_present(self):
         ''' Test that sheet form is present on first entering page '''
-        pass
+        self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
+        response = self.client.get(
+            reverse(f'EntryApp:{self.template_name}'),
+            follow=True
+        )
+
+        form_html = '''<form id="image-info" method="POST">'''
+        self.assertTrue(form_html in str(response.content))
 
     
     def test_b_sheet_form_options(self):
@@ -121,3 +138,27 @@ class CodeImageTests(TestCase):
     def test_c_sheet_form_post(self):
         ''' Test that the sheet form POST method works '''
         pass
+
+
+class LoginSeleniumTests(StaticLiveServerTestCase):
+    
+    fixtures = [DEV_FIXTURE]
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.selenium = WebDriver()
+        cls.selenium.implicitly_wait(10)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.selenium.quit()
+        super().tearDownClass()
+    
+    def test_login(self):
+        self.selenium.get('%s%s' % (self.live_server_url, '/login/'))
+        username_input = self.selenium.find_element_by_name("username")
+        username_input.send_keys(TEMP_USERNAME)
+        password_input = self.selenium.find_element_by_name("password")
+        password_input.send_keys(TEMP_PW)
+        self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
