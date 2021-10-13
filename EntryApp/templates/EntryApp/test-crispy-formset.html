@@ -2,6 +2,7 @@
 
 
 {% block header %}
+<script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
 <style>
 /* I don't know why this doesn't work in custom.css */
 
@@ -43,35 +44,35 @@
 
 
 
-      /* 1970 */
-    
-        #form-1970-names-div {
-            display:block;
-        }
-    
-        #form-1970-last-name-suffix {
-            display:flex;
-            gap:25px;
-        }
+/* 1970 */
 
-        #form-1970-first-name-middle-init {
-            display:flex;
-            gap:25px;
-        }
-    
-        #form-1970-age-block {
-            display:block;
-        }
+    #form-1970-names-div {
+        display:block;
+    }
 
-        #form-1970-block-radios {
-            display:flex;
-            gap:5px;
-        }
+    #form-1970-last-name-suffix {
+        display:flex;
+        gap:25px;
+    }
 
-        #form-1970-serial-radios {
-            display:flex;
-            gap:5px;
-        }
+    #form-1970-first-name-middle-init {
+        display:flex;
+        gap:25px;
+    }
+
+    #form-1970-age-block {
+        display:block;
+    }
+
+    #form-1970-block-radios {
+        display:flex;
+        gap:5px;
+    }
+
+    #form-1970-serial-radios {
+        display:flex;
+        gap:5px;
+    }
 
 /* 1980 */
 
@@ -124,11 +125,9 @@
 {% block content %}
 
 {% load crispy_forms_tags %}
-<div class='flex-container'>
-<div class='row row-height' >
+<div class='row row-height'>
     <div class='col-lg-5'>
-        <div id="openseadragon1" style="width: 95%; height: 800px;"></div>
-        <script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
+        <div id="openseadragon1" style="width: 95%; height: 500px;"></div>
         <script type="text/javascript">
                 var Viewer = OpenSeadragon({
                     id: "openseadragon1",
@@ -139,22 +138,21 @@
                     },
                     buildPyramid: false
                 });
-            </script>    
+        </script>    
     </div>
     
-    <div class='col-lg-7 right-col'>
-        <div id='the_crispy_formset' class='container-fluid col-8' style="max-width: 100%;">
+    <div class='col-lg-7 justify-content-center right-col'>
+        <div id='the_crispy_formset' class='col-8' style="max-width: 100%;">
             This is the record entry form.
         </div>
-        <div class='flex-container'  style="margin-left: 50px;">
+        <div class='row'  style="margin-left: 50px;">
             {% crispy formset helper %}
         </div>
     </div>
 </div>
 </div>
     
-    
-    {% endblock content %}
+{% endblock content %}
 
 
 

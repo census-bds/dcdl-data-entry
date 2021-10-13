@@ -474,9 +474,11 @@ def get_next_reel(request):
         # which keyer is this? mark old reel complete
         if old_reel.keyer_one.jbid == request.user.username:
             old_reel.is_complete_keyer_one = True
+            old_reel.save()
         
         elif old_reel.keyer_two.jbid == request.user.username:
             old_reel.is_complete_keyer_two = True
+            old_reel.save()
 
         else:
             logger.warn(f"{me}: {request.user} is not assigned to either keyer slot in this reel")

@@ -279,19 +279,18 @@ class Image(models.Model):
     """
 
     # we will bulk load DB with all images to enter
-    image_file = models.ForeignKey( ImageFile, on_delete = models.CASCADE, blank = True, null = True )
+    image_file = models.ForeignKey(
+        ImageFile,
+        on_delete = models.CASCADE,
+        blank = True,
+        null = True
+    )
 
-    # seeing how broken everything is if I remove this - ideally, just want
-    #     image path in one place, so you can change it there and not have to
-    #     update all Image instances that reference it.
-    #img_path = models.CharField(max_length=200)
-
+    # this should get populated when instances are created
     jbid = models.CharField(
         max_length=20,
         default='jbid000'
     )
-
-    # this should get populated on load
     year = models.IntegerField( blank = True, null = False )
 
     # these values will be populated as entry proceeds

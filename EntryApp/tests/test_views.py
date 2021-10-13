@@ -3,202 +3,162 @@ from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.forms import modelformset_factory
 
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from selenium.webdriver.chrome.webdriver import WebDriver
+
 from http import HTTPStatus
 
-from EntryApp.models import Image 
+
 from EntryApp.models import Breaker
 from EntryApp.models import CurrentEntry
+from EntryApp.models import FormField
+from EntryApp.models import Image
+from EntryApp.models import ImageFile
+from EntryApp.models import Keyer
+from EntryApp.models import LongForm1990
+from EntryApp.models import OtherImage
+from EntryApp.models import Record
+from EntryApp.models import Reel
 from EntryApp.models import Sheet
-from EntryApp.forms import ImageForm, 
-from EntryApp.forms import BreakerForm
-from EntryApp.forms import SheetForm
+
+# EntryApp forms
 from EntryApp.forms import BaseBreakerFormSet
+from EntryApp.forms import BaseEmptyRecordFormSet
+from EntryApp.forms import BaseRecordFormSet
+from EntryApp.forms import CrispyFormSetHelper
+from EntryApp.forms import CrispyLongFormHelper
+from EntryApp.forms import ImageForm
+from EntryApp.forms import LongForm1990Form
+from EntryApp.forms import LongFormHelper
+from EntryApp.forms import OtherImageForm
+from EntryApp.forms import ProblemForm
+from EntryApp.forms import RecordForm
+from EntryApp.forms import RecordFormHelper
+from EntryApp.forms import SheetForm
+
+# user creation and DB load methods
+import EntryApp.create_users as users
+import EntryApp.load_db as ldb
 
 import EntryApp.tests.test_utils as utils
 
 import logging
 logger = logging.getLogger('EntryApp.test_views')
 
-TEMP_USERNAME = 'temp112'
-TEMP_EMAIL = "temp@temp.com"
-TEMP_PW = 'TEMP_PW1'
+DEV_FIXTURE =  'fixtures/dev_data_20211012_1543.json'
+TEMP_USERNAME = 'jbid123'
+TEMP_PW = 'dcdl1980'
 
 class IndexViewTests(TestCase):
 
+    fixtures = [DEV_FIXTURE]
+    template_name = "index"
+
     @classmethod
     def setUpTestData(cls):
-        User = get_user_model()
-        user = User.objects.create_user(TEMP_USERNAME, TEMP_EMAIL, TEMP_PW)
-
-    def test_url_exists(self):
-        ''' Test that the html response for this url is OK'''
-        User = get_user_model()
-        self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
-        response = self.client.get(reverse('EntryApp:index'))
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-
-    def test_seed_current_entry(self):
-        ''' Test that CurrentEntry has values after keyer logs in'''
         pass
 
 
-class BeginNewImageTests(TestCase):
+    def test_url_exists(self):
+        ''' Test that the html response for this url is OK'''
+        self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
+        response = self.client.get(reverse('EntryApp:index'), follow=True)
 
-    fixtures = ['image_dummy_data.json']
-    template_name = 'EntryApp:begin_new_image'
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+
+
+    def test_code_image_button_present(self):
+        ''' Test that the CodeImage button is present '''
+        self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
+        response = self.client.get(reverse('EntryApp:index'), follow=True)
+
+        # is the code image form action present?
+        html_snippet = """<form action=/EntryApp/code-image/ method="post">"""
+        self.assertTrue(html_snippet in str(response.content))
+
+    
+    def test_next_thumbnail_present(self):
+        ''' Test that the thumbnail of next image is present '''
+        pass
+
+
+    def test_recent_image_queue_present(self):
+        ''' Test that the recent image queue is present '''
+        pass
+
+
+    def test_get_next_image(self):
+        ''' Test that the next image in queue is as expected '''
+        pass
+
+
+
+class CodeImageTests(TestCase):
+
+    fixtures = [DEV_FIXTURE]
+    template_name = "code_image"
 
     @classmethod
     def setUpTestData(cls):
-        User = get_user_model()
-        user = User.objects.create_user(TEMP_USERNAME, TEMP_EMAIL, TEMP_PW)
-        img = Image.objects.create(img_path='test_sheet.png', \
-                                    jbid=TEMP_USERNAME, \
-                                    image_type='breaker', \
-                                    is_complete=False)
-        breaker_img = Breaker.objects.create(img=img, \
-                                            jbid=TEMP_USERNAME)
-        print("setUpTestData complete")
- 
-    def test_a_url_exists(self):
+        pass
+
+    def test_url_status_ok(self):
         ''' Test that the html response for this url is HTTPStatus.OK'''
-        print('testing url exists...')
-        User = get_user_model()
         self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
-        response = self.client.get(reverse(self.template_name))
+        response = self.client.get(
+            reverse(f'EntryApp:{self.template_name}'),
+            follow=True
+        )
+
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
-    def test_b_get_next_image(self):
-        ''' Test that the app loads next image into CurrentEntry as specified'''
-        print('testing get_next_image...')
-        User = get_user_model()
-        self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
-        response = self.client.get(reverse(self.template_name))
-        self.assertEqual(CurrentEntry.objects.get(jbid=TEMP_USERNAME).img.img_path, 'test_sheet.png') 
 
-    def test_c_form_year_present(self):
-        ''' Test that the year field is present in the form'''
-        print('testing form_year_present...')
-        User = get_user_model()
-        self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
-        response = self.client.get(reverse(self.template_name))
-        self.assertEqual(response.context['form'].fields['year'].label, 'Year') 
+    def test_image_is_present(self):
+        ''' Test that openseadragon found an image '''
+        pass
 
-    def test_d_form_image_type_present(self):
-        ''' Test that the image type field is present'''
-        print('testing image type present...')
-        User = get_user_model()
-        self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
-        response = self.client.get(reverse(self.template_name))
-        self.assertEqual(response.context['form'].fields['image_type'].label, 'Image type') 
 
-    def test_e_form_post_breaker(self):
-        print('Test that the page successfully redirects to breaker entry')
-        User = get_user_model()
+    def test_a_sheet_form_present(self):
+        ''' Test that sheet form is present on first entering page '''
         self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
-        CurrentEntry.objects.create(img=Image.objects.get(jbid=TEMP_USERNAME),
-                                    jbid=TEMP_USERNAME,
-                                    breaker=Breaker.objects.get(jbid=TEMP_USERNAME   ))
-        response = self.client.post(
-            reverse(self.template_name),
-            {'year': [1960], 'image_type': ['breaker']}
+        response = self.client.get(
+            reverse(f'EntryApp:{self.template_name}'),
+            follow=True
         )
-        self.assertEqual(response.status_code, HTTPStatus.FOUND)
-        self.assertEqual(response.url, "/EntryApp/enter-breaker-data/")
 
-    def test_f_form_post_sheet(self):
-        print('Test that the page successfully redirects to sheet entry')
-        User = get_user_model()
-        self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
-        CurrentEntry.objects.create(img=Image.objects.get(jbid=TEMP_USERNAME),
-                                    jbid=TEMP_USERNAME,
-                                    breaker=Breaker.objects.get(jbid=TEMP_USERNAME   ))
-        response = self.client.post(
-            reverse(self.template_name),
-            {'year': [1960], 'image_type': ['sheet']}
-        )
-        self.assertEqual(response.status_code, HTTPStatus.FOUND)
-        self.assertEqual(response.url, "/EntryApp/enter-sheet-data/")
+        form_html = '''<form id="image-info" method="POST">'''
+        self.assertTrue(form_html in str(response.content))
 
-
-class EnterBreakerDataTests(TestCase):
     
-    fixtures = ['image_dummy_data.json']
-    template_name = 'EntryApp:enter_breaker_data'
+    def test_b_sheet_form_options(self):
+        ''' Test that sheet form options match year '''
+        pass
+
+
+    def test_c_sheet_form_post(self):
+        ''' Test that the sheet form POST method works '''
+        pass
+
+
+class LoginSeleniumTests(StaticLiveServerTestCase):
+    
+    fixtures = [DEV_FIXTURE]
 
     @classmethod
-    def setUpTestData(cls):
-        User = get_user_model()
-        user = User.objects.create_user(TEMP_USERNAME, TEMP_EMAIL, TEMP_PW)
-        img = Image.objects.create(img_path='test_sheet.png', \
-                                    jbid=TEMP_USERNAME, \
-                                    image_type='breaker', \
-                                    is_complete=False)
-        breaker_img = Breaker.objects.create(img=img, \
-                                            jbid=TEMP_USERNAME)
-        current = CurrentEntry.objects.create(jbid=TEMP_USERNAME, \
-                                            img=img, \
-                                            breaker = breaker_img, \
-                                            sheet = None)
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.selenium = WebDriver()
+        cls.selenium.implicitly_wait(10)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.selenium.quit()
+        super().tearDownClass()
     
-    def test_a_url_exists(self):
-        ''' Test that the html response for this url is HTTPStatus.OK'''
-        print('testing url exists...')
-        User = get_user_model()
-        self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
-        response = self.client.get(reverse(self.template_name))
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-
-    def test_b_formset_present(self):
-        ''' Test that the formset is present in the view'''
-        print('testing form_year_present...')
-        User = get_user_model()
-        self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
-        response = self.client.get(reverse(self.template_name))
-        self.assertIsNotNone(response.context['formset'])
-
-    # def test_e_form_post(self):
-    #     ''' Test that breaker view redirects to index after submission '''
-    #     User = get_user_model()
-    #     self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
-    #     response = self.client.get(reverse(self.template_name))
-    #     self.assertEqual(response.status_code, HTTPStatus.OK)
-        
-    #     data = [{'state': ['CA'], 'county': ['Alameda']}]
-    #     post_data = utils.create_formset_post_data(response, new_form_data=data)
-    #     response = self.client.post(
-    #         reverse(self.template_name),
-    #         post_data
-    #     )
-    #     self.assertEqual(response.status_code, HTTPStatus.FOUND)
-    #     self.assertEqual(response.url, "/EntryApp/")
-
-    # def test_f_breaker_data_submission(self):
-    #     ''' Test that submitted data is saved to DB '''
-    #     User = get_user_model()
-    #     self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
-    #     response = self.client.post(
-    #         reverse(self.template_name),
-    #         {'state': ['OH'], 'county': ['Cuyahoga']}
-    #     )
-    #     latest = Breaker.objects.filter(jbid=TEMP_USERNAME) \
-    #                             .order_by('-timestamp')[0]
-    #     print(latest)
-    #     self.assertEqual(latest.state, 'OH')
-        # self.assertEqual(latest.county, 'Cuyahoga')
-
-
-class EnterSheetDataTests(TestCase):
-    pass
-
-
-
-class EnterRecordsTests(TestCase):
-    pass
-
-
-class SelectExportFormTests(TestCase):
-    pass
-
-
-class ExportRecordsTests(TestCase):
-    pass
+    def test_login(self):
+        self.selenium.get('%s%s' % (self.live_server_url, '/login/'))
+        username_input = self.selenium.find_element_by_name("username")
+        username_input.send_keys(TEMP_USERNAME)
+        password_input = self.selenium.find_element_by_name("password")
+        password_input.send_keys(TEMP_PW)
+        self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
