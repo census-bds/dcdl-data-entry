@@ -52,6 +52,7 @@ from EntryApp.models import Sheet
 
 # EntryApp forms
 from EntryApp.forms import BaseBreakerFormSet
+from EntryApp.forms import BreakerFormHelper
 from EntryApp.forms import BaseEmptyRecordFormSet
 from EntryApp.forms import BaseRecordFormSet
 from EntryApp.forms import CrispyFormSetHelper
