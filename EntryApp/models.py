@@ -32,11 +32,6 @@ FORM_CHOICES = [
 # MODELS FOR TRACKING DATA ENTRY
 #=====================================================#
 
-# TODO: abstract parent model with?:
-#    create_date = models.DateTimeField( auto_now_add = True )
-#    last_modified = models.DateTimeField( auto_now = True )
-#    # tags! - django_taggit - not sure if you need or want tags.
-#    tags = TaggableManager( blank = True )
 
 class Keyer(models.Model):
     '''
@@ -48,7 +43,7 @@ class Keyer(models.Model):
     reel_count = models.IntegerField(default = 0)
 
     def __str__(self):
-        string_OUT = f'{self.jbid}: reel count {self.reel_count}'
+        string_OUT = f'{self.jbid}'
         return string_OUT
 
 
@@ -98,10 +93,6 @@ class Reel(models.Model):
     is_complete_keyer_one = models.BooleanField(null=False, default=False)
     is_complete_keyer_two = models.BooleanField(null=False, default=False)
 
-    # # need to modify view to update these
-    # # probably create a new class method in CodeImageView?
-    # user_start_time = models.DateTimeField()
-    # user_complete_time = models.DateTimeField()
 
     class Meta:
         constraints = [
@@ -116,7 +107,6 @@ class Reel(models.Model):
         ]
 
 
-    #TODO: improve __str__ method
     def __str__(self):
         
         string_list = [
@@ -126,6 +116,28 @@ class Reel(models.Model):
         ]
 
         return ' '.join(string_list)
+
+    # method to print jbid for first keyer
+    def get_keyer_one(self):
+
+        keyer_one_jbid = self.keyer_one.jbid
+
+        if keyer_one_jbid:
+            return keyer_one_jbid
+        else:
+            return ''
+
+    # method to print jbid for second keyer
+    def get_keyer_two(self):
+
+        keyer_two_jbid = self.keyer_two.jbid
+
+        if keyer_two_jbid:
+            return keyer_two_jbid
+        else:
+            return ''
+
+
 
 
 class ImageFile(models.Model):

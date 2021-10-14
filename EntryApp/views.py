@@ -10,6 +10,7 @@ import re
 
 
 # django imports
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Permission
@@ -133,13 +134,14 @@ VALID_ACTIONS.append( ACTION_UPDATE_SHEET_TYPE )
 VALID_ACTIONS.append( ACTION_UPDATE_RECORD )
 
 #==============================================================================#
-# variables
+# LOGGER
 #==============================================================================#
 
-logger = logging.getLogger('EntryApp.views')
+logger = logging.getLogger(__name__)
+# adapter = settings.CustomAdapter(logger, {'user': ''})
 
 #==============================================================================#
-# functions
+# HELPERS + FUNCTIONAL VIEWS
 #==============================================================================#
 
 def get_form_fields( year, form_type ):
@@ -258,6 +260,9 @@ def get_image_todo_qs( request ):
     reel_image_qs = Image.objects.filter(image_file__img_reel = current_reel)
     user_image_qs = reel_image_qs.filter(jbid = current_username)
     todo_image_qs = user_image_qs.filter( is_complete = False )
+
+    # order according to ImageFile name instead of id in case loaded wrong?
+    todo_image_qs = user_image_qs.order_by("image_file__img_reel")
 
     logger.info(f'get_image_todo_qs() image_qs length {len(reel_image_qs)}, user_image_qs length {len(user_image_qs)}')
 
