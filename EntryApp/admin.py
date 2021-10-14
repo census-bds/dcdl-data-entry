@@ -1,4 +1,5 @@
 import csv
+import logging
 
 from django.contrib import admin
 from django.http import HttpResponse
@@ -17,6 +18,7 @@ from .models import Record
 from .models import Reel
 from .models import Sheet
 
+logger = logging.getLogger(__name__)
 
 
 def export_to_csv(modeladmin, request, queryset):
@@ -164,13 +166,13 @@ class ImageAdmin( admin.ModelAdmin ):
         'last_modified'
     )
     list_display_links = ( 'id', 'image_file' )
-    list_filter = [ 'is_complete', 'problem', 'image_type' ]
+    list_filter = [ 'is_complete', 'problem', 'image_type', 'year', 'jbid' ]
     search_fields = [
         'jbid',
         'image_file.img_path',
         'year',
         'prob_description',
-        'id'
+        'id',
     ]
     # date_hierarchy = 'status_date'
     ordering = [ 'last_modified' ]
@@ -188,6 +190,28 @@ class KeyerAdmin( admin.ModelAdmin ):
     )
 
 
+# # method to print jbid for keyer
+# def get_keyer_one(obj):
+
+#     logger.info(f'ReelAdmin obj {obj.keyer_one}')
+#     keyer_one_jbid = obj.keyer_one.jbid
+
+#     if keyer_one_jbid:
+#         return keyer_one_jbid
+#     else:
+#         return ''
+
+# # method to print jbid for keyer
+# def get_keyer_two(obj):
+
+#     keyer_two_jbid = obj.keyer_two.jbid
+
+#     if keyer_two_jbid:
+#         return keyer_two_jbid
+#     else:
+#         return ''
+
+
 # Reel inline
 @admin.register(Reel)
 class ReelAdmin( admin.ModelAdmin ):
@@ -197,35 +221,16 @@ class ReelAdmin( admin.ModelAdmin ):
         'reel_path',
         'year',
         'image_count',
-        'get_keyer_one',
-        'get_keyer_two',
+        'keyer_one',
+        'keyer_two',
     )
 
     list_display_links = [
         'id',
         'reel_path',
-        'get_keyer_one',
-        'get_keyer_two'
+        'keyer_one',
+        'keyer_two',
     ]
 
-    # method to print jbid for keyer
-    def get_keyer_one(self, obj):
-
-        keyer_one_jbid = obj.keyer_one.jbid
-
-        if keyer_one_jbid:
-            return keyer_one_jbid
-        else:
-            return ''
-
-    # method to print jbid for keyer
-    def get_keyer_two(self, obj):
-
-        keyer_two_jbid = obj.keyer_two.jbid
-
-        if keyer_two_jbid:
-            return keyer_two_jbid
-        else:
-            return ''
 
 
