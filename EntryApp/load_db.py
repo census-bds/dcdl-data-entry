@@ -47,7 +47,7 @@ def load_imagefiles(reel_path, year):
     image_file = None
 
 
-    files = glob.glob(reel_path + "/*.jpg")
+    files = sorted(glob.glob(reel_path + "/*.jpg"))
     print(f'load_imagefiles() files on {reel_path} are: {files}')
 
     # get reel associated with this filepath and year
@@ -104,12 +104,16 @@ def load_reel(reel_path, year, state):
     Used for csv bulk load
 
     Takes:
-    - list of string reel directory filepaths 
+    - string reel directory filepath, NOT ending in / 
     - integer year to which the images belong
     - string state abbreviation (postal code)
     Returns:
     - None
     '''
+
+    if reel_path[-1] == '/':
+        print("ldb.load_reel() error: please remove the trailing slash from filepath")
+        raise ValueError
 
     _, path_head = os.path.split(reel_path)
 
