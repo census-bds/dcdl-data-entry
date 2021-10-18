@@ -190,28 +190,6 @@ class KeyerAdmin( admin.ModelAdmin ):
     )
 
 
-# # method to print jbid for keyer
-# def get_keyer_one(obj):
-
-#     logger.info(f'ReelAdmin obj {obj.keyer_one}')
-#     keyer_one_jbid = obj.keyer_one.jbid
-
-#     if keyer_one_jbid:
-#         return keyer_one_jbid
-#     else:
-#         return ''
-
-# # method to print jbid for keyer
-# def get_keyer_two(obj):
-
-#     keyer_two_jbid = obj.keyer_two.jbid
-
-#     if keyer_two_jbid:
-#         return keyer_two_jbid
-#     else:
-#         return ''
-
-
 # Reel inline
 @admin.register(Reel)
 class ReelAdmin( admin.ModelAdmin ):
