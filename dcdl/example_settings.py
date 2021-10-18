@@ -29,39 +29,46 @@ SECRET_KEY = ''
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-THIS_USER = os.getlogin()
-
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{levelname} ' + THIS_USER + ' {asctime} {module} {message}',
+            'format': '{levelname} {asctime} {module} {message}',
             'style': '{',
         }
     },
     'handlers': {
+        'console': {
+            'level': 'INFO',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': f'/data/data/user/django_user/{APP_INSTANCE}/logs/info.log',
             'formatter': 'verbose'
         },
-        'console': {
-            'level': 'INFO',
-            'class': 'logging.StreamHandler',
+        # this one doesn't directly email admin: it dumps to a file, then
+        # there's a cron job watching for changes to the file that sends the
+        # email. This avoids disclosure risk if error contains T13 info.
+        'mail_admin': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': f'/data/data/user/django_user/{APP_INSTANCE}/logs/error.log',
             'formatter': 'verbose'
-        },
+        }
     },
-    
+
     'loggers': {
         'root': {
-            'handlers': ['file',],
+            'handlers': ['file', 'mail_admin'],
             'level': 'INFO',
             'formatter': 'verbose'
         },
         'django': {
-            'handlers': ['console', 'file',],
+            'handlers': ['file', 'mail_admin'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': True,
         },
@@ -178,7 +185,7 @@ MEDIA_ROOT = '/data/data/images/dev_images'
 
 # where it looks for static files: everything inside these goes into STATIC_ROOT
 STATICFILES_DIRS = (
-    '/data/data/user/django_user/dev/static/openseadragon_images',  
+    '/data/data/user/django_user/dev/static/',  
 )
 
 # globals for loading data
