@@ -263,9 +263,9 @@ def get_image_todo_qs( request ):
     todo_image_qs = user_image_qs.filter( is_complete = False )
 
     # order according to ImageFile name instead of id in case loaded wrong?
-    todo_image_qs = user_image_qs.order_by("image_file__img_reel")
+    todo_image_qs = todo_image_qs.order_by("image_file__img_reel")
 
-    logger.info(f'get_image_todo_qs() image_qs length {len(reel_image_qs)}, user_image_qs length {len(user_image_qs)}')
+    logger.info(f'get_image_todo_qs() reel_image_qs length {len(reel_image_qs)}, todo_image_qs length {len(todo_image_qs)}')
 
     qs_OUT = todo_image_qs
 
