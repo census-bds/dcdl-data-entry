@@ -14,6 +14,6 @@ elif [ $APP_DIR = 'dcdl_data_entry' ]
 then
     cd /apps/django/dcdl_data_entry
     python manage.py runserver 8000
-
+fi
 
 
