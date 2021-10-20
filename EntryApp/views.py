@@ -140,7 +140,14 @@ VALID_ACTIONS.append( ACTION_UPDATE_RECORD )
 #==============================================================================#
 
 logger = logging.getLogger(__name__)
-# adapter = settings.CustomAdapter(logger, {'user': ''})
+
+class CustomAdapter(logging.LoggerAdapter):
+    ''' Custom class for adding keyer id to log output '''
+
+    def process(self, msg, kwargs):
+        return '%s %s' % (self.extra['user'], msg), kwargs
+
+adapter = CustomAdapter(logger, {'user': '_'})
 
 #==============================================================================#
 # HELPERS + FUNCTIONAL VIEWS
@@ -159,17 +166,29 @@ def get_form_fields( year, form_type ):
 
     allowed_years = [1960, 1970, 1980, 1990, ]
     allowed_forms = ['breaker', 'short', 'long']
-    logger.info("get_form_fields got {year}, {form_type}".format(year=year, form_type=form_type))
+    
+    adapter.info(
+        f"get_form_fields got {year}, {form_type}",
+        {'user': '_'}
+    )
 
     if year in allowed_years and form_type in allowed_forms:
 
         field_query = FormField.objects.filter(year=year).filter(form_type=form_type)
-        logger.info(f'FormField query length was {len(field_query)}')
+        adapter.info(
+            f'FormField query length was {len(field_query)}',
+            {'user': '_'}
+        )
+        
         return [f.field_name for f in list(field_query)]
 
     else:
 
-        logger.info(f'Invalid argument for get_fields: {year} {form_type}')
+        adapter.info(
+            f'Invalid argument for get_fields: {year} {form_type}',
+            {'user': '_'}
+        )
+        
         return []
 
 
@@ -194,7 +213,10 @@ def get_next_image(request):
     todo_image_count = todo_image_qs.count()
     next_image = todo_image_qs.first()
 
-    logger.info(f'get_next_image got {next_image}')
+    adapter.info(
+        f'get_next_image got {next_image}',
+        {'user': '_'}
+    )
 
     if next_image:
         current = CurrentEntry.objects.get(jbid=request.user)
@@ -266,7 +288,10 @@ def get_image_todo_qs( request ):
     # order according to ImageFile name instead of id in case loaded wrong?
     todo_image_qs = todo_image_qs.order_by("image_file__img_reel")
 
-    logger.info(f'get_image_todo_qs() reel_image_qs length {len(reel_image_qs)}, todo_image_qs length {len(todo_image_qs)}')
+    adapter.info(
+        f'get_image_todo_qs() reel_image_qs length {len(reel_image_qs)}, todo_image_qs length {len(todo_image_qs)}',
+        {'user': '_'}
+    )
 
     qs_OUT = todo_image_qs
 
@@ -339,7 +364,10 @@ def assign_reel(keyer):
 
     # do we have any reels to assign?
     if len(reel_qs) == 0:
-        logger.info(f'{me}: found no reels to assign')
+        adapter.info(
+            f'{me}: found no reels to assign',
+            {'user': '_'}
+        )
         return
 
     # prefer to assign reels that have 1 keyer over those that have none
@@ -355,9 +383,10 @@ def assign_reel(keyer):
         this_reel.keyer_two = keyer
 
     else:
-        print(f'assign_images() reel has a keyer issue')
-        print(f'/t keyer one is {this_reel.keyer_one}')
-        print(f'/t keyer two is {this_reel.keyer_two}')
+        adapter.warn(
+            f'assign_images() reel has a keyer issue /n keyer one is {this_reel.keyer_one} keyer two is {this_reel.keyer_two}',
+            {'user': '_'}
+        )
         raise ValueError
 
     # increment reel keyer count
@@ -385,7 +414,10 @@ def assign_reel(keyer):
         )
 
     if not created:
-        logger.info(f"{me}: images already existed, weird")
+        adapter.info(
+            f"{me}: images already existed, weird",
+            {'user': '_'}
+        )
 
     #-- END loop over images in the reel --#
 
@@ -408,7 +440,10 @@ def seed_current_entry(request):
     this_breaker = None
     current = None
 
-    logger.info(f'seed_current_entry() user is {request.user}')
+    adapter.info(
+        f'seed_current_entry() call',
+        {'user': '_'}
+    )
 
     # got a current for current user?
     current_qs = CurrentEntry.objects.filter(jbid=request.user)
@@ -469,14 +504,20 @@ def get_next_reel(request):
     current = CurrentEntry.objects.get(jbid=request.user)
     this_keyer = Keyer.objects.get(jbid = request.user)
 
-    logger.info(f"{me}: loading new reel for {request.user}")
+    adapter.info(
+        f"{me}: loading new reel",
+        {'user': '_'}
+    )
 
     # is there a reel in CurrentEntry? mark complete if so
     if current.reel:
 
         old_reel = current.reel
 
-        logger.info(f"{me}: replacing {old_reel}")
+        adapter.info(
+            f"{me}: replacing {old_reel}",
+            {'user': '_'}
+        )
         
         # which keyer is this? mark old reel complete
         if old_reel.keyer_one.jbid == request.user.username:
@@ -488,7 +529,10 @@ def get_next_reel(request):
             old_reel.save()
 
         else:
-            logger.warn(f"{me}: {request.user} is not assigned to either keyer slot in this reel")
+            adapter.warn(
+                f"{me}: user is not assigned to either keyer slot in this reel",
+                {'user': '_'}
+            )
             raise ValueError
 
     # if not, assign the reel:
@@ -541,11 +585,12 @@ class IndexView(LoginRequiredMixin, TemplateView):
         # return reference
         response_OUT = None
 
-        # declare variables - config
+        # declare variables - config log
         me = "IndexView.process_request"
-        recent_image_limit = None
+        adapter = CustomAdapter(logger, {'user': request.user.username})
 
         # declare variables
+        recent_image_limit = None
         current_user = None
         current_username = None
         user_image_qs = None
@@ -560,7 +605,10 @@ class IndexView(LoginRequiredMixin, TemplateView):
         next_image = None
         context = None
 
-        logger.info(f'user info:\n \t {request.user}')
+        adapter.info(
+            f'{me} called',
+            {'user': request.user.username}
+        )
 
         # init
         recent_image_limit = 5
@@ -580,7 +628,10 @@ class IndexView(LoginRequiredMixin, TemplateView):
         total_image_count = user_image_qs.count()
         context[ 'num_images' ] = total_image_count
 
-        logger.info(f'{me}: current reel is {current_reel}')
+        adapter.info(
+            f'{me}: current reel is {current_reel}',
+            {'user': request.user.username}
+        )
 
         # todo
         todo_image_qs = get_image_todo_qs( request )
@@ -696,8 +747,11 @@ class CodeImage( LoginRequiredMixin, FormView ):
             
             else:
 
-                logger.info(f"{me}(): no image id")
-                                # no inputs?
+                adapter.info(
+                    f"{me}(): no image id",
+                    {'user': request_IN.user.username}
+                )
+                # no inputs?
                 error_message = "In {method}(): No image ID received ( {form} ).".format(
                     method = me,
                     form = form
@@ -760,7 +814,11 @@ class CodeImage( LoginRequiredMixin, FormView ):
             image_has_related_objects = image_instance.has_related_objects()
 
             form = inputs_IN
-            logger.info(f'Breaker form is{form}')
+            
+            adapter.info(
+                f'Breaker form is {form}',
+                {'user': request_IN.user.username}
+            )
 
             # define fields based on which year it is
             breaker_fields = get_form_fields(image_instance.year, "breaker")
@@ -773,7 +831,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
             cleaned_data = formset.cleaned_data
             cleaned_data_count = len( cleaned_data )
 
-            logger.info(f'Breaker formset clean data should have length 1: {cleaned_data}')
+            adapter.info(
+                f'Breaker formset clean data should have length 1: {cleaned_data}',
+                {'user': request_IN.user.username}
+            )
 
             # do we have just 1?
             if ( cleaned_data_count == 1 ):
@@ -891,7 +952,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
             image_instance = Image.objects.get( pk = image_id )
             image_has_related_objects = image_instance.has_related_objects()
 
-            logger.info(f"{me}(): image has related? {image_has_related_objects}")
+            logger.info(
+                f"{me}(): image has related? {image_has_related_objects}",
+                {'user': request_IN.user.username}
+            )
 
             # Only allow updates if image doesn't already have related.
             if ( image_has_related_objects == False ):
@@ -901,7 +965,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
                 # year
                 year_value = inputs_IN.get( PARAM_NAME_YEAR, None )
 
-                logger.info(f"{me}(): {image_id} and {year_value}")
+                logger.info(
+                    f"{me}(): {image_id} and {year_value}",
+                    {'user': request_IN.user.username}
+                )
 
                 # got a value?
                 if ( ( year_value is not None ) and ( year_value != "" ) ):
@@ -1018,7 +1085,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
             form = inputs_IN
 
-            logger.info(f'{me}(): LongForm1990 inputs_IN is {form}')
+            adapter.info(
+                f'{me}(): LongForm1990 inputs_IN is {form}',
+                {'user': request_IN.user.username}
+            )
 
             # do we have a longform ID?
             longform_id = form.get( PARAM_NAME_SHEET_ID, None )
@@ -1051,7 +1121,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
                     # collect data that we're entering for this longform
                     l_data = {f: form[f] for f in form if f in fields}
-                    logger.info(f'{me}(): longform form collected data is {l_data}')
+                    adapter.info(
+                        f'{me}(): longform form collected data is {l_data}',
+                        {'user': request_IN.user.username}
+                    )
                         
                     # add additional fields
                     l_data['img'] = image_instance
@@ -1060,7 +1133,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
                     # if the request passed in an instance, we do an update
                     if longform_id:
-                        logger.info(f"{me}(): got longform_id {longform_id}")
+                        adapter.info(
+                            f"{me}(): got longform_id {longform_id}",
+                            {'user': request_IN.user.username}
+                        )
 
                         # get the existing longform record and update it 
                         LongForm1990.objects.filter(pk=longform_id).update(**l_data)
@@ -1070,7 +1146,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
                     
                     # no ID => new longform record
                     else:
-                        logger.info(f"{me}(): no longform_id, creating new object")
+                        adapter.info(
+                            f"{me}(): no longform_id, creating new object",
+                            {'user': request_IN.user.username}
+                        )
                         longform_instance = LongForm1990.objects.create(**l_data)
 
                         # set Image to complete after initial creation
@@ -1153,7 +1232,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
             # update if so
             if other_image_id:
     
-                logger.info(f"{me}(): got OtherImage id, updating description")
+                adapter.info(
+                    f"{me}(): got OtherImage id, updating description",
+                    {'user': request_IN.user.username}
+                )
 
                 other_image_instance = OtherImage.objects.get(pk = other_image_id)
 
@@ -1163,7 +1245,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
             # otherwise create one
             else: 
                                 
-                logger.info(f"{me}(): no OtherImage id, creating new instance")
+                adapter.info(
+                    f"{me}(): no OtherImage id, creating new instance",
+                    {'user': request_IN.user.username}
+                )
 
                 ot_data = {}
                 ot_data['img'] = image_instance
@@ -1255,7 +1340,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
             record_id = inputs_IN.get(PARAM_NAME_RECORD_ID, None)
 
             form = inputs_IN
-            logger.info(f'{me}: form is {form}')
+            adapter.info(
+                f'{me}: form is {form}',
+                {'user': request_IN.user.username}
+            )
 
             # check that there's a sheet ID passed in
             if sheet_instance:
@@ -1275,11 +1363,17 @@ class CodeImage( LoginRequiredMixin, FormView ):
                     r_data['timestamp'] = datetime.datetime.now()
                     r_data['is_complete'] = True
 
-                    logger.info(f'{me}(): record form cleaned_data is {r_data}')
+                    adapter.info(
+                        f'{me}(): record form cleaned_data is {r_data}',
+                        {'user': request_IN.user.username}
+                    )
 
                     # if the request passed in a record, we do an update
                     if record_id:
-                        logger.info(f"{me}(): got record_id {record_id}")
+                        adapter.info(
+                            f"{me}(): got record_id {record_id}",
+                            {'user': request_IN.user.username}
+                        )
 
                         # get the record and update it 
                         Record.objects.filter(pk=record_id).update(**r_data)
@@ -1289,7 +1383,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
                     
                     # no ID => new record
                     else:
-                        logger.info(f"{me}(): no record_id, creating new object")
+                        adapter.info(
+                            f"{me}(): no record_id, creating new object",
+                            {'user': request_IN.user.username}
+                        )
                         record_instance = Record.objects.create(**r_data)
 
                     #-- END check to see if this is a record create or update--#
@@ -1368,7 +1465,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
             form = inputs_IN
 
-            logger.info(f'Sheet form is{form}')
+            adapter.info(
+                f'Sheet form is{form}',
+                {'user': request_IN.user.username}
+            )
 
             # 1990 never has breakers, so assign the default dummy
             if image_instance.year == 1990:
@@ -1449,7 +1549,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
         # return reference
         response_OUT = None
 
-        logger.info('CodeImageView GET request')
+        adapter.info(
+            'CodeImageView GET request',
+            {'user': request.user.username}
+        )
 
         # render response
         response_OUT = self.process_request( request )
@@ -1463,7 +1566,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
         # return reference
         response_OUT = None
 
-        logger.info('CodeImageView POST request')
+        adapter.info(
+            'CodeImageView POST request',
+            {'user': request_IN.user.username}
+        )
 
         # render response
         response_OUT = self.process_request( request )
@@ -1530,7 +1636,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
             formset_extra_count = 0
 
             # log error message.
-            logger.error( "Multiple breakers for image {image}. Not good.".format( image = image_IN ) )
+            adapter.error(
+                "Multiple breakers for image {image}. Not good.".format( image = image_IN ),
+                {'user': request_IN.user.username}
+            )
 
         #-- END check if single breaker. --#
 
@@ -1600,8 +1709,6 @@ class CodeImage( LoginRequiredMixin, FormView ):
             # create image form(s).
             image_form = ImageForm( image_IN.year, reel_name, image_form_values )
 
-            # logger.info(f"{me}(): dir(image_form) is {image_form")
-
             # send them to template.
             context_OUT[ "image_form" ] = image_form
 
@@ -1632,7 +1739,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
         if longform_qs.count() == 1:
             this_longform = longform_qs.get()
         elif longform_qs.count() > 1:
-            logger.error(f"Multiple 1990 long forms associated with image {image_IN}.")
+            adapter.error(
+                f"Multiple 1990 long forms associated with image {image_IN}.",
+                {'user': request_IN.user.username}
+            )
 
         context_OUT[ CONTEXT_LONGFORM_INSTANCE ] = this_longform
 
@@ -1649,7 +1759,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
         context_OUT[ CONTEXT_LONGFORM_FORM ] = this_form
         context_OUT[ CONTEXT_LONGFORM_HELPER ] = helper
 
-        logger.info(f'{me}: context_OUT is {context_OUT}')
+        adapter.info(
+            f'{me}: context_OUT is {context_OUT}',
+            {'user': request_IN.user.username}
+        )
 
         return context_OUT
 
@@ -1665,15 +1778,24 @@ class CodeImage( LoginRequiredMixin, FormView ):
         # look up existing instance for this image
         other_image_qs = image_IN.otherimage_set.all()
 
-        logger.info(f"{me}(): other_image_qs is {other_image_qs}")
+        adapter.info(
+            f"{me}(): other_image_qs is {other_image_qs}",
+            {'user': request_IN.user.username}
+        )
 
         # there shouldn't be more than one
         if other_image_qs.count() == 1:
             this_other_image = other_image_qs.get()
         elif other_image_qs.count() > 1:
-            logger.error(f"Multiple OtherImages associated with image {image_IN}.")
+            adapter.error(
+                f"Multiple OtherImages associated with image {image_IN}.",
+                {'user': request_IN.user.username}
+            )
 
-        logger.info(f"{me}(): this_other_image is {this_other_image}")
+        adapter.info(
+            f"{me}(): this_other_image is {this_other_image}",
+            {'user': request_IN.user.username}
+        )
 
         context_OUT[ CONTEXT_OTHER_IMAGE_INSTANCE ] = this_other_image
 
@@ -1683,7 +1805,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
         context_OUT[ CONTEXT_OTHER_IMAGE_FORM ] = this_form
 
-        logger.info(f'{me}: context_OUT is {context_OUT}')
+        adapter.info(
+            f'{me}: context_OUT is {context_OUT}',
+            {'user': request_IN.user.username}
+        )
 
         return context_OUT
 
@@ -1703,9 +1828,14 @@ class CodeImage( LoginRequiredMixin, FormView ):
         record_count = record_qs.count()
 
         # DEBUG
-        logger.info(f'{me}: record_count is {record_count}')
-        logger.info(f'{me}: context_IN is {context_IN}')
-        # logger.info(f'{me}: context_IN is {json.dumps(context_IN, indent=4, sort_keys=True)}')
+        adapter.info(
+            f'{me}: record_count is {record_count}',
+            {'user': context_IN.user.username}
+        )
+        adapter.info(
+            f'{me}: context_IN is {context_IN}',
+            {'user': context_IN.user.username}
+        )
 
         # set up form.
         record_fields = get_form_fields( parent_sheet.year, 'short' ) #TODO: THIS SHOULD NOT BE HARD-CODED
@@ -1718,7 +1848,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
         my_action = request_inputs.get(PARAM_NAME_ACTION, None)
         record_id = request_inputs.get(PARAM_NAME_RECORD_ID, None)
 
-        logger.info(f'prepare_record_context my_action is {my_action}')
+        adapter.info(
+            f'prepare_record_context my_action is {my_action}',
+            {'user': context_IN.user.username}
+        )
 
 
         if CONTEXT_RECORD_INSTANCE in context_IN.keys():
@@ -1730,7 +1863,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
         else:
             record_instance = None
 
-        logger.info(f"{me}(): record_instance has id {record_id}, {record_instance}")
+        adapter.info(
+            f"{me}(): record_instance has id {record_id}, {record_instance}",
+            {'user': context_IN.user.username}
+        )
 
         # did we get a record id?
         if record_instance and my_action == ACTION_EDIT_RECORD:
@@ -1748,7 +1884,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
         context_OUT[ CONTEXT_RECORD_LIST ] = record_qs
 
 
-        logger.info(f'context returned from prepare_record_context {context_OUT}')
+        adapter.info(
+            f'context returned from prepare_record_context {context_OUT}',
+            {'user': context_IN.user.username}
+        )
 
         return context_OUT
 
@@ -1777,7 +1916,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
         if ( sheet_count == 1 ):
             this_sheet = sheet_qs.get()
         elif ( sheet_count > 1 ):
-            logger.error( "Multiple sheets for image {image}. Not good.".format( image = image_IN ) )
+            adapter.error( 
+                "Multiple sheets for image {image}. Not good.".format( image = image_IN ),
+                {'user': context_IN.user.username}
+            )
         #-- END check if single sheet. --#
 
         context_OUT[ CONTEXT_SHEET_INSTANCE ] = this_sheet
@@ -1793,8 +1935,6 @@ class CodeImage( LoginRequiredMixin, FormView ):
         #         edit link next to each.
         if this_sheet:
             context_OUT = self.prepare_record_context( image_IN, context_OUT, request_inputs )
-
-        # logger.info(f'{me}: context_OUT is {context_OUT}')
 
         return context_OUT
 
@@ -1846,7 +1986,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
                     # what action?
                     action_error_list = None
-                    logger.info(f'CodeImageView.process_action() action is {my_action}')
+                    adapter.info(
+                        f'CodeImageView.process_action() action is {my_action}',
+                        {'user': context_IN.user.username}
+                    )
                     
                     if ( my_action == ACTION_COMPLETE_IMAGE ):
                         
@@ -1954,8 +2097,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
         # return reference
         response_OUT = None
 
-        # declare variables
+        # config logger
         me = "CodeImage.process_request"
+
+        # declare variables
         error_message = None
         error_list = None
         request_inputs = None
@@ -1993,11 +2138,13 @@ class CodeImage( LoginRequiredMixin, FormView ):
         # please don't mess with the context
 
         # get current user info
-        logger.info(f'{me} user info:\n \t {request.user}')
         current_user = request.user.username
         context[ "user" ] = current_user
 
-        logger.info(f'CodeImageView.process_request(): request_inputs are {request_inputs}')
+        adapter.info(
+            f'CodeImageView.process_request(): request_inputs are {request_inputs}',
+            {'user': current_user}
+        )
 
         # get IDs of image to process.
         current_image_id = request_inputs.get( PARAM_NAME_IMAGE_ID, None )
@@ -2007,7 +2154,12 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
             # is there an action?
             my_action = request_inputs.get( PARAM_NAME_ACTION, None )
-            logger.info(f"{me}() my_action is {my_action}")
+            
+            adapter.info(
+                f"{me}() my_action is {my_action}",
+                {'user': current_user}
+            )
+            
             if ( ( my_action is not None ) and ( my_action in VALID_ACTIONS ) ):
 
                 # process action
@@ -2119,20 +2271,34 @@ class CodeImage( LoginRequiredMixin, FormView ):
 # PROBLEM VIEW
 #------------------------------------------------------------------------------#
 
-def parse_http_referral(url):
+def parse_http_referral(url, username):
     '''
     Helper function for report_problem view
     Parses referring url from HTTP request to extract site of problem
 
-    Takes: string from the HTTP request referring url
-    Returns: string name of model affected
+    Takes: 
+    - string from the HTTP request referring url
+    - string username (for logging)
+    Returns:
+    - string name of model affected
     '''
     if url:
+    
         page_name = re.search('(?<=EntryApp/).+/', url).group(0)[:-1]
-        logger.info(f"parse_http_referral: {page_name}")
+    
+        adapter.info(
+            f"parse_http_referral: {page_name}",
+            {'user': username}
+        )
+    
         return page_name
+    
     else:
-        logger.info(f'parse_http_referral did not get a url, returning empty string.')
+
+        adapter.info(
+            f'parse_http_referral did not get a url, returning empty string.',
+            {'user': username}
+        )
         return ""
 
 
@@ -2156,8 +2322,16 @@ def report_problem(request):
 
             image_instance = Image.objects.get(pk=image_id)
 
-            logger.info(f'report_problem GET request for {image_id}')
-            logger.info(f"report_problem referred from {request.META['HTTP_REFERER']}")
+            adapter.info(
+                f'report_problem GET request for {image_id}',
+                {'user': request.user.username}
+            )
+            adapter.info(
+                f"report_problem referred from {request.META['HTTP_REFERER']}",
+                {'user': request.user.username}
+            )
+            
+            
             flagged_view = parse_http_referral(request.META['HTTP_REFERER'])
             
             return render(
@@ -2173,8 +2347,14 @@ def report_problem(request):
             )
         else:
             
-            logger.info(f"report_problem GET request with no image id")
-            logger.info(f"report_problem referred from {request.META['HTTP_REFERER']}")
+            adapter.info(
+                f"report_problem GET request with no image id",
+                {'user': request.user.username}
+            )
+            adapter.info(
+                f"report_problem referred from {request.META['HTTP_REFERER']}",
+                {'user': request.user.username}
+            )
 
             return render(
                 request,
@@ -2189,8 +2369,15 @@ def report_problem(request):
         form = request.POST
         problem_image_id = current.img_id
         problem_image = Image.objects.get(id=problem_image_id)
-        logger.info(f'report_problem POST request for file {problem_image.image_file.img_file_name}')
-        logger.info(f'report_problem problem_image id is {problem_image.id}')
+
+        adapter.info(
+            f'report_problem POST request for file {problem_image.image_file.img_file_name}',
+            {'user': request.user.username}
+        )
+        adapter.info(
+            f'report_problem problem_image id is {problem_image.id}',
+            {'user': request.user.username}
+        )
 
         # do I need to figure out what kind of image it is?
         try:
@@ -2206,7 +2393,13 @@ def report_problem(request):
             return redirect(reverse('EntryApp:index'))
 
         except Exception as e:
-            logger.warn(f"Exception in report_problem: ", e)
+
+            adapter.error(
+                f"Exception in report_problem: ", 
+                {'user': request.user.username},
+                e
+            )
+
             return render(
                 request, \
                 'EntryApp/report-problem.html',
@@ -2245,11 +2438,18 @@ def test_crispy_formset_view(request, year, form_type):
     View for testing django crispy formsets
     '''
 
-    logger.info(f'test_crispy_formset_view() request: {request}')
+    adapter.info(
+        f'test_crispy_formset_view() request: {request}',
+        {'user': request.user.username}
+    )
 
     fields = get_form_fields(year, form_type) 
-    logger.info(f'crispy formset fields are {fields}')
     field_widgets = {f: choices.FORM_WIDGETS[f] for f in fields if f in choices.FORM_WIDGETS}
+    
+    adapter.info(
+        f'crispy formset fields are {fields}',
+        {'user': request.user.username}
+    )
 
 
     # different layout helpers depending on form type
@@ -2274,7 +2474,10 @@ def test_crispy_formset_view(request, year, form_type):
         helper = CrispyLongFormHelper(year=year)
     
     else:
-        logger.warn(f"test_crispy_formset_view(): unknown form_type is {form_type}")
+        adapter.error(
+            f"test_crispy_formset_view(): unknown form_type is {form_type}",
+            {'user': request.user.username}
+        )
         raise ValueError
 
     ft = ''
