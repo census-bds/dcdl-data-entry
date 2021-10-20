@@ -51,23 +51,22 @@
 <div class="row" id="record-entry">
     <div class="flex-container" style="margin-left: 50px;">
     {% if record_form %}
-    <p>
-        Record form goes here.
-    </p>
-    <form method="POST">
-        {% csrf_token %}
-        {% crispy record_form helper %}
 
-        <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
-        <input type="hidden" name="{{ param_names.PARAM_NAME_SHEET_ID }}" value="{{ sheet_instance.id }}" />
-        <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_record" />
-        
-        <input type="submit" value="Submit"> 
+        <form method="POST">
+            {% csrf_token %}
+            {% crispy record_form helper %}
 
-        {% if record_instance %}
-        <input type="hidden" name="{{ param_names.PARAM_NAME_RECORD_ID }}" value="{{ record_instance.id }}">
-        {% endif %}
-    </form>
+            <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
+            <input type="hidden" name="{{ param_names.PARAM_NAME_SHEET_ID }}" value="{{ sheet_instance.id }}" />
+            <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_record" />
+            
+            <input type="submit" value="Submit"> 
+
+            {% if record_instance %}
+                <input type="hidden" name="{{ param_names.PARAM_NAME_RECORD_ID }}" value="{{ record_instance.id }}">
+            {% endif %}
+
+        </form>
     {% endif %}
     </div>        
 </div>

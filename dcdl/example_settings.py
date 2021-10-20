@@ -31,25 +31,40 @@ DEBUG = True
 
 LOGGING = {
     'version': 1,
+    
     'disable_existing_loggers': False,
+
     'formatters': {
         'verbose': {
             'format': '{levelname} {asctime} {module} {message}',
             'style': '{',
+        },
+        'root-verbose': {
+            'format': '{levelname} {asctime} {module} root {message}',
+            'style': '{',
         }
     },
     'handlers': {
+        # this one logs to console
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
         },
+        # this one logs to file
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': f'/data/data/user/django_user/{APP_INSTANCE}/logs/info.log',
             'formatter': 'verbose'
         },
+        # this one uses the root verbose handler for root logging
+        'root-file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': f'/data/data/user/django_user/{APP_INSTANCE}/logs/info.log',
+            'formatter': 'root-verbose'
+        }, 
         # this one doesn't directly email admin: it dumps to a file, then
         # there's a cron job watching for changes to the file that sends the
         # email. This avoids disclosure risk if error contains T13 info.
@@ -60,20 +75,21 @@ LOGGING = {
             'formatter': 'verbose'
         }
     },
+    
+    'root': {
+        'handlers': ['console', 'mail_admin'],
+        'level': 'INFO',
+    },
 
     'loggers': {
-        'root': {
-            'handlers': ['file', 'mail_admin'],
-            'level': 'INFO',
-            'formatter': 'verbose'
-        },
         'django': {
-            'handlers': ['file', 'mail_admin'],
-            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'handlers': ['console', 'file', 'mail_admin'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'ERROR'),
             'propagate': True,
         },
     }
 }
+
 
 
 ALLOWED_HOSTS = []
