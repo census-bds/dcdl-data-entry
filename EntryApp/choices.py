@@ -21,7 +21,6 @@ IMAGE_TYPE_CHOICES = [
     ( IMAGE_TYPE_OTHER, "Other"),
 ]
 
-# TO DO: get names to match actual taxonomy - check w/Katie
 FORM_CHOICES = [
     ('short', 'Short'),
     ('long', 'Long'),

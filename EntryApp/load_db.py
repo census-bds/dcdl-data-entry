@@ -5,7 +5,6 @@
 import csv
 import glob
 import json
-import logging
 import os
 import socket
 from pathlib import Path
@@ -24,8 +23,6 @@ from EntryApp.models import OtherImage
 from EntryApp.models import Record
 from EntryApp.models import Reel
 from EntryApp.models import Sheet
-
-logger = logging.getLogger('EntryApp.load_db')
 
 
 def load_imagefiles(reel_path, year):

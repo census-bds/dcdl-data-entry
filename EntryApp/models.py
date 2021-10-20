@@ -14,19 +14,19 @@ from django.urls import reverse
 
 import EntryApp.choices as choices
 
-
 #==============================================================================#
-# variables
+# LOGGER
 #==============================================================================#
 
-logger = logging.getLogger( 'EntryApp.models' )
+logger = logging.getLogger(__name__)
 
+class CustomAdapter(logging.LoggerAdapter):
+    ''' Custom class for adding keyer id to log output '''
 
-# TO DO: get names to match actual taxonomy - check w/Katie
-FORM_CHOICES = [
-    ('short', 'Short'),
-    ('long', 'Long')
-]
+    def process(self, msg, kwargs):
+        return '%s %s' % (self.extra['user'], msg), kwargs
+
+adapter = CustomAdapter(logger, {'user': '_'})
 
 #=====================================================#
 # MODELS FOR TRACKING DATA ENTRY
@@ -409,7 +409,7 @@ class Image(models.Model):
                     image_type = my_type,
                     me = self
                 )
-                logger.warning( status_message )
+                adapter.warning( status_message, {'user': 'models'} )
             #-- END check if type matches what found records. --#
         #-- END check if related breakers --#
 
@@ -423,7 +423,7 @@ class Image(models.Model):
                     image_type = my_type,
                     me = self
                 )
-                logger.warning( status_message )
+                adapter.warning( status_message, {'user': 'models'} )
             #-- END check if type matches what found records. --#
         #-- END check if related breakers --#
 
@@ -1164,7 +1164,7 @@ class FormField(models.Model):
     year = models.FloatField()
     form_type = models.CharField(
             max_length=255,
-            choices=FORM_CHOICES
+            choices=choices.FORM_CHOICES
         )     
     field_name = models.CharField(max_length=255)
 
