@@ -2,5 +2,9 @@ SHELL=/bin/bash
 HOME=/
 EMAIL="cecile.m.murray@census.gov"
 # Start postgres and start the test app every weekday at 8:30AM
-@reboot /data/data/postgresql/start_pgsql.sh >> /data/data/postgresql/cronlog.out
-@reboot /apps/django/dcdl_test/start_app.sh 'test' >> /apps/django/dcdl_test/logs/app.out 
+@reboot /data/data/postgresql/start_pgsql.sh >> /data/data/postgresql/cronlog.out 2>&1
+@reboot /apps/django/dcdl_test/start_app.sh 'dcdl_test' >> /data/data/user/django_user/test/logs/cronlog.out 2>&1
+@reboot /apps/django/dcdl_data_entry/start_app.sh 'dcdl_data_entry' >> /data/data/user/django_user/prod/logs/cronlog.out 2>&1
+
+# check prod error log every 10 minutes
+*/10 * * * * /apps/django/dcdl_data_entry/watch_error_log.sh prod >> /data/data/user/django_user/prod/logs/cronlog.out

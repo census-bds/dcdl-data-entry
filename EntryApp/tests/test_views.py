@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.forms import modelformset_factory
 
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-from selenium.webdriver.chrome.webdriver import WebDriver
+# from selenium.webdriver.chrome.webdriver import WebDriver
 
 from http import HTTPStatus
 
@@ -87,10 +87,17 @@ class IndexViewTests(TestCase):
         pass
 
 
-    def test_get_next_image(self):
-        ''' Test that the next image in queue is as expected '''
+class GetNextTests(TestCase):
+
+    fixtures = [DEV_FIXTURE]
+    
+    @classmethod
+    def setUpTestData(cls):
         pass
 
+    def test_get_image_todo_qs(self):
+        ''' Test method returns image queue as expected '''
+        pass
 
 
 class CodeImageTests(TestCase):
@@ -140,25 +147,25 @@ class CodeImageTests(TestCase):
         pass
 
 
-class LoginSeleniumTests(StaticLiveServerTestCase):
+# class LoginSeleniumTests(StaticLiveServerTestCase):
     
-    fixtures = [DEV_FIXTURE]
+#     fixtures = [DEV_FIXTURE]
 
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.selenium = WebDriver()
-        cls.selenium.implicitly_wait(10)
+#     @classmethod
+#     def setUpClass(cls):
+#         super().setUpClass()
+#         cls.selenium = WebDriver()
+#         cls.selenium.implicitly_wait(10)
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.selenium.quit()
-        super().tearDownClass()
+#     @classmethod
+#     def tearDownClass(cls):
+#         cls.selenium.quit()
+#         super().tearDownClass()
     
-    def test_login(self):
-        self.selenium.get('%s%s' % (self.live_server_url, '/login/'))
-        username_input = self.selenium.find_element_by_name("username")
-        username_input.send_keys(TEMP_USERNAME)
-        password_input = self.selenium.find_element_by_name("password")
-        password_input.send_keys(TEMP_PW)
-        self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
+#     def test_login(self):
+#         self.selenium.get('%s%s' % (self.live_server_url, '/login/'))
+#         username_input = self.selenium.find_element_by_name("username")
+#         username_input.send_keys(TEMP_USERNAME)
+#         password_input = self.selenium.find_element_by_name("password")
+#         password_input.send_keys(TEMP_PW)
+#         self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()
