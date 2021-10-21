@@ -1568,7 +1568,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
         adapter.info(
             'CodeImageView POST request',
-            {'user': request_IN.user.username}
+            {'user': request.user.username}
         )
 
         # render response
@@ -1638,7 +1638,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
             # log error message.
             adapter.error(
                 "Multiple breakers for image {image}. Not good.".format( image = image_IN ),
-                {'user': request_IN.user.username}
+                {'user': "_"}
             )
 
         #-- END check if single breaker. --#
@@ -1741,7 +1741,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         elif longform_qs.count() > 1:
             adapter.error(
                 f"Multiple 1990 long forms associated with image {image_IN}.",
-                {'user': request_IN.user.username}
+                {'user': "_"}
             )
 
         context_OUT[ CONTEXT_LONGFORM_INSTANCE ] = this_longform
@@ -1761,7 +1761,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
         adapter.info(
             f'{me}: context_OUT is {context_OUT}',
-            {'user': request_IN.user.username}
+            {'user': "_"}
         )
 
         return context_OUT
@@ -1780,7 +1780,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
         adapter.info(
             f"{me}(): other_image_qs is {other_image_qs}",
-            {'user': request_IN.user.username}
+            {'user': "_"}
         )
 
         # there shouldn't be more than one
@@ -1789,12 +1789,12 @@ class CodeImage( LoginRequiredMixin, FormView ):
         elif other_image_qs.count() > 1:
             adapter.error(
                 f"Multiple OtherImages associated with image {image_IN}.",
-                {'user': request_IN.user.username}
+                {'user': "_"}
             )
 
         adapter.info(
             f"{me}(): this_other_image is {this_other_image}",
-            {'user': request_IN.user.username}
+            {'user': "_"}
         )
 
         context_OUT[ CONTEXT_OTHER_IMAGE_INSTANCE ] = this_other_image
@@ -1830,11 +1830,11 @@ class CodeImage( LoginRequiredMixin, FormView ):
         # DEBUG
         adapter.info(
             f'{me}: record_count is {record_count}',
-            {'user': context_IN.user.username}
+            {'user': "_"}
         )
         adapter.info(
             f'{me}: context_IN is {context_IN}',
-            {'user': context_IN.user.username}
+            {'user': "_"}
         )
 
         # set up form.
@@ -1850,7 +1850,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
         adapter.info(
             f'prepare_record_context my_action is {my_action}',
-            {'user': context_IN.user.username}
+            {'user': "_"}
         )
 
 
@@ -1865,7 +1865,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
         adapter.info(
             f"{me}(): record_instance has id {record_id}, {record_instance}",
-            {'user': context_IN.user.username}
+            {'user': "_"}
         )
 
         # did we get a record id?
@@ -1886,7 +1886,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
         adapter.info(
             f'context returned from prepare_record_context {context_OUT}',
-            {'user': context_IN.user.username}
+            {'user': "_"}
         )
 
         return context_OUT
@@ -1918,7 +1918,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         elif ( sheet_count > 1 ):
             adapter.error( 
                 "Multiple sheets for image {image}. Not good.".format( image = image_IN ),
-                {'user': context_IN.user.username}
+                {'user': "_"}
             )
         #-- END check if single sheet. --#
 
@@ -1988,7 +1988,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
                     action_error_list = None
                     adapter.info(
                         f'CodeImageView.process_action() action is {my_action}',
-                        {'user': context_IN.user.username}
+                        {'user': "_"}
                     )
                     
                     if ( my_action == ACTION_COMPLETE_IMAGE ):
@@ -2332,7 +2332,7 @@ def report_problem(request):
             )
             
             
-            flagged_view = parse_http_referral(request.META['HTTP_REFERER'])
+            flagged_view = parse_http_referral(request.META['HTTP_REFERER'], request.user.username)
             
             return render(
                     request, \
