@@ -36,6 +36,8 @@ from EntryApp.forms import RecordForm
 from EntryApp.forms import RecordFormHelper
 from EntryApp.forms import SheetForm
 
+import EntryApp.views as views
+
 # user creation and DB load methods
 import EntryApp.create_users as users
 import EntryApp.load_db as ldb
@@ -49,28 +51,48 @@ DEV_FIXTURE =  'fixtures/dev_data_20211012_1543.json'
 TEMP_USERNAME = 'jbid123'
 TEMP_PW = 'dcdl1980'
 
-class IndexViewTests(TestCase):
+class BaseTestCase(TestCase):
 
     fixtures = [DEV_FIXTURE]
-    template_name = "index"
+    template_name = None
 
     @classmethod
     def setUpTestData(cls):
         pass
 
+    def authenticate_and_get_response(self):
+        self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
+        return self.client.get(reverse(self.template_name), follow=True)
+
+# canned json: get the data from the logs
+
+# 
+
+
+class IndexViewTests(BaseTestCase):
+
+    template_name = "EntryApp:index" # this is a class variable not instance, think about it
+
 
     def test_url_exists(self):
         ''' Test that the html response for this url is OK'''
-        self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
-        response = self.client.get(reverse('EntryApp:index'), follow=True)
-
+        response = self.authenticate_and_get_response()
         self.assertEqual(response.status_code, HTTPStatus.OK)
+
+
+    # def test_user_has_reel(self):
+    #     ''' Test that the user has the expected reel assigned '''
+    #     response =  self.authenticate_and_get_response()
+
+    #     current = CurrentEntry.objects.get(jbid = TEMP_USERNAME)
+
+    #     assertEqual
 
 
     def test_code_image_button_present(self):
         ''' Test that the CodeImage button is present '''
-        self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
-        response = self.client.get(reverse('EntryApp:index'), follow=True)
+        response = self.authenticate_and_get_response()
+        response = self.client.get(reverse(self.template_name), follow=True)
 
         # is the code image form action present?
         html_snippet = """<form action=/EntryApp/code-image/ method="post">"""
@@ -79,7 +101,12 @@ class IndexViewTests(TestCase):
     
     def test_next_thumbnail_present(self):
         ''' Test that the thumbnail of next image is present '''
-        pass
+        response = self.authenticate_and_get_response()
+        response = self.client.get(reverse(self.template_name), follow=True)
+
+        # grab the image url from the page
+        # try to follow that url
+        # assert that the status code is 200
 
 
     def test_recent_image_queue_present(self):
@@ -87,16 +114,9 @@ class IndexViewTests(TestCase):
         pass
 
 
-class GetNextTests(TestCase):
+class GetNextTests(BaseTestCase):
 
-    fixtures = [DEV_FIXTURE]
-    
-    @classmethod
-    def setUpTestData(cls):
-        pass
-
-    def test_get_image_todo_qs(self):
-        ''' Test method returns image queue as expected '''
+    def test_method(self):
         pass
 
 

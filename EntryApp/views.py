@@ -145,9 +145,10 @@ class CustomAdapter(logging.LoggerAdapter):
     ''' Custom class for adding keyer id to log output '''
 
     def process(self, msg, kwargs):
-        return '%s %s' % (self.extra['user'], msg), kwargs
+        extra_info = kwargs.pop('user', self.extra['user'])
+        return '%s %s' % (extra_info, msg), kwargs
 
-adapter = CustomAdapter(logger, {'user': '_'})
+adapter = CustomAdapter(logger, {'user': "_"})
 
 #==============================================================================#
 # HELPERS + FUNCTIONAL VIEWS
@@ -169,7 +170,7 @@ def get_form_fields( year, form_type ):
     
     adapter.info(
         f"get_form_fields got {year}, {form_type}",
-        {'user': '_'}
+        # {'user': '_'}
     )
 
     if year in allowed_years and form_type in allowed_forms:
@@ -177,7 +178,7 @@ def get_form_fields( year, form_type ):
         field_query = FormField.objects.filter(year=year).filter(form_type=form_type)
         adapter.info(
             f'FormField query length was {len(field_query)}',
-            {'user': '_'}
+            # {'user': '_'}
         )
         
         return [f.field_name for f in list(field_query)]
@@ -186,7 +187,7 @@ def get_form_fields( year, form_type ):
 
         adapter.info(
             f'Invalid argument for get_fields: {year} {form_type}',
-            {'user': '_'}
+            # {'user': '_'}
         )
         
         return []
@@ -215,7 +216,7 @@ def get_next_image(request):
 
     adapter.info(
         f'get_next_image got {next_image}',
-        {'user': '_'}
+        user=current_username
     )
 
     if next_image:
@@ -290,7 +291,7 @@ def get_image_todo_qs( request ):
 
     adapter.info(
         f'get_image_todo_qs() reel_image_qs length {len(reel_image_qs)}, todo_image_qs length {len(todo_image_qs)}',
-        {'user': '_'}
+        user = current_username
     )
 
     qs_OUT = todo_image_qs
@@ -366,7 +367,7 @@ def assign_reel(keyer):
     if len(reel_qs) == 0:
         adapter.info(
             f'{me}: found no reels to assign',
-            {'user': '_'}
+            user = keyer.jbid
         )
         return
 
@@ -385,7 +386,7 @@ def assign_reel(keyer):
     else:
         adapter.warn(
             f'assign_images() reel has a keyer issue /n keyer one is {this_reel.keyer_one} keyer two is {this_reel.keyer_two}',
-            {'user': '_'}
+            user = keyer.jbid
         )
         raise ValueError
 
@@ -414,9 +415,9 @@ def assign_reel(keyer):
         )
 
     if not created:
-        adapter.info(
+        adapter.warn(
             f"{me}: images already existed, weird",
-            {'user': '_'}
+            user = keyer.jbid
         )
 
     #-- END loop over images in the reel --#
@@ -441,8 +442,8 @@ def seed_current_entry(request):
     current = None
 
     adapter.info(
-        f'seed_current_entry() call',
-        {'user': '_'}
+        f'seed_current_entry() call \n {request}',
+        user = request.user.username
     )
 
     # got a current for current user?
@@ -503,10 +504,11 @@ def get_next_reel(request):
     me = 'get_next_reel()'
     current = CurrentEntry.objects.get(jbid=request.user)
     this_keyer = Keyer.objects.get(jbid = request.user)
+    this_keyer_jbid
 
     adapter.info(
         f"{me}: loading new reel",
-        {'user': '_'}
+        user = this_keyer_jbid
     )
 
     # is there a reel in CurrentEntry? mark complete if so
@@ -516,7 +518,7 @@ def get_next_reel(request):
 
         adapter.info(
             f"{me}: replacing {old_reel}",
-            {'user': '_'}
+            user = this_keyer_jbid
         )
         
         # which keyer is this? mark old reel complete
@@ -529,9 +531,9 @@ def get_next_reel(request):
             old_reel.save()
 
         else:
-            adapter.warn(
+            adapter.exception(
                 f"{me}: user is not assigned to either keyer slot in this reel",
-                {'user': '_'}
+                user = this_keyer_jbid
             )
             raise ValueError
 
