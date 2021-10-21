@@ -681,15 +681,17 @@ class Record(models.Model):
     ) 
 
     # need one or the other of these
-    line_no = models.IntegerField(
+    line_no = models.CharField(
         verbose_name = 'Line number',
         null = True,
-        blank = True
+        blank = True,
+        max_length = 255
     )
-    col_no = models.IntegerField(
+    col_no = models.CharField(
         verbose_name = 'Column number',
         null = True,
-        blank = True
+        blank = True,
+        max_length = 255
     )
 
 
