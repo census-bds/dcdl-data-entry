@@ -1809,7 +1809,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
         adapter.info(
             f'{me}: context_OUT is {context_OUT}',
-            {'user': request_IN.user.username}
+            {'user': "_"}
         )
 
         return context_OUT
