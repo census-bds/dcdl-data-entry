@@ -1,14 +1,20 @@
-from django.test import TestCase
-from django.urls import reverse
-from django.contrib.auth import get_user_model
-from django.forms import modelformset_factory
+#===============================================================#
+# TEST ENTRYAPP VIEWS
+#===============================================================#
 
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
-# from selenium.webdriver.chrome.webdriver import WebDriver
+import logging
 
+from bs4 import BeautifulSoup
 from http import HTTPStatus
 
+# django imports
+from django.conf import settings
+from django.forms import modelformset_factory
+from django.test import TestCase
+from django.urls import get_script_prefix
+from django.urls import reverse
 
+# EntryApp models
 from EntryApp.models import Breaker
 from EntryApp.models import CurrentEntry
 from EntryApp.models import FormField
@@ -36,20 +42,45 @@ from EntryApp.forms import RecordForm
 from EntryApp.forms import RecordFormHelper
 from EntryApp.forms import SheetForm
 
-import EntryApp.views as views
-
 # user creation and DB load methods
 import EntryApp.create_users as users
 import EntryApp.load_db as ldb
-
 import EntryApp.tests.test_utils as utils
 
-import logging
+#================================#
+# LOGGER
+#================================#
+
 logger = logging.getLogger('EntryApp.test_views')
+
+#================================#
+# GLOBALS
+#================================#
 
 DEV_FIXTURE =  'fixtures/dev_data_20211012_1543.json'
 TEMP_USERNAME = 'jbid123'
 TEMP_PW = 'dcdl1980'
+
+EXPECTED = {
+    'current_image_file_id': 139,
+    'current_img_id': 37,
+    'current_reel_id': 21,
+    'img_url': '/images/1960/dev_1960/fake_IMG_4.jpg',
+    'sheet_type_breaker_post': {
+        'image_type': 'breaker'
+    },
+    'sheet_type_other_post': {
+        'image_type': 'other'
+    },
+    'sheet_type_sheet_post': {
+        'image_type': 'sheet'
+    },
+}
+
+
+#================================#
+# BASE CLASS
+#================================#
 
 class BaseTestCase(TestCase):
 
@@ -64,10 +95,9 @@ class BaseTestCase(TestCase):
         self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
         return self.client.get(reverse(self.template_name), follow=True)
 
-# canned json: get the data from the logs
-
-# 
-
+#================================#
+# TEST CASES
+#================================#
 
 class IndexViewTests(BaseTestCase):
 
@@ -80,13 +110,15 @@ class IndexViewTests(BaseTestCase):
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
 
-    # def test_user_has_reel(self):
-    #     ''' Test that the user has the expected reel assigned '''
-    #     response =  self.authenticate_and_get_response()
+    def test_user_has_reel(self):
+        ''' Test that the user has the expected reel+images assigned '''
+        response =  self.authenticate_and_get_response()
 
-    #     current = CurrentEntry.objects.get(jbid = TEMP_USERNAME)
+        current = CurrentEntry.objects.get(jbid = TEMP_USERNAME)
 
-    #     assertEqual
+        self.assertEqual(current.reel_id, EXPECTED['current_reel_id']) 
+        self.assertEqual(current.image_file_id, EXPECTED['current_image_file_id'])
+        self.assertEqual(current.img_id, EXPECTED['current_img_id'])
 
 
     def test_code_image_button_present(self):
@@ -99,19 +131,21 @@ class IndexViewTests(BaseTestCase):
         self.assertTrue(html_snippet in str(response.content))
 
     
-    def test_next_thumbnail_present(self):
+    def test_image_present(self):
         ''' Test that the thumbnail of next image is present '''
         response = self.authenticate_and_get_response()
-        response = self.client.get(reverse(self.template_name), follow=True)
 
         # grab the image url from the page
         # try to follow that url
         # assert that the status code is 200
+        soup = BeautifulSoup(response.content, 'html.parser')
+        img_url = soup.body.find("img")['src']
+        img_response = self.client.get(img_url)
 
+        self.assertEqual(img_url, EXPECTED['img_url'])
 
-    def test_recent_image_queue_present(self):
-        ''' Test that the recent image queue is present '''
-        pass
+        # this fails right now but works in browser, not sure why
+        self.assertEqual(img_response.status_code, HTTPStatus.OK)
 
 
 class GetNextTests(BaseTestCase):
@@ -120,10 +154,10 @@ class GetNextTests(BaseTestCase):
         pass
 
 
-class CodeImageTests(TestCase):
+class CodeImageTests(BaseTestCase):
 
     fixtures = [DEV_FIXTURE]
-    template_name = "code_image"
+    template_name = "EntryApp:code_image"
 
     @classmethod
     def setUpTestData(cls):
@@ -131,27 +165,13 @@ class CodeImageTests(TestCase):
 
     def test_url_status_ok(self):
         ''' Test that the html response for this url is HTTPStatus.OK'''
-        self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
-        response = self.client.get(
-            reverse(f'EntryApp:{self.template_name}'),
-            follow=True
-        )
-
+        response = self.authenticate_and_get_response()
         self.assertEqual(response.status_code, HTTPStatus.OK)
 
 
-    def test_image_is_present(self):
-        ''' Test that openseadragon found an image '''
-        pass
-
-
-    def test_a_sheet_form_present(self):
+    def test_a_image_form_present(self):
         ''' Test that sheet form is present on first entering page '''
-        self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
-        response = self.client.get(
-            reverse(f'EntryApp:{self.template_name}'),
-            follow=True
-        )
+        response = self.authenticate_and_get_response()
 
         form_html = '''<form id="image-info" method="POST">'''
         self.assertTrue(form_html in str(response.content))
@@ -162,9 +182,21 @@ class CodeImageTests(TestCase):
         pass
 
 
-    def test_c_sheet_form_post(self):
-        ''' Test that the sheet form POST method works '''
-        pass
+    def test_c_sheet_type_breaker_post(self):
+        ''' Test a post request when sheet_type is breaker '''
+        response = self.authenticate_and_get_response()
+
+        # post request should have okay status
+        post_response = self.client.post(
+            reverse(self.template_name),
+            EXPECTED['sheet_type_breaker_post']
+        ) 
+        self.assertEqual(post_response.status_code, HTTPStatus.OK)
+
+        # should also update database
+        current_image_id = CurrentEntry.objects.get(jbid = TEMP_USERNAME).img_id
+        image = Image.objects.get(id = current_image_id)
+        self.assertEqual(image.image_type, 'breaker')
 
 
 # class LoginSeleniumTests(StaticLiveServerTestCase):
