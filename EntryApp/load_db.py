@@ -331,8 +331,7 @@ def load_reels_from_csv(reel_csv_path):
         next(csvreader) # skip header row
     
         for row in csvreader:
-            logger.info(row)
-
+            print(row)
             load_reel(reel_path = row[0], year = row[1], state = row[2])
 
 
