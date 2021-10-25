@@ -504,7 +504,7 @@ def get_next_reel(request):
     me = 'get_next_reel()'
     current = CurrentEntry.objects.get(jbid=request.user)
     this_keyer = Keyer.objects.get(jbid = request.user)
-    this_keyer_jbid
+    this_keyer_jbid = this_keyer.jbid
 
     adapter.info(
         f"{me}: loading new reel",
