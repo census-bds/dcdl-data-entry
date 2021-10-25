@@ -313,7 +313,7 @@ def load_form_fields(field_tbl_path=settings.FORM_FIELDS_CSV, reload=True):
         next(csvreader) # skip header row
 
         for row in csvreader:
-            logger.info(row)
+            print(row)
             field = FormField(year = row[0], form_type=row[1], field_name=row[2])
             field.save()
 
