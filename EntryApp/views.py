@@ -810,22 +810,33 @@ class CodeImage( LoginRequiredMixin, FormView ):
             current = CurrentEntry.objects.get(jbid = request_IN.user.username)
             current_reel = Reel.objects.get(id = current.reel_id)
 
-            # get image for ID (TODO: check for image ID)
+            # get image for ID 
             image_id = inputs_IN.get( PARAM_NAME_IMAGE_ID, None )
-            image_instance = Image.objects.get( pk = image_id )
-            image_has_related_objects = image_instance.has_related_objects()
+
+            if image_id:
+                image_instance = Image.objects.get( pk = image_id )
+                image_has_related_objects = image_instance.has_related_objects()
+            else:
+                adapter.exception(
+                    f'{me}(): no image ID in inputs_IN',
+                    {'user': request_IN.user.username}
+                )
 
             form = inputs_IN
             
             adapter.info(
-                f'Breaker form is {form}',
+                f'{me}(): Breaker form is {form}',
                 {'user': request_IN.user.username}
             )
 
             # define fields based on which year it is
             breaker_fields = get_form_fields(image_instance.year, "breaker")
 
-            BreakerFormSet = modelformset_factory( Breaker, fields = breaker_fields, formset = BaseBreakerFormSet )
+            BreakerFormSet = modelformset_factory( 
+                Breaker,
+                fields = breaker_fields,
+                formset = BaseBreakerFormSet 
+            )
             formset = BreakerFormSet( inputs_IN, request_IN.FILES )
             helper = BreakerFormHelper(year=image_instance.year)
 
@@ -2172,7 +2183,11 @@ class CodeImage( LoginRequiredMixin, FormView ):
                 #-- END check if process_action errors. --#
 
                 # if the action is complete_image, update_breaker_type, update_other_image, we return to the index
-                if my_action in [ACTION_COMPLETE_IMAGE, ACTION_UPDATE_OTHER_IMAGE, ACTION_UPDATE_BREAKER_TYPE]:
+                if my_action in [
+                    ACTION_COMPLETE_IMAGE, \
+                    ACTION_UPDATE_OTHER_IMAGE, \
+                    ACTION_UPDATE_BREAKER_TYPE
+                ]:
                     
                     return redirect(reverse("EntryApp:index"))
                 
