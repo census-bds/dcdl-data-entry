@@ -116,7 +116,7 @@ PARAM_NAMES[ "PARAM_NAME_RECORD_ID" ] = PARAM_NAME_RECORD_ID
 PARAM_NAMES[ "PARAM_NAME_SHEET_ID" ] = PARAM_NAME_SHEET_ID
 PARAM_NAMES[ "PARAM_NAME_YEAR" ] = PARAM_NAME_YEAR
 
-# actions
+# actions for CodeImageView
 ACTION_COMPLETE_IMAGE = "complete_image"
 ACTION_EDIT_RECORD = "edit_record"
 ACTION_UPDATE_BREAKER_TYPE = "update_breaker_type"
@@ -134,6 +134,13 @@ VALID_ACTIONS.append( ACTION_UPDATE_LONGFORM )
 VALID_ACTIONS.append( ACTION_UPDATE_OTHER_IMAGE )
 VALID_ACTIONS.append( ACTION_UPDATE_SHEET_TYPE )
 VALID_ACTIONS.append( ACTION_UPDATE_RECORD )
+
+# actions for IndexView
+ACTION_LOAD_NEXT_BATCH = "load_next_batch"
+ACTION_LOAD_NEXT_REEL = "load_next_reel"
+INDEX_ACTIONS = []
+INDEX_ACTIONS.APPEND( ACTION_LOAD_NEXT_BATCH )
+INDEX_ACTIONS.APPEND( ACTION_LOAD_NEXT_REEL )
 
 #==============================================================================#
 # LOGGER
@@ -344,8 +351,9 @@ def initialize_context( request_IN, dict_IN = None ):
 
 def assign_reel(keyer):
     '''
-    Helper fn to assign a keyer the images from a given reel by loading image
-     info into Image model for a keyer. This method populates the Image model.
+    Helper method for IndexView to assign a keyer the images from a given reel
+     by loading image info into Image model for a keyer. This method populates
+     the Image model.
 
     Required arguments:
     - keyer 
@@ -430,7 +438,7 @@ def assign_reel(keyer):
 def seed_current_entry(request):
 
     '''
-    Helper function: Put dummy data into current entry
+    Helper function for IndexView: Put dummy data into current entry
      table. It should only be called for the first image for each user.
     '''
 
@@ -492,8 +500,9 @@ def seed_current_entry(request):
 
 def get_next_reel(request):
     '''
-    Helper function to put next reel in queue for a keyer. This method 
-     populates CurrentEntry whenever needed
+    Helper view to put next reel in queue for a keyer. It is called from
+    IndexView.post(). It populates CurrentEntry with a new reel when a keyer
+    clicks the button. 
 
     - marks the existing reel in CurrentEntry (if there is one) complete
     for that keyer
@@ -547,6 +556,17 @@ def get_next_reel(request):
     current.save()
 
 
+def start_new_batch(request):
+    '''
+    View to reset the batch counter to 0
+    '''
+
+    pass
+    # current_username = request.user.username
+    # current_entry = CurrentEntry.objects.get(jbid = current_username)
+
+
+
 #==============================================================================#
 # views
 #==============================================================================#
@@ -559,6 +579,11 @@ class IndexView(LoginRequiredMixin, TemplateView):
     """
     Define view for app landing page
     """
+
+    # some view-specific constants
+    self.batch_size = 25
+    self.recent_image_limit = batch_size # may need to reduce this
+
 
     def get(self, request):
 
@@ -575,12 +600,34 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
     def post(self, request):
 
-        # call get_next_reel
-        get_next_reel(request)
+        # return reference
+        response_OUT = None
+
+        # render response
+        response_OUT = self.process_request( request )
 
         # reload page with get request, and proceed
         return redirect(reverse("EntryApp:index"))
 
+    #-- END method post() --#
+
+
+    def prepare_recent_image_queue(self, recent_image_limit):
+        '''
+        Helper method to get most recent images: 
+        - completed images with a year and a type, but not 1990 breakers
+        - order images based on most recently modified to least recently modified
+        - limited to recent_image limit (defined in process_request)
+        '''
+
+        recent_image_qs = user_image_qs.filter( Q( year__isnull = False ) | Q( image_type__isnull = False ) )
+        recent_image_qs = recent_image_qs.filter(is_complete = True)
+        recent_image_qs = recent_image_qs.exclude( Q(year__exact = 1990) & Q(image_type__contains = 'breaker')) # exclude 1900 dummy breaker
+        recent_image_qs = recent_image_qs.order_by( '-last_modified' )
+        recent_image_qs = recent_image_qs[ : recent_image_limit ]
+
+        return list( recent_image_qs )
+        
 
     def process_request( self, request ):
 
@@ -592,14 +639,14 @@ class IndexView(LoginRequiredMixin, TemplateView):
         adapter = CustomAdapter(logger, {'user': request.user.username})
 
         # declare variables
-        recent_image_limit = None
+        # batch_size = None
         current_user = None
         current_username = None
         user_image_qs = None
-        total_image_count = None
         todo_image_qs = None
         todo_image_count = None
         recent_image_qs = None
+        # recent_image_limit = None
         recent_image_list = None
         recent_image_count = None
         completed_image_qs = None
@@ -612,59 +659,80 @@ class IndexView(LoginRequiredMixin, TemplateView):
             {'user': request.user.username}
         )
 
-        # init
-        recent_image_limit = 5
-        seed_current_entry( request ) # this ensures there's a value in CurrentEntry
-        get_next_image( request )
-        context = initialize_context( request )
+        # init state 
+        seed_current_entry( request ) # ensures there's a value in CurrentEntry
+        get_next_image( request ) # gets the next image loaded into CurrentEntry
+        context = initialize_context( request ) # prep context dict
 
-        # get current username
+        # do we have an action? if so, do action
+        action = context.get( PARAM_NAME_ACTION, None)
+
+        # this case can definitely be improved, ouch 
+        if action == ACTION_LOAD_NEXT_BATCH:
+            get_next_reel(request)
+
+        #TODO implement load next batch
+        elif action == ACTION_LOAD_NEXT_BATCH:
+            pass
+
+        # got an action but not one in defined list, this is an error
+        elif action not None and action not in INDEX_ACTIONS:
+            adapter.exception(
+                f'{me}() unknown POST action',
+                {'user': request.user.username}
+            )
+
+        # get current username and current entry
         current_user = request.user
         current_username = current_user.username
         context[ "user" ] = current_user
+        current_entry = CurrentEntry.objects.get(jbid = current_username)
 
-        # get user image lists
-        current_reel = CurrentEntry.objects.get(jbid = current_username).reel
+        # get user image queryset for this reel
+        current_reel = current_entry.reel
         image_qs = Image.objects.filter(image_file__img_reel = current_reel)
         user_image_qs = image_qs.filter(jbid = current_username)
-        total_image_count = user_image_qs.count()
-        context[ 'num_images' ] = total_image_count
 
         adapter.info(
             f'{me}: current reel is {current_reel}',
             {'user': request.user.username}
         )
 
-        # todo
+        # get queue of images to code and add next image to context for thumbnail
         todo_image_qs = get_image_todo_qs( request )
         todo_image_count = todo_image_qs.count()
         next_image = todo_image_qs.first()
-        context[ 'num_todo' ] = todo_image_count
         context[ 'next_image' ] = next_image
 
-        # completed work
-        completed_image_qs = user_image_qs.filter( is_complete = True )
-        completed_image_qs = completed_image_qs.exclude( Q(year__exact = 1990) & Q(image_type__contains = 'breaker')) # exclude 1900 dummy breaker
-        completed_image_qs = completed_image_qs.order_by( '-last_modified' )
-        completed_count = completed_image_qs.count()
-        context[ 'num_completed' ] = completed_count
+        # get most recent images
+        context[ 'recent_image_list' ] = self.prepare_recent_image_queue(recent_image_limit)
 
-        # recent work: completed images with a year and a type, but not 1990 breakers
-        recent_image_qs = user_image_qs.filter( Q( year__isnull = False ) | Q( image_type__isnull = False ) )
-        recent_image_qs = recent_image_qs.filter(is_complete = True)
-        recent_image_qs = recent_image_qs.exclude( Q(year__exact = 1990) & Q(image_type__contains = 'breaker')) # exclude 1900 dummy breaker
-        recent_image_qs = recent_image_qs.order_by( '-last_modified' )
-        recent_image_count = recent_image_qs.count()
-        context[ 'num_in_progress' ] = recent_image_count
+        # get batch information for keyers
+        context[ 'num_completed' ] = current_entry.batch_position
+        context[ 'num_images' ] = self.batch_size # this is going to be wrong at end of reel maybe
+        num_left_in_batch =  self.batch_size - current_entry.batch_position
+        context[ 'num_todo' ] = num_left_in_batch
 
-        # limit to recent_image_limit, and add list to context.
-        recent_image_qs = recent_image_qs[ : recent_image_limit ]
-        recent_image_list = list( recent_image_qs )
-        context[ 'recent_image_list' ] = recent_image_list
 
-        # check if all images in reel are completed
+        # check if all images in reel or batch are completed
+        # if so, reveal one of two magic buttons
+        # - advance to next reel if more images needed (takes priority)
+        # - advance to "new batch" if we hit batch_size
+        completed_count = user_image_qs.filter( is_complete = True ).count()
         if completed_count == current_reel.image_count:
+            # this will reveal a button that has backend effects
             context[ 'make_next_reel_button_appear' ] = True
+        
+        # this case will reveal a button that has no backend effects
+        elif num_left_in_batch == 0:
+            context[ 'make_next_batch_button_appear' ] = True
+
+            # modify other context variables... I need to write a helper method.
+            context[ 'recent_image_list' ] = None
+            
+            # - recent image queue needs to be erased
+            # - set num_completed to 0
+            # - set num_todo to batch_size
 
         # render response
         response_OUT = render( request, 'EntryApp/index.html', context )
@@ -672,6 +740,29 @@ class IndexView(LoginRequiredMixin, TemplateView):
         return response_OUT
 
     #-- END method process_request() --#
+
+    def compute_keyer_completion_numbers(self, todo_image_count, batch_size):
+        '''
+        Compute num_completed, num_images, and num_todo for template
+        
+        Case 1: we're at the end of a reel 
+        Case 2: we're at the end of a batch 
+        Case 3: we're just chugging along
+
+        Or maybe for this method it is like this:
+        Case 1: we can make a batch of 25 images with remaining in reel
+        Case 2: we need to adjust num_images because < 25 left in reel (i.e. last batch)
+        '''
+        pass
+        # # determine where we are in the reel
+        # current_entry = CurrentEntry.objects.get(jbid = current_username)
+        # current_reel = current_entry.reel
+        
+        # num_left_in_batch = current_reel - todo_image_count
+
+
+
+
 
 #-- END view class IndexView
 
