@@ -139,8 +139,8 @@ VALID_ACTIONS.append( ACTION_UPDATE_RECORD )
 ACTION_LOAD_NEXT_BATCH = "load_next_batch"
 ACTION_LOAD_NEXT_REEL = "load_next_reel"
 INDEX_ACTIONS = []
-INDEX_ACTIONS.APPEND( ACTION_LOAD_NEXT_BATCH )
-INDEX_ACTIONS.APPEND( ACTION_LOAD_NEXT_REEL )
+INDEX_ACTIONS.append( ACTION_LOAD_NEXT_BATCH )
+INDEX_ACTIONS.append( ACTION_LOAD_NEXT_REEL )
 
 #==============================================================================#
 # LOGGER
@@ -498,11 +498,11 @@ def seed_current_entry(request):
 #-- END function seed_current_entry() --#
 
 
-def get_next_reel(request):
+def get_next_reel(username):
     '''
-    Helper view to put next reel in queue for a keyer. It is called from
-    IndexView.post(). It populates CurrentEntry with a new reel when a keyer
-    clicks the button. 
+    Helper method to put next reel in queue for a keyer. It is called from
+    IndexView.process_request(). It populates CurrentEntry with a new reel
+    when a keyer clicks the button. 
 
     - marks the existing reel in CurrentEntry (if there is one) complete
     for that keyer
@@ -511,8 +511,8 @@ def get_next_reel(request):
     '''
 
     me = 'get_next_reel()'
-    current = CurrentEntry.objects.get(jbid=request.user)
-    this_keyer = Keyer.objects.get(jbid = request.user)
+    current = CurrentEntry.objects.get(jbid = username)
+    this_keyer = Keyer.objects.get(jbid = username)
     this_keyer_jbid = this_keyer.jbid
 
     adapter.info(
@@ -531,11 +531,11 @@ def get_next_reel(request):
         )
         
         # which keyer is this? mark old reel complete
-        if old_reel.keyer_one.jbid == request.user.username:
+        if old_reel.keyer_one.jbid == username:
             old_reel.is_complete_keyer_one = True
             old_reel.save()
         
-        elif old_reel.keyer_two.jbid == request.user.username:
+        elif old_reel.keyer_two.jbid == username:
             old_reel.is_complete_keyer_two = True
             old_reel.save()
 
@@ -581,8 +581,40 @@ class IndexView(LoginRequiredMixin, TemplateView):
     """
 
     # some view-specific constants
-    self.batch_size = 25
-    self.recent_image_limit = batch_size # may need to reduce this
+    batch_size = 25
+    recent_image_limit = batch_size # may need to reduce this
+    template_name = "EntryApp:index"
+
+
+    def action_load_next_batch(self, context_IN):
+        '''
+        Modifies context dict to load new "fake" batch of images for keyers.
+            - set num_completed images to 0
+            - set num_images to min of batch_size and # images left in reel
+            - compute num remaining
+            - set recent_image_list to empty
+        Takes: 
+            - context dict
+        Returns:
+            - modified context dict
+        '''
+
+        context_OUT = context_IN
+
+        # get current values for keyer
+        current_entry = CurrentEntry.objects.get(jbid = context_IN[ 'user' ])
+        current_reel_image_ct = current_reel.image_count
+        num_images_remaining = context_IN[ 'todo_image_count' ]
+
+        # reset values that show progress through batch
+        context_OUT[ 'num_completed' ] = 0
+        context_OUT[ 'num_images' ] = min(self.batch_size, num_images_remaining)
+        context_OUT[ 'num_todo' ] = min(self.batch_size, num_images_remaining)
+
+        # reset recent_image_queue
+        context_OUT [ 'recent_image_list' ] = None
+
+        return context_OUT
 
 
     def get(self, request):
@@ -607,7 +639,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
         response_OUT = self.process_request( request )
 
         # reload page with get request, and proceed
-        return redirect(reverse("EntryApp:index"))
+        return redirect(reverse(self.template_name))
 
     #-- END method post() --#
 
@@ -664,24 +696,6 @@ class IndexView(LoginRequiredMixin, TemplateView):
         get_next_image( request ) # gets the next image loaded into CurrentEntry
         context = initialize_context( request ) # prep context dict
 
-        # do we have an action? if so, do action
-        action = context.get( PARAM_NAME_ACTION, None)
-
-        # this case can definitely be improved, ouch 
-        if action == ACTION_LOAD_NEXT_BATCH:
-            get_next_reel(request)
-
-        #TODO implement load next batch
-        elif action == ACTION_LOAD_NEXT_BATCH:
-            pass
-
-        # got an action but not one in defined list, this is an error
-        elif action not None and action not in INDEX_ACTIONS:
-            adapter.exception(
-                f'{me}() unknown POST action',
-                {'user': request.user.username}
-            )
-
         # get current username and current entry
         current_user = request.user
         current_username = current_user.username
@@ -700,22 +714,45 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
         # get queue of images to code and add next image to context for thumbnail
         todo_image_qs = get_image_todo_qs( request )
-        todo_image_count = todo_image_qs.count()
+        todo_image_ct = todo_image_qs.count()
         next_image = todo_image_qs.first()
+        context[ "todo_image_count" ] = todo_image_count
         context[ 'next_image' ] = next_image
 
         # get most recent images
         context[ 'recent_image_list' ] = self.prepare_recent_image_queue(recent_image_limit)
 
         # get batch information for keyers
+        num_images_in_batch = min(self.batch_size, todo_image_count_qs.count())
+        num_left_in_batch =  num_images_in_batch - current_entry.batch_position
         context[ 'num_completed' ] = current_entry.batch_position
-        context[ 'num_images' ] = self.batch_size # this is going to be wrong at end of reel maybe
-        num_left_in_batch =  self.batch_size - current_entry.batch_position
+        context[ 'num_images' ] = num_images_in_batch
         context[ 'num_todo' ] = num_left_in_batch
 
 
+        # do we have an action? if so, do action
+        action = context.get( PARAM_NAME_ACTION, None)
+
+        if action == ACTION_LOAD_NEXT_BATCH:
+
+            #TODO: make this a class method?
+            get_next_reel(current_username)
+
+        elif action == ACTION_LOAD_NEXT_BATCH:
+            
+            context = self.action_load_next_batch(context)
+
+        # got an action but not one in defined list, this is an error
+        elif action and action not in INDEX_ACTIONS:
+
+            adapter.exception(
+                f'{me}() unknown POST action',
+                {'user': request.user.username}
+            )
+
+
         # check if all images in reel or batch are completed
-        # if so, reveal one of two magic buttons
+        # if so, reveal one of two buttons
         # - advance to next reel if more images needed (takes priority)
         # - advance to "new batch" if we hit batch_size
         completed_count = user_image_qs.filter( is_complete = True ).count()
@@ -723,16 +760,10 @@ class IndexView(LoginRequiredMixin, TemplateView):
             # this will reveal a button that has backend effects
             context[ 'make_next_reel_button_appear' ] = True
         
-        # this case will reveal a button that has no backend effects
+        # this case will reveal a button that has no backend effects but will
+        # allow user to trigger reset of count of images to do
         elif num_left_in_batch == 0:
             context[ 'make_next_batch_button_appear' ] = True
-
-            # modify other context variables... I need to write a helper method.
-            context[ 'recent_image_list' ] = None
-            
-            # - recent image queue needs to be erased
-            # - set num_completed to 0
-            # - set num_todo to batch_size
 
         # render response
         response_OUT = render( request, 'EntryApp/index.html', context )
@@ -741,24 +772,6 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
     #-- END method process_request() --#
 
-    def compute_keyer_completion_numbers(self, todo_image_count, batch_size):
-        '''
-        Compute num_completed, num_images, and num_todo for template
-        
-        Case 1: we're at the end of a reel 
-        Case 2: we're at the end of a batch 
-        Case 3: we're just chugging along
-
-        Or maybe for this method it is like this:
-        Case 1: we can make a batch of 25 images with remaining in reel
-        Case 2: we need to adjust num_images because < 25 left in reel (i.e. last batch)
-        '''
-        pass
-        # # determine where we are in the reel
-        # current_entry = CurrentEntry.objects.get(jbid = current_username)
-        # current_reel = current_entry.reel
-        
-        # num_left_in_batch = current_reel - todo_image_count
 
 
 
