@@ -10,33 +10,36 @@
 {% endblock header %}
 
 {% block content %}
-    {% if num_images %}
+    {% if num_completed %}
 
-    <p><b>User {{ user }} has completed data entry for {{ num_completed }} / {{ num_images }} images.</b></p>
+        <p><b>User {{ user }} has completed data entry for {{ num_completed }} / {{ num_images }} images.</b></p>
 
-        {% if next_image %}
-    <p>
-        The current reel is from {{ next_image.year }}. Next image ({{ num_todo }} remaining):
-        <br/>
-        <img src = "/images/{{next_image.year}}/{{ next_image.image_file.img_reel.reel_name }}/{{ next_image.image_file.img_file_name }}" style="width: 200px;" />
-        <form action={% url 'EntryApp:code_image' %} method="post">
-            {% csrf_token %}
-            <input type="hidden" name="image_id" value="{{ next_image.id }}" />
-            <input type="submit" value="Code Image">
-        </form>
-    </p>
-        {% elif make_next_reel_button_appear %}
+        {% if make_next_reel_button_appear %}
+            bar
             <form method="post">
                 {% csrf_token %}
                 <input type='hidden' name='action' value="load_next_reel"/>
                 <input type="submit" value="Load next reel">
             </form>
+
         {% elif make_next_batch_button_appear %}
             <form method="post">
-                {% csrf_token}
+                {% csrf_token %}
                 <input type='hidden' name='action' value='start_new_batch'>
                 <input type="submit" value="Load next batch">
             </form>
+
+        {% elif next_image %}
+        <p>
+            The current reel is from {{ next_image.year }}. Next image ({{ num_todo }} remaining):
+            <br/>
+            <img src = "/images/{{next_image.year}}/{{ next_image.image_file.img_reel.reel_name }}/{{ next_image.image_file.img_file_name }}" style="width: 200px;" />
+            <form action={% url 'EntryApp:code_image' %} method="post">
+                {% csrf_token %}
+                <input type="hidden" name="image_id" value="{{ next_image.id }}" />
+                <input type="submit" value="Code Image">
+            </form>
+        </p>
         {% endif %}
 
     {% else %}

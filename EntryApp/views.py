@@ -229,6 +229,7 @@ def get_next_image(request):
     if next_image:
         current = CurrentEntry.objects.get(jbid=request.user)
         current.img = next_image
+        current.batch_position += 1
         current.save()
 
 #-- END function get_next_image() --#
@@ -581,7 +582,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
     """
 
     # some view-specific constants
-    batch_size = 25
+    batch_size = 3
     recent_image_limit = batch_size # may need to reduce this
     template_name = "EntryApp:index"
 
@@ -602,9 +603,19 @@ class IndexView(LoginRequiredMixin, TemplateView):
         context_OUT = context_IN
 
         # get current values for keyer
-        current_entry = CurrentEntry.objects.get(jbid = context_IN[ 'user' ])
+        this_keyer_jbid = context_IN[ "user" ]
+        current_entry = CurrentEntry.objects.get(jbid = this_keyer_jbid)
+
+        # how many images in this reel? how many left?
         current_reel_image_ct = current_reel.image_count
+        image_qs = Image.objects.filter(image_file__img_reel =  current_reel)
+        user_image_qs = image_qs.filter(jbid = this_keyer_jbid)
+        images_left_in_reel = user_image_qs.count()
+        CurrentEntry.batch_size = images_left_in_reel
+
         num_images_remaining = context_IN[ 'todo_image_count' ]
+
+
 
         # reset values that show progress through batch
         context_OUT[ 'num_completed' ] = 0
@@ -644,7 +655,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
     #-- END method post() --#
 
 
-    def prepare_recent_image_queue(self, recent_image_limit):
+    def prepare_recent_image_queue(self, user_image_qs):
         '''
         Helper method to get most recent images: 
         - completed images with a year and a type, but not 1990 breakers
@@ -656,7 +667,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
         recent_image_qs = recent_image_qs.filter(is_complete = True)
         recent_image_qs = recent_image_qs.exclude( Q(year__exact = 1990) & Q(image_type__contains = 'breaker')) # exclude 1900 dummy breaker
         recent_image_qs = recent_image_qs.order_by( '-last_modified' )
-        recent_image_qs = recent_image_qs[ : recent_image_limit ]
+        recent_image_qs = recent_image_qs[ : self.recent_image_limit ]
 
         return list( recent_image_qs )
         
@@ -702,7 +713,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
         context[ "user" ] = current_user
         current_entry = CurrentEntry.objects.get(jbid = current_username)
 
-        # get user image queryset for this reel
+        # # get user image queryset for this reel
         current_reel = current_entry.reel
         image_qs = Image.objects.filter(image_file__img_reel = current_reel)
         user_image_qs = image_qs.filter(jbid = current_username)
@@ -712,6 +723,9 @@ class IndexView(LoginRequiredMixin, TemplateView):
             {'user': request.user.username}
         )
 
+        # get most recent images
+        context[ 'recent_image_list' ] = self.prepare_recent_image_queue(user_image_qs)
+
         # get queue of images to code and add next image to context for thumbnail
         todo_image_qs = get_image_todo_qs( request )
         todo_image_ct = todo_image_qs.count()
@@ -719,11 +733,8 @@ class IndexView(LoginRequiredMixin, TemplateView):
         context[ "todo_image_count" ] = todo_image_count
         context[ 'next_image' ] = next_image
 
-        # get most recent images
-        context[ 'recent_image_list' ] = self.prepare_recent_image_queue(recent_image_limit)
-
         # get batch information for keyers
-        num_images_in_batch = min(self.batch_size, todo_image_count_qs.count())
+        num_images_in_batch = min(self.batch_size, todo_image_ct)
         num_left_in_batch =  num_images_in_batch - current_entry.batch_position
         context[ 'num_completed' ] = current_entry.batch_position
         context[ 'num_images' ] = num_images_in_batch
@@ -756,9 +767,20 @@ class IndexView(LoginRequiredMixin, TemplateView):
         # - advance to next reel if more images needed (takes priority)
         # - advance to "new batch" if we hit batch_size
         completed_count = user_image_qs.filter( is_complete = True ).count()
+
+        adapter.info(
+            f'{me}(): completed_count is {completed_count}',
+            {'user': current_username}
+        )
+        adapter.info(
+            f'{me}(): current_reel.image_count is {current_reel.image_count}',
+            {'user': current_username}
+        )
+
         if completed_count == current_reel.image_count:
             # this will reveal a button that has backend effects
             context[ 'make_next_reel_button_appear' ] = True
+            adapter.info(f'{context}')
         
         # this case will reveal a button that has no backend effects but will
         # allow user to trigger reset of count of images to do

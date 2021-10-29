@@ -1145,8 +1145,12 @@ class CurrentEntry(models.Model):
 
     # track position in batch for improved user experience
     batch_position = models.PositiveIntegerField(
-        null=False,
-        default=0
+        null = False,
+        default = 0
+    )
+    batch_size = models.PositiveIntegerField(
+        null = False,
+        default = 25
     )
 
     def __str__(self):
