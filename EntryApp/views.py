@@ -600,9 +600,10 @@ class IndexView(LoginRequiredMixin, TemplateView):
             - modified context dict
         '''
 
-        context_OUT = context_IN
+        me = 'IndexView:action_load_next_batch()'
 
         # get current values for keyer
+        context_OUT = context_IN
         this_keyer_jbid = context_IN[ "user" ]
         current_entry = CurrentEntry.objects.get(jbid = this_keyer_jbid)
 
@@ -611,13 +612,14 @@ class IndexView(LoginRequiredMixin, TemplateView):
         image_qs = Image.objects.filter(image_file__img_reel =  current_reel)
         user_image_qs = image_qs.filter(jbid = this_keyer_jbid)
         images_left_in_reel = user_image_qs.count()
-        CurrentEntry.batch_size = images_left_in_reel
-
-        num_images_remaining = context_IN[ 'todo_image_count' ]
-
-
 
         # reset values that show progress through batch
+        current_entry.batch_size = images_left_in_reel
+        current_entry.batch_position = 0
+        current_entry.save() 
+
+        # now return to context
+        num_images_remaining = context_IN[ 'todo_image_count' ]
         context_OUT[ 'num_completed' ] = 0
         context_OUT[ 'num_images' ] = min(self.batch_size, num_images_remaining)
         context_OUT[ 'num_todo' ] = min(self.batch_size, num_images_remaining)
@@ -746,11 +748,21 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
         if action == ACTION_LOAD_NEXT_BATCH:
 
+            adapter.info(
+                f'{me}' got action: {action},
+                {'user': context_IN['user']}
+            )
+
             #TODO: make this a class method?
             get_next_reel(current_username)
 
         elif action == ACTION_LOAD_NEXT_BATCH:
-            
+
+            adapter.info(
+                f'{me}' got action: {action},
+                {'user': context_IN['user']}
+            )
+
             context = self.action_load_next_batch(context)
 
         # got an action but not one in defined list, this is an error
