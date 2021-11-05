@@ -566,6 +566,109 @@ def start_new_batch(request):
     # current_username = request.user.username
     # current_entry = CurrentEntry.objects.get(jbid = current_username)
 
+def analyze_timing_list(timing_list_IN, label_IN = None, add_to_series_IN = True ):
+
+    # return reference
+    duration_list_OUT = None
+
+    # declare variables
+    status_message = None
+    work_duration = None
+    duration_sum = None
+    duration_list = None
+    index_1 = None
+    index_2 = None
+    time_1 = None
+    time_2 = None
+    percent_of_total_duration = None
+
+    # init
+    duration_list = []
+
+    # Initial label
+    status_message = "\n\nTiming overview"
+    if ( ( label_IN is not None ) and ( label_IN != "" ) ):
+        status_message = "{header} ( {label} )".format(
+            header = status_message,
+            label = label_IN
+        )
+    #-- END check if label --#
+    status_message += ":"
+    print( status_message )
+
+    # loop over items
+    for timing_index in range( 0, ( len( timing_list_IN ) - 1 ) ):
+
+        # time slice indices
+        index_1 = timing_index
+        index_2 = timing_index + 1
+
+        # timestamps
+        time_1 = timing_list_IN[ index_1 ][1]
+        time_2 = timing_list_IN[ index_2 ][1]
+
+        # get duration of current time slice.
+        work_duration = time_2 - time_1
+
+        # add to list of durations.
+        duration_list.append( work_duration )
+
+        # update sum.
+        if ( duration_sum is None ):
+            duration_sum = work_duration
+        else:
+            duration_sum = duration_sum + work_duration
+        #-- END check if sum already has something in it --#
+
+    #-- END loop over time slices --#
+
+    # add to duration series?
+    # if ( add_to_series_IN == True ):
+
+    #     # yes.
+    #     cls.api_profile_durations_series.append( duration_list )
+
+    #-- END check to see if add to series --#
+
+    # loop over durations for analysis
+    for timing_index in range( 0, ( len( duration_list ) ) ):
+
+        # time slice indices
+        index_1 = timing_index
+        index_2 = timing_index + 1
+
+        # timestamps
+        time_1 = timing_list_IN[ index_1 ]
+        time_2 = timing_list_IN[ index_2 ]
+
+        # get duration of current time slice.
+        work_duration = duration_list[ index_1 ]
+
+        # try percentage of total duration...
+        percent_of_total_duration = work_duration / duration_sum
+
+        # print time slice details
+        status_message = "- {index} - {work_duration} - %: {percentage} ( {time_1} to {time_2} )".format(
+            index = timing_index,
+            work_duration = work_duration,
+            percentage = percent_of_total_duration,
+            time_1 = time_1,
+            time_2 = time_2
+        )
+        print( status_message )
+
+    #-- END loop over durations. --#
+
+    # print total duration
+    status_message = "- total: {duration_sum}".format( duration_sum = duration_sum )
+    print( status_message )
+    print( "\n\n" )
+
+    duration_list_OUT = duration_list
+
+    return duration_list_OUT
+
+#-- END classmethod analyze_timing_list() --#
 
 
 #==============================================================================#
@@ -704,10 +807,16 @@ class IndexView(LoginRequiredMixin, TemplateView):
             {'user': request.user.username}
         )
 
+        # for profiling
+        timestamps_list = []
+        timestamps_list.append(('before db queries', datetime.datetime.now()))
+
         # init state 
         seed_current_entry( request ) # ensures there's a value in CurrentEntry
         get_next_image( request ) # gets the next image loaded into CurrentEntry
         context = initialize_context( request ) # prep context dict
+
+        timestamps_list.append(('after db queries before user stuff', datetime.datetime.now()))
 
         # get current username and current entry
         current_user = request.user
@@ -715,10 +824,14 @@ class IndexView(LoginRequiredMixin, TemplateView):
         context[ "user" ] = current_user
         current_entry = CurrentEntry.objects.get(jbid = current_username)
 
+        timestamps_list.append(('after user stuff before image queryset', datetime.datetime.now()))
+
         # # get user image queryset for this reel
         current_reel = current_entry.reel
         image_qs = Image.objects.filter(image_file__img_reel = current_reel)
         user_image_qs = image_qs.filter(jbid = current_username)
+
+        timestamps_list.append(('after image queryset before recent images', datetime.datetime.now()))
 
         adapter.info(
             f'{me}: current reel is {current_reel}',
@@ -728,12 +841,16 @@ class IndexView(LoginRequiredMixin, TemplateView):
         # get most recent images
         context[ 'recent_image_list' ] = self.prepare_recent_image_queue(user_image_qs)
 
+        timestamps_list.append(('after recent images before todo_image_qs', datetime.datetime.now()))
+
         # get queue of images to code and add next image to context for thumbnail
         todo_image_qs = get_image_todo_qs( request )
         todo_image_ct = todo_image_qs.count()
         next_image = todo_image_qs.first()
         context[ "todo_image_count" ] = todo_image_count
         context[ 'next_image' ] = next_image
+
+        timestamps_list.append(('after todo_image_qs before context stuff', datetime.datetime.now()))
 
         # get batch information for keyers
         num_images_in_batch = min(self.batch_size, todo_image_ct)
@@ -742,6 +859,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
         context[ 'num_images' ] = num_images_in_batch
         context[ 'num_todo' ] = num_left_in_batch
 
+        timestamps_list.append(('after context stuff before sketchy action section', datetime.datetime.now()))
 
         # do we have an action? if so, do action
         action = context.get( PARAM_NAME_ACTION, None)
@@ -749,7 +867,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
         if action == ACTION_LOAD_NEXT_BATCH:
 
             adapter.info(
-                f'{me}' got action: {action},
+                f'{me} got action: {action}',
                 {'user': context_IN['user']}
             )
 
@@ -759,7 +877,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
         elif action == ACTION_LOAD_NEXT_BATCH:
 
             adapter.info(
-                f'{me}' got action: {action},
+                f'{me} got action: {action}',
                 {'user': context_IN['user']}
             )
 
@@ -802,13 +920,32 @@ class IndexView(LoginRequiredMixin, TemplateView):
         # render response
         response_OUT = render( request, 'EntryApp/index.html', context )
 
+        timestamps_list.append(('after sketchy action button section, last one', datetime.datetime.now()))
+
+        adapter.info(
+            analyze_timing_list(timestamps_list),
+            # timestamps_list,
+            {'user': 'profiler'}
+        )
+
+        
+
         return response_OUT
 
     #-- END method process_request() --#
 
 
 
+# from itertools import tee, islice, chain, izip
+# def previous_and_next(some_iterable):
+#     prevs, items, nexts = tee(some_iterable, 3)
+#     prevs = chain([None], prevs)
+#     nexts = chain(islice(nexts, 1, None), [None])
+#     return izip(prevs, items, nexts)
 
+
+# for previous, item, nxt in previous_and_next(mylist):
+#     ...
 
 
 #-- END view class IndexView
