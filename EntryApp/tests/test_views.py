@@ -46,6 +46,7 @@ from EntryApp.forms import SheetForm
 import EntryApp.create_users as users
 import EntryApp.load_db as ldb
 import EntryApp.tests.test_utils as utils
+import EntryApp.tests.expected_values as expected
 
 #================================#
 # LOGGER
@@ -57,25 +58,11 @@ logger = logging.getLogger('EntryApp.test_views')
 # GLOBALS
 #================================#
 
-DEV_FIXTURE =  'fixtures/dev_data_20211012_1543.json'
+DEV_FIXTURE =  'fixtures/dev_data_20211027_1506.json'
 TEMP_USERNAME = 'jbid123'
 TEMP_PW = 'dcdl1980'
 
-EXPECTED = {
-    'current_image_file_id': 139,
-    'current_img_id': 37,
-    'current_reel_id': 21,
-    'img_url': '/images/1960/dev_1960/fake_IMG_4.jpg',
-    'sheet_type_breaker_post': {
-        'image_type': 'breaker'
-    },
-    'sheet_type_other_post': {
-        'image_type': 'other'
-    },
-    'sheet_type_sheet_post': {
-        'image_type': 'sheet'
-    },
-}
+EXPECTED = expected.DATA[DEV_FIXTURE]
 
 
 #================================#
@@ -170,10 +157,10 @@ class CodeImageTests(BaseTestCase):
 
 
     def test_a_image_form_present(self):
-        ''' Test that sheet form is present on first entering page '''
+        ''' Test that image form is present on first entering page '''
         response = self.authenticate_and_get_response()
 
-        form_html = '''<form id="image-info" method="POST">'''
+        form_html = '''<form id="image-info"'''
         self.assertTrue(form_html in str(response.content))
 
     
@@ -197,6 +184,42 @@ class CodeImageTests(BaseTestCase):
         current_image_id = CurrentEntry.objects.get(jbid = TEMP_USERNAME).img_id
         image = Image.objects.get(id = current_image_id)
         self.assertEqual(image.image_type, 'breaker')
+
+
+    #TODO: abstract to reduce redundancy here
+    def test_d_sheet_type_other_post(self):
+        ''' Test a post request when sheet_type is other '''
+        response = self.authenticate_and_get_response()
+
+        # post request should have okay status
+        post_response = self.client.post(
+            reverse(self.template_name),
+            EXPECTED['sheet_type_other_post']
+        ) 
+        self.assertEqual(post_response.status_code, HTTPStatus.OK)
+
+        # should also update database
+        current_image_id = CurrentEntry.objects.get(jbid = TEMP_USERNAME).img_id
+        image = Image.objects.get(id = current_image_id)
+        self.assertEqual(image.image_type, 'other')
+
+
+    #TODO: abstract to reduce redundancy here
+    def test_e_sheet_type_sheet_post(self):
+        ''' Test a post request when sheet_type is sheet '''
+        response = self.authenticate_and_get_response()
+
+        # post request should have okay status
+        post_response = self.client.post(
+            reverse(self.template_name),
+            EXPECTED['sheet_type_sheet_post']
+        ) 
+        self.assertEqual(post_response.status_code, HTTPStatus.OK)
+
+        # should also update database
+        current_image_id = CurrentEntry.objects.get(jbid = TEMP_USERNAME).img_id
+        image = Image.objects.get(id = current_image_id)
+        self.assertEqual(image.image_type, 'sheet')
 
 
 # class LoginSeleniumTests(StaticLiveServerTestCase):
