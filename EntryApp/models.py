@@ -475,7 +475,8 @@ class Breaker(models.Model):
     )
     enumeration_district = models.CharField(
         verbose_name = "Enumeration District (ED)",
-        max_length=255
+        max_length=255,
+        null=True
     )
     mcd = models.CharField(
         verbose_name = "MCD",
