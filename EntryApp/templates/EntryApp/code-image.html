@@ -2,6 +2,120 @@
 
 {% block end_of_head_tag %}
 <script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
+<style>
+    #form-row-div  {
+        flex-flow: row nowrap;
+        overflow-x: scroll;
+        align-items: flex-start;
+        gap: 25px;
+    }
+
+    .form-inline label {
+        justify-content:flex-start;
+    }
+
+    .control-label {
+        display: inline-block;
+        width:max-content;   /*auto Prevent labels from stacking above inputs in `.form-group` */
+        font-weight:bold;
+    }
+
+    .form-column {
+        max-width: 300px;
+
+    }
+
+    .control-group {
+        margin-bottom: 10px;
+    }
+
+    /* For inputs */
+
+    .numberinput-small {
+    width:60px;
+    }
+
+    .textinput-small {
+    width:60px;
+    }
+
+
+
+    /* 1970 */
+
+    #form-1970-names-div {
+        display:block;
+    }
+
+    #form-1970-last-name-suffix {
+        display:flex;
+        gap:25px;
+    }
+
+    #form-1970-first-name-middle-init {
+        display:flex;
+        gap:25px;
+    }
+
+    #form-1970-age-block {
+        display:block;
+    }
+
+    #form-1970-block-radios {
+        display:flex;
+        gap:5px;
+    }
+
+    #form-1970-serial-radios {
+        display:flex;
+        gap:5px;
+    }
+
+    /* 1980 */
+
+    #form-1980-first-name-middle-init {
+        display:flex;
+        gap:25px;
+    }
+
+    #form-1980-sex-radios {
+        display:flex;
+        margin-right:200px;
+    }
+
+    #form-1980-race-radios {
+        margin-right: 200px;
+    }
+
+    #form-1980-birth-year-radios {
+        margin-right:100px;
+    }
+
+    #form-1980-age-block {
+        display: flex;
+        gap:25px;
+    }
+
+
+    /* 1990 */
+
+    #form-1990-first-name-middle-init {
+        display:flex;
+        gap:25px;
+    }
+
+    #form-1990-sex-radios {
+        display:flex;
+        margin-right:200px;
+    }
+
+    #form-1990-race-radios {
+        margin-right: 200px;
+    }
+    
+</style>
+
+
 {% endblock end_of_head_tag %}
 
 {% block header %}
@@ -11,7 +125,8 @@
 {% endblock header %}
 
 {% block content %}
-        <div id="openseadragon1" style="width: 2000px; height: 600px;"></div>
+    <div id="openseadragon-image" class='flex-container'>
+        <div id="openseadragon1" style="width: 2000px; height: 500px;"></div>
         <script type="text/javascript">
             var Viewer = OpenSeadragon({
                 id: "openseadragon1",
@@ -23,10 +138,10 @@
                 buildPyramid: false
             });
         </script>
+    </div>
 
-    <div class="height:45%; overflow:scroll;">
+    <div id="entry-area" style="height:45%; overflow-y:scroll;">
 
-        <div id="basic-image-info">
             <h2>Basic image info</h2>
             {% if image_form %}
                         <form id="image-info" method="POST">
@@ -43,26 +158,8 @@
                         </ul>
             {% endif %}
 
-        </div>
-        <div id="breaker-info">
             {% if breaker_formset %}
-                        <hr />
-                        <p class = "breaker_info">
-                            <h2>Breaker info</h2>
-                            <form method="post">
-                                {{ breaker_formset.management_form }}
-                                <table>
-                                    {% csrf_token %}
-                                    {{ breaker_formset }}
-                                </table>
-                                <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
-                                <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_breaker_type" />
-                {% if breaker_instance %}
-                                <input type="hidden" name="{{ param_names.PARAM_NAME_BREAKER_ID }}" value="{{ breaker_instance.id }}" />
-                    {% endif %}
-                                <input type="submit" value="Submit">
-                            </form>
-                        </p>
+                    {% include "EntryApp/includes/code-image-edit-breaker.html" %}
             {% endif %}
             {% if sheet_form %}
                     {% include "EntryApp/includes/code-image-edit-sheet.html" %}
@@ -73,8 +170,8 @@
             {% if other_image_form %}
                     {% include "EntryApp/includes/code-image-edit-other-image.html" %}
             {% endif %}
-        </div>
     </div>
+    
 
 {% endblock content %}
 {% block logout %}

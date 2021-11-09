@@ -256,7 +256,7 @@ BREAKER_FORM_1980 = Layout(
         Field('place'),
         Field('tract'),
         Field('smsa'),
-        css_class = 'form-inline form-column'
+        css_class = 'form-inline-block'
     )
 )
 
