@@ -4,7 +4,9 @@
 # begins after you clone the repo into the directory where it will live 
 #=======================================================================#
 
+# starting in the repo root
 cd /apps/django/training/
+
 
 # 1. COLLECT IMAGES INTO RELEVANT DIRECTORY
 
@@ -43,14 +45,42 @@ source /data/data/postgresql/activate_conda_env.sh
 psql postgres -c "CREATE DATABASE dcdl_train WITH OWNER django_user;"
 conda deactivate
 
+
 # 3. CONFIGURE SETTINGS.PY
-cp ../dcdl_data_entry/dcdl/settings.py dcdl/example_settings.py 
+cp dcdl/example_settings.py dcdl/settings.py
 # then modify it!!! 
 # - change app instance to train
-# - change database to dcdl_train
+# - add secret key
+# - change database to dcdl_train and add django_user postgres PW
 # - change MEDIA_ROOT and STATIC_ROOT
 
-# logging directory
+# set up logging directory
 mkdir /data/data/user/django_user/train/
 mkdir /data/data/user/django_user/train/logs
 
+
+# 4. MIGRATE THE DB
+python manage.py makemigrations
+python manage.py migrate 
+
+
+# 5. COLLECT STATIC IMAGES
+
+mkdir /data/data/user/django_user/train/static/
+
+cp -R /data/data/user/django_user/prod/static/openseadragon_images /data/data/user/django_user/train/static
+
+python manage.py collectstatic
+
+
+# 6. ADD USERS
+
+
+
+
+# 7. LOAD FORM FIELDS
+
+
+
+
+# 8. LOAD IMAGES
