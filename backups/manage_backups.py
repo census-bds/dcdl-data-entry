@@ -1,6 +1,8 @@
 import argparse
 from contextlib import contextmanager
 import os
+import pathlib
+
 import subprocess
 import time
 
@@ -12,6 +14,10 @@ to create/restore backups of the default database specified in settings.py
 """
 
 OUTPUT_BASE="/data/data/backup"
+
+# by default, pgpass file gets created in cwd
+# (in case of this script, project root)
+PGPASS_PATH = os.path.join(pathlib.Path().resolve(), ".pgpass")
 
 @contextmanager
 def pgpass_context(db_settings):
@@ -26,9 +32,8 @@ def pgpass_context(db_settings):
 
     """
 
-    pgpass_path = os.path.join(os.path.expanduser("~"), ".pgpass")
-    if os.path.exists(pgpass_path):
-        raise KeyError("the ~/.pgpass file exists, move before running this.")
+    if os.path.exists(PGPASS_PATH):
+        raise KeyError("the .pgpass file exists, move before running this.")
 
     pgpass_str = "{host}:{port}:{name}:{user}:{password}\n"\
         .format(user=db_settings["USER"],
@@ -37,15 +42,15 @@ def pgpass_context(db_settings):
                 port=db_settings["PORT"],
                 name=db_settings["NAME"])
 
-    with open(pgpass_path, "w+") as pgpass_f:
+    with open(PGPASS_PATH, "w+") as pgpass_f:
         pgpass_f.write(pgpass_str)
 
-    os.chmod(pgpass_path, 0o600)
+    os.chmod(PGPASS_PATH, 0o600)
 
     try:
         yield
     finally:
-        os.remove(pgpass_path)
+        os.remove(PGPASS_PATH)
 
 
 def _gen_output_path(db_settings):
@@ -67,8 +72,12 @@ def run_backup(db_settings):
     """
     command = "pg_dump {}".format(db_settings["NAME"])
     out_path = _gen_output_path(db_settings)
+
+    env = os.environ.copy()
+    env["PGPASSFILE"] = PGPASS_PATH
+
     with open(out_path, "w+") as out_f:
-        subprocess.run(command, shell=True, stdout=out_f)
+        subprocess.run(command, shell=True, stdout=out_f, env=env)
 
 
 def restore_backup(backup_path, new_db_name):
