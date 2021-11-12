@@ -6,6 +6,11 @@ import time
 
 import dcdl.settings as settings
 
+"""
+Backup management script. Works off of django settings file
+to create/restore backups of the default database specified in settings.py
+"""
+
 OUTPUT_BASE="/data/data/backup"
 
 @contextmanager
