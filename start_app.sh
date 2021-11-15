@@ -8,8 +8,13 @@ source /apps/user/${USER}/miniconda3/bin/activate /apps/user/${USER}/conda_envs/
 if [ $APP_DIR = 'dcdl_test' ]
 then
     cd /apps/django/dcdl_test
-    # python manage.py runserver 7000
-    gunicorn dcdl.wsgi 127.0.0.1:7000 -w 8 
+    # python manage.py runserver 7001
+    gunicorn dcdl.wsgi 127.0.0.1:7001 -w 8 
+
+elif [ $APP_DIR = 'dcdl_train' ]
+then
+    cd /apps/django/training
+    gunicorn dcdl.wsgi 127.0.0.1:7000 -w 8
 
 elif [ $APP_DIR = 'dcdl_data_entry' ]
 then

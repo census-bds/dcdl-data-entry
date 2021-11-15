@@ -23,7 +23,7 @@ done
 cp -R /data/storage/images/1970/1970_Illinois_391 /data/storage/images/training_images/1970/
 
 # move ~60 images from other 1970 reels
-for reel in "1970_Alabama_303" "1970_California_3301" "1970_Florida_1204" "1970_Kansas_176"; do
+for reel in "1970_Alabama_303" "1970_Michigan_151" "1970_Florida_1204" "1970_Kansas_176"; do
 
     mkdir /data/storage/images/training_images/1970/$reel;
     find /data/storage/images/1970/$reel/*_00[0-5][0-9].jpg -exec cp -R {} /data/storage/images/training_images/1970/$reel/ \;
@@ -37,6 +37,15 @@ for reel in "1980_California_1032" "1980_Colorado_678" "1980_Florida_2138" "1980
     find /data/storage/images/1980/$reel/*_00[0-5][0-9].jpg -exec cp -R {} /data/storage/images/training_images/1980/$reel/ \;
 
 done
+
+# move ~50 images from 1990 reels
+for reel in "1990_11025574" "1990_41067349" "1990_56071517"; do
+
+    mkdir /data/storage/images/training_images/1990/$reel;
+    find /data/storage/images/1990/$reel/*_00[0-4][0-9].jpg -exec cp -R {} /data/storage/images/training_images/1990/$reel/ \;
+
+done
+
 
 
 # 2. CREATE NEW DB
@@ -75,11 +84,14 @@ python manage.py collectstatic
 
 # 6. ADD USERS
 
+#
 
 
 
 # 7. LOAD FORM FIELDS
 
+# grab form_fields.csv from prod
+cp ../dcdl_data_entry/form_fields.csv .
 
 
 

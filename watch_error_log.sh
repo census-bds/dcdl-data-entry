@@ -8,5 +8,5 @@ if [ $? -eq 0 ]
 then
     echo -e "nothing has changed"
 else
-    echo "change to error log file" | mail -s "DCDL error" cecile.m.murray@census.gov
+    echo "change to ${APP_INSTANCE} error log file" | mail -s "DCDL error in ${APP_INSTANCE}" cecile.m.murray@census.gov
 fi
