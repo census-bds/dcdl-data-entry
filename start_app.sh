@@ -21,6 +21,6 @@ then
     cd /apps/django/dcdl_data_entry
     # python manage.py runserver 8000
     gunicorn dcdl.wsgi -w 8 
-
+fi
 
 
