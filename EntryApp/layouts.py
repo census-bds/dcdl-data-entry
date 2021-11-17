@@ -105,7 +105,7 @@ FORM_1980 = Layout(
                 Field('exact_birth_month'),
                 Div('birth_quarter', css_id='race-1980-vertical-radios'),
             ),
-            Field('exact_birth_year', css_class='row'),
+            Field('exact_birth_year'),
             Div(
                 Div(InlineRadios('birth_year_thousands'), css_class='col-lg-3 col-md-3 col-sm-3'),
                 Div(InlineRadios('birth_year_hundreds'), css_class='col-lg-3 col-md-3 col-sm-3'),
