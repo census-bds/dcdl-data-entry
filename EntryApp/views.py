@@ -256,9 +256,12 @@ def get_next_image(request):
     )
 
     if next_image:
+
         current = CurrentEntry.objects.get(jbid=request.user)
         current.img = next_image
         current.save()
+
+        # increment_current_batch_position(request.user.username)
 
 #-- END function get_next_image() --#
 
@@ -560,7 +563,7 @@ def get_next_reel(username):
         )
         
         # which keyer is this? mark old reel complete
-        if old_reel.keyer_one.jbid == username:
+        if old_reel.keyer_one.jbid == username:     
             old_reel.is_complete_keyer_one = True
             old_reel.save()
         
@@ -584,15 +587,6 @@ def get_next_reel(username):
     current.reel = this_reel
     current.save()
 
-
-def start_new_batch(request):
-    '''
-    View to reset the batch counter to 0
-    '''
-
-    pass
-    # current_username = request.user.username
-    # current_entry = CurrentEntry.objects.get(jbid = current_username)
 
 def analyze_timing_list(timing_list_IN, label_IN = None, add_to_series_IN = True ):
 
@@ -714,7 +708,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
     # some view-specific constants
     batch_size = 3
-    recent_image_limit = batch_size # may need to reduce this
+    recent_image_limit = 5
     template_name = "EntryApp:index"
 
 
@@ -765,7 +759,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
         # now return to context
         num_images_remaining = context_IN[ 'todo_image_count' ]
         context_OUT[ 'num_completed' ] = 0
-        context_OUT[ 'num_images' ] = min(self.batch_size, num_images_remaining)
+        context_OUT[ 'num_images' ] = current.batch_size
         context_OUT[ 'num_todo' ] = min(self.batch_size, num_images_remaining)
         context_OUT[ 'make_next_batch_button_appear' ] = False
 
@@ -819,12 +813,14 @@ class IndexView(LoginRequiredMixin, TemplateView):
         - order images based on most recently modified to least recently modified
         - limited to recent_image limit (defined in process_request)
         '''
+        me = "IndexView:prepare_recent_image_queue"
 
         recent_image_qs = user_image_qs.filter( Q( year__isnull = False ) | Q( image_type__isnull = False ) )
         recent_image_qs = recent_image_qs.filter(is_complete = True)
-        recent_image_qs = recent_image_qs.exclude( Q(year__exact = 1990) & Q(image_type__contains = 'breaker')) # exclude 1900 dummy breaker
+        recent_image_qs = recent_image_qs.exclude( (Q(year__exact = 1990) & Q(image_type__contains = 'breaker'))) # exclude 1900 dummy breaker
         recent_image_qs = recent_image_qs.order_by( '-last_modified' )
         recent_image_qs = recent_image_qs[ : self.recent_image_limit ]
+
 
         return list( recent_image_qs )
         
@@ -906,12 +902,12 @@ class IndexView(LoginRequiredMixin, TemplateView):
         # get batch information for keyers
         
         # watch out for edge case where num_left_in_batch < 0 because 
-        num_images_in_batch = min(self.batch_size, todo_image_ct)
-        num_left_in_batch =  num_images_in_batch - current_entry.batch_position
+        num_images_in_batch = current_entry.batch_size 
+        num_left_in_batch =  num_images_in_batch - current_entry.batch_position 
 
 
         context[ 'num_completed' ] = current_entry.batch_position
-        context[ 'num_images' ] = num_images_in_batch
+        context[ 'num_images' ] = current_entry.batch_size
         context[ 'num_todo' ] = num_left_in_batch
 
         # timestamps_list.append(('after context stuff before sketchy action section', datetime.datetime.now()))
@@ -942,6 +938,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
             )
 
             context = self.action_load_next_batch(context)
+            num_left_in_batch = self.batch_size
 
         # got an action but not one in defined list, this is an error
         elif action and action not in INDEX_ACTIONS:
@@ -999,19 +996,6 @@ class IndexView(LoginRequiredMixin, TemplateView):
         return response_OUT
 
     #-- END method process_request() --#
-
-
-
-# from itertools import tee, islice, chain, izip
-# def previous_and_next(some_iterable):
-#     prevs, items, nexts = tee(some_iterable, 3)
-#     prevs = chain([None], prevs)
-#     nexts = chain(islice(nexts, 1, None), [None])
-#     return izip(prevs, items, nexts)
-
-
-# for previous, item, nxt in previous_and_next(mylist):
-#     ...
 
 
 #-- END view class IndexView
@@ -1090,7 +1074,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
                 image_instance.save()
 
                 # also increment the pointer in CurrentEntry
-                increment_current_batch_position(request_IN.user.username)
+                # increment_current_batch_position(request_IN.user.username)
             
             else:
 
@@ -1244,7 +1228,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
                     current.save()
 
                     # increment batch position
-                    increment_current_batch_position(request_IN.user.username)
+                    # increment_current_batch_position(request_IN.user.username)
 
                 #-- END check to see if new or existing --#
 
@@ -1518,7 +1502,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
                         image_instance.save()
 
                         # increment current batch position
-                        increment_current_batch_position(request_IN.user.username)
+                        # increment_current_batch_position(request_IN.user.username)
 
 
                     #-- END check to see if this is a longform create or update--#
@@ -1627,7 +1611,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
                 image_instance.save()
 
                 # increment current batch position
-                increment_current_batch_position(request_IN.user.username)
+                # increment_current_batch_position(request_IN.user.username)
 
             #-- END check to see if other image ID present --#
 

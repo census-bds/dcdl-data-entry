@@ -10,19 +10,21 @@
 {% endblock header %}
 
 {% block content %}
+    
+    {% if make_next_reel_button_appear %}
+    <form id='load-next-reel' method="POST">
+        {% csrf_token %}
+        <input type='hidden' name="{{ param_names.PARAM_NAME_ACTION }}" value="load_next_reel"/>
+        <input type="submit" value="Load next reel">
+    </form>
+    {% endif %}
+
     {% if num_images %}
 
         <p><b>User {{ user }} has completed data entry for {{ num_completed }} / {{ num_images }} images.</b></p>
 
-        {% if make_next_reel_button_appear %}
-            bar
-            <form id='load-next-reel' method="POST">
-                {% csrf_token %}
-                <input type='hidden' name="{{ param_names.PARAM_NAME_ACTION }}" value="load_next_reel"/>
-                <input type="submit" value="Load next reel">
-            </form>
 
-        {% elif make_next_batch_button_appear %}
+        {% if make_next_batch_button_appear %}
             <form id='load-next-batch' method="POST">
                 {% csrf_token %}
                 <input type='hidden' name="{{ param_names.PARAM_NAME_ACTION }}" value='load_next_batch'>

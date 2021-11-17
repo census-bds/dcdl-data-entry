@@ -138,6 +138,47 @@ class Reel(models.Model):
             return ''
 
 
+class Batch(models.Model):
+    """
+    Class for keeping track of batches of images within reels. Captures keyer, 
+        reel, batch_size, start and stop image ID, start time, and stop time;
+        can store duration and # names on images
+
+    This isn't directly touched by keyers, but is updated during data entry.
+    """
+
+    # foreign keys
+    keyer = models.ForeignKey( 
+        Keyer,
+        on_delete = models.CASCADE
+    )
+    reel = models.ForeignKey(
+        Reel,
+        on_delete = models.CASCADE
+    )
+    start_image = models.ForeignKey(
+        Image,
+        on_delete = models.CASCADE,
+        related_name = 'start_image'
+    )
+    stop_image = models.ForeignKey(
+        Image,
+        on_delete = models.CASCADE,
+        related_name = 'stop_image'
+    )
+    
+    # batch metrics
+    batch_size = models.IntegerField(
+        null = False, 
+        default = 25 
+    )
+    start_time = models.DateTimeField( auto_now_add = True)
+    stop_time = models.DateTimeField( auto_now_add = False)
+    duration = models.DurationField()
+    num_names = models.IntegerField()
+
+    keyer_jbid = models.CharField( max_length = 255) # denormalizing for convenience
+
 
 
 class ImageFile(models.Model):
