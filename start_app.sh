@@ -14,7 +14,7 @@ then
 elif [ $APP_DIR = 'dcdl_train' ]
 then
     cd /apps/django/training
-    gunicorn dcdl.wsgi 127.0.0.1:7000 -w 8
+    gunicorn dcdl.wsgi -b 127.0.0.1:7000 -w 8
 
 elif [ $APP_DIR = 'dcdl_data_entry' ]
 then
