@@ -35,7 +35,7 @@ def pgpass_context(db_settings):
     if os.path.exists(PGPASS_PATH):
         raise KeyError("the .pgpass file exists, move before running this.")
 
-    pgpass_str = "{host}:{port}:{name}:{user}:{password}\n"\
+    pgpass_str = "{host}:{port}:{name}:{user}:{password}"\
         .format(user=db_settings["USER"],
                 password=db_settings["PASSWORD"],
                 host=db_settings["HOST"],
@@ -70,7 +70,7 @@ def run_backup(db_settings):
 
     Uses pg_dump command. All pg_dump stderr messages are printed to terminal.
     """
-    command = "pg_dump {}".format(db_settings["NAME"])
+    command = "pg_dump -U {} -d {}".format(db_settings["USER"], db_settings["NAME"])
     out_path = _gen_output_path(db_settings)
 
     env = os.environ.copy()
