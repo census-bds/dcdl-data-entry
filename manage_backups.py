@@ -5,7 +5,7 @@ import pathlib
 import sys
 
 import subprocess
-import time
+from datetime import datetime
 
 import dcdl.settings as settings
 
@@ -58,8 +58,10 @@ def _gen_output_path(db_settings):
     Helper function to generate output file for this backup.
     """
 
+    timestr = datetime.now().strftime("%Y_%m_%d__%H%M")
+
     fname = "{name}_{time}.sql".format(name=db_settings["NAME"],
-                                       time=int(time.time()))
+                                       time=timestr)
     out_path = os.path.join(OUTPUT_BASE, fname)
     return out_path
 
