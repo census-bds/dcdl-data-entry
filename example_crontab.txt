@@ -8,3 +8,6 @@ EMAIL="cecile.m.murray@census.gov"
 
 # check prod error log every 10 minutes
 */10 * * * * /apps/django/dcdl_data_entry/watch_error_log.sh prod >> /data/data/user/django_user/prod/logs/cronlog.out
+
+# run backup
+4 5 * * * /apps/django/dcdl_data_entry/run_backup.sh >> /data/data/user/django_user/prod/logs/backup.log 2>&1
