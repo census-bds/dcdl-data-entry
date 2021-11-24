@@ -11,6 +11,7 @@ train_reel_load_spec.csv
 prod_reel_load_spec.csv
 form_fields.csv
 user_info.csv
+npc_leads.csv
 
 # migrations? yes, for now anyway
 EntryApp/migrations/00*
