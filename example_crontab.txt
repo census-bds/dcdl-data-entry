@@ -14,4 +14,4 @@ EMAIL="cecile.m.murray@census.gov"
 */15 * * * * /apps/django/training/watch_error_log.sh train >> /data/data/user/django_user/train/logs/cronlog.out
 
 # run backup
-4 5 * * * /apps/django/dcdl_data_entry/run_backup.sh >> /data/data/user/django_user/prod/logs/backup.log 2>&1
+4 5 * * * /apps/django/dcdl_data_entry/run_backup.sh '/apps/django/dcdl_data_entry/' >> /data/data/user/django_user/prod/logs/backup.log 2>&1
