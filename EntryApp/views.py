@@ -38,6 +38,7 @@ from django.views.generic import TemplateView
 from django.views.generic import View
 
 # EntryApp models
+from EntryApp.models import Batch
 from EntryApp.models import Breaker
 from EntryApp.models import CurrentEntry
 from EntryApp.models import FormField
@@ -228,6 +229,32 @@ def increment_current_batch_position(keyer_jbid):
             f'error when incrementing current batch position - does keyer row exist?',
             {'user': keyer_jbid}
         )
+
+
+def check_batch_position(request):
+    '''
+    Helper function
+    Where are we in this batch of images?
+    '''
+
+    # get user and current info
+    current_username = request.user.username
+    current_entry = CurrentEntry.objects.get(jbid=current_username)
+    current_reel = current_entry.reel
+    current_image = current_entry.img
+
+    # get batch information
+    batch_qs = Batch.objects.filter(reel=current_entry.current_reel)
+    this_batch = batch_qs.filter(keyer_jbid=current_username)
+    batch_start = Image.objects.get(this_batch.start_image).image_file.img_position
+    batch_stop = Image.objects.get(this_batch.stop_image).image_file.img_position
+
+    # now, where is the current image in the batch?
+    current_image_position = current_image.image_file.img_position
+    num_images_done = current_image_position - batch_start
+    num_images_left = batch_stop - current_image_position
+
+    return num_images_done, num_images_left
 
 
 def get_next_image(request):
@@ -821,6 +848,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
         recent_image_qs = recent_image_qs.order_by( '-last_modified' )
         recent_image_qs = recent_image_qs[ : self.recent_image_limit ]
 
+        # TODO add filter to remove images that are smaller than minimum index for this batch
 
         return list( recent_image_qs )
         
