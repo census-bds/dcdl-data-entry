@@ -242,6 +242,8 @@ def compute_batch_position(current_username):
     - tuple: (current batch position, num images left in batch)
     '''
 
+    me = "compute_batch_position()"
+
     # get user and current info
     current_entry = CurrentEntry.objects.get(jbid=current_username)
     current_reel = current_entry.reel
@@ -249,7 +251,12 @@ def compute_batch_position(current_username):
     current_position_in_reel = current_image.image_file.img_position
     num_images_in_reel = current_reel.image_count
 
-    # figure out batch size
+    adapter.info(
+        f"{me}: current_position_in_reel is {current_position_in_reel}",
+        {'user': current_username}
+    )
+
+    # figure out batch size, handling corner case where batch_size > # images left in reel
     if num_images_in_reel % 3 == 0:
         batch_size = 3
     else:
@@ -257,9 +264,21 @@ def compute_batch_position(current_username):
 
     # modular arithmetic to compute where we are in a batch    
     current_batch_position =  current_position_in_reel % batch_size
+    batch_done = False
+
+    # if batch_position == 0, is that image complete?
+    if current_batch_position == 0 and not current_image.is_complete:
+        batch_done = True
+        current_batch_position = batch_size
+
     num_images_left = batch_size - current_batch_position
 
-    return current_batch_position, num_images_left, batch_size
+    adapter.info(
+        f"{me}: current_batch_position is {current_batch_position}, num_left is {num_images_left}, batch_size is {batch_size}",
+        {'user': current_username}
+    )
+
+    return current_batch_position, num_images_left, batch_size, batch_done
 
 
 def get_next_image(request):
@@ -920,7 +939,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
         # timestamps_list.append(('after todo_image_qs before context stuff', datetime.datetime.now()))
 
         # get batch information for keyers
-        batch_position, images_left_in_batch, batch_size = compute_batch_position(current_username)
+        batch_position, images_left_in_batch, batch_size, batch_done = compute_batch_position(current_username)
 
         context[ 'num_completed' ] = batch_position
         context[ 'num_images' ] = batch_size
@@ -985,7 +1004,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
         
         # this case will reveal a button that has no backend effects but will
         # allow user to trigger reset of count of images to do
-        elif batch_position == 0:
+        elif batch_position == 0 and batch_done:
             context[ 'make_next_batch_button_appear' ] = True
 
         # adapter.info(
@@ -993,6 +1012,10 @@ class IndexView(LoginRequiredMixin, TemplateView):
         #     {'user': current_username}
         # )
 
+        adapter.info(
+            f"{me}(): context[num_completed] is {context['num_completed']}",
+            {'user': current_username}
+        )
 
         # render response
         response_OUT = render( request, 'EntryApp/index.html', context )
