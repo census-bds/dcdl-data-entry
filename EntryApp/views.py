@@ -257,28 +257,49 @@ def compute_batch_position(current_username):
     )
 
     # figure out batch size, handling corner case where batch_size > # images left in reel
+    # case 1: # images in reel is evenly divisible by batch size, easy
     if num_images_in_reel % 3 == 0:
         batch_size = 3
+
+        adapter.info(
+            f'{me}: case 1',
+            {'user': current_username}
+        )
+
+    # case 2: # images not evenly divisible by batch size, need to compute final batch size and figure out where we are relative to end of the reel
     else:
-        batch_size = min(3, num_images_in_reel - current_position_in_reel)
+        num_standard_batches = num_images_in_reel // 3
+
+        adapter.info(
+            f'{me}: case 2',
+            {'user': current_username}
+        )
+
+        if current_position_in_reel > 3 * num_standard_batches:
+            batch_size = num_images_in_reel % 3
+            adapter.info(
+                f'{me}: case 2B',
+                {'user': current_username}
+            ) 
+        else:
+            batch_size = 3
+            adapter.info(
+                f'{me}: case 2A',
+                {'user': current_username}
+            ) 
+
+
 
     # modular arithmetic to compute where we are in a batch    
-    current_batch_position =  current_position_in_reel % batch_size
-    batch_done = False
-
-    # if batch_position == 0, is that image complete?
-    if current_batch_position == 0 and not current_image.is_complete:
-        batch_done = True
-        current_batch_position = batch_size
-
+    current_batch_position = current_position_in_reel % batch_size
     num_images_left = batch_size - current_batch_position
 
     adapter.info(
-        f"{me}: current_batch_position is {current_batch_position}, num_left is {num_images_left}, batch_size is {batch_size}",
+        f"{me}: current_batch_position is {current_batch_position}, num_left is {num_images_left}, batch_size is {batch_size}", #, batch_done is {batch_done}
         {'user': current_username}
     )
 
-    return current_batch_position, num_images_left, batch_size, batch_done
+    return current_batch_position, num_images_left, batch_size #, batch_done
 
 
 def get_next_image(request):
@@ -922,7 +943,8 @@ class IndexView(LoginRequiredMixin, TemplateView):
         current_reel = current_entry.reel
         image_qs = Image.objects.filter(image_file__img_reel = current_reel)
         user_image_qs = image_qs.filter(jbid = current_username)
-        context[ 'recent_image_list' ] = self.prepare_recent_image_queue(user_image_qs)
+        recent_image_qs = self.prepare_recent_image_queue(user_image_qs)
+        context[ 'recent_image_list' ] = recent_image_qs
 
         adapter.info(
             f'{me}: current reel is {current_reel}',
@@ -939,13 +961,77 @@ class IndexView(LoginRequiredMixin, TemplateView):
         # timestamps_list.append(('after todo_image_qs before context stuff', datetime.datetime.now()))
 
         # get batch information for keyers
-        batch_position, images_left_in_batch, batch_size, batch_done = compute_batch_position(current_username)
+        if next_image:
+            current_batch_position, images_left_in_batch, batch_size = compute_batch_position(current_username)
 
-        context[ 'num_completed' ] = batch_position
-        context[ 'num_images' ] = batch_size
-        context[ 'num_todo' ] = images_left_in_batch
+            context[ 'num_completed' ] = current_batch_position
+            context[ 'num_images' ] = batch_size
+            context[ 'num_todo' ] = images_left_in_batch
+
+
+            # if batch_position == 0, is that image complete?
+            if current_batch_position == 0: #and current_image.is_complete == True:
+                current_batch_position = batch_size
+                batch_done = True
+
+                adapter.info(
+                    f'{me}: case 3A',
+                    {'user': current_username}
+                ) 
+
+            # elif current_batch_position == 0 and current_image.is_complete == False:
+            #     current_batch_position = batch_size
+            #     batch_done = False
+
+            #     adapter.info(
+            #         f'{me}: case 3B',
+            #         {'user': current_username}
+            #     ) 
+
+            else:
+                batch_done = False
+
+                adapter.info(
+                    f'{me}: case 3C',
+                    {'user': current_username}
+                )         
+
+        else:
+            context[ 'num_completed' ] = None
+            context[ 'num_images' ] = None
+            context[ 'num_todo' ] = None
+
 
         # timestamps_list.append(('after context stuff before sketchy action section', datetime.datetime.now()))
+                # check if all images in reel or batch are completed
+        # if so, reveal one of two buttons
+        # - advance to next reel if more images needed (takes priority)
+        # - advance to "new batch" if batch_position is zero
+        completed_count = user_image_qs.filter( is_complete = True ).count()
+
+        adapter.info(
+            f'{me}(): completed_count is {completed_count}',
+            {'user': current_username}
+        )
+        adapter.info(
+            f'{me}(): current_reel.image_count is {current_reel.image_count}',
+            {'user': current_username}
+        )
+
+        if completed_count == current_reel.image_count:
+            # this will reveal a button that has backend effects
+            context[ 'make_next_reel_button_appear' ] = True
+            adapter.info(f'{context}')
+        
+        # this case will reveal a button that has no backend effects but will
+        # allow user to trigger reset of count of images to do
+        elif current_batch_position == batch_size and batch_done:
+            context[ 'make_next_batch_button_appear' ] = True
+
+        # adapter.info(
+        #     f'{me}() context at end of process_request is {context}',
+        #     {'user': current_username}
+        # )
 
         # do we have an action? if so, do action
         action = request_inputs.get( PARAM_NAME_ACTION, None)
@@ -982,35 +1068,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
                 {'user': request.user.username}
             )
 
-        # check if all images in reel or batch are completed
-        # if so, reveal one of two buttons
-        # - advance to next reel if more images needed (takes priority)
-        # - advance to "new batch" if batch_position is zero
-        completed_count = user_image_qs.filter( is_complete = True ).count()
 
-        adapter.info(
-            f'{me}(): completed_count is {completed_count}',
-            {'user': current_username}
-        )
-        adapter.info(
-            f'{me}(): current_reel.image_count is {current_reel.image_count}',
-            {'user': current_username}
-        )
-
-        if completed_count == current_reel.image_count:
-            # this will reveal a button that has backend effects
-            context[ 'make_next_reel_button_appear' ] = True
-            adapter.info(f'{context}')
-        
-        # this case will reveal a button that has no backend effects but will
-        # allow user to trigger reset of count of images to do
-        elif batch_position == 0 and batch_done:
-            context[ 'make_next_batch_button_appear' ] = True
-
-        # adapter.info(
-        #     f'{me}() context at end of process_request is {context}',
-        #     {'user': current_username}
-        # )
 
         adapter.info(
             f"{me}(): context[num_completed] is {context['num_completed']}",
