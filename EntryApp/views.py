@@ -201,10 +201,10 @@ def get_form_fields( year, form_type ):
         return []
 
 
-def increment_current_batch_position(keyer_jbid):
+def make_batch_done_true(keyer_jbid):
     '''
-    Helper method to increment current position in batch
-    Method should be called whenever an image is complete
+    Helper method to track whether last image in batch is done
+    Method should be called when an image is completed
 
     Takes:
     - string keyer jbid
@@ -220,13 +220,13 @@ def increment_current_batch_position(keyer_jbid):
     try:
         # now update CurrentEntry batch position
         current = CurrentEntry.objects.get(jbid = keyer_jbid)
-        current.batch_position += 1
+        current.batch_position = 1 # TODO: change to boolean
         current.save()
 
     except:
 
         adapter.execption(
-            f'error when incrementing current batch position - does keyer row exist?',
+            f'error when setting current batch status - does keyer row exist?',
             {'user': keyer_jbid}
         )
 
@@ -262,7 +262,7 @@ def compute_batch_position(current_username):
         batch_size = 3
 
         adapter.info(
-            f'{me}: case 1',
+            f'{me}: case 1: batch_size is {batch_size}',
             {'user': current_username}
         )
 
@@ -275,16 +275,16 @@ def compute_batch_position(current_username):
             {'user': current_username}
         )
 
-        if current_position_in_reel > 3 * num_standard_batches:
-            batch_size = num_images_in_reel % 3
+        if current_position_in_reel >= 3 * num_standard_batches:
+            batch_size = num_images_in_reel % 3 + 1 # otherwise off by one error
             adapter.info(
-                f'{me}: case 2B',
+                f'{me}: case 2B: batch_size is {batch_size}',
                 {'user': current_username}
             ) 
         else:
             batch_size = 3
             adapter.info(
-                f'{me}: case 2A',
+                f'{me}: case 2A: batch_size is {batch_size}',
                 {'user': current_username}
             ) 
 
@@ -332,8 +332,6 @@ def get_next_image(request):
         current = CurrentEntry.objects.get(jbid=request.user)
         current.img = next_image
         current.save()
-
-        # increment_current_batch_position(request.user.username)
 
 #-- END function get_next_image() --#
 
@@ -398,7 +396,7 @@ def get_image_todo_qs( request ):
     todo_image_qs = user_image_qs.filter( is_complete = False )
 
     # order according to ImageFile name instead of id in case loaded wrong?
-    todo_image_qs = todo_image_qs.order_by("image_file__img_reel")
+    todo_image_qs = todo_image_qs.order_by("image_file__img_position")
 
     adapter.info(
         f'get_image_todo_qs() reel_image_qs length {len(reel_image_qs)}, todo_image_qs length {len(todo_image_qs)}',
@@ -884,13 +882,17 @@ class IndexView(LoginRequiredMixin, TemplateView):
         - order images based on most recently modified to least recently modified
         - limited to recent_image limit (defined in process_request)
         '''
-        me = "IndexView:prepare_recent_image_queue"
+        me = "IndexView:prepare_recent_image_queue()"
 
         recent_image_qs = user_image_qs.filter( Q( year__isnull = False ) | Q( image_type__isnull = False ) )
         recent_image_qs = recent_image_qs.filter(is_complete = True)
         recent_image_qs = recent_image_qs.exclude( (Q(year__exact = 1990) & Q(image_type__contains = 'breaker'))) # exclude 1900 dummy breaker
         recent_image_qs = recent_image_qs.order_by( '-last_modified' )
         recent_image_qs = recent_image_qs[ : self.recent_image_limit ]
+
+        adapter.info(
+            f'{me}: recent_image_qs is {recent_image_qs}'
+        )
 
         return list( recent_image_qs )
         
@@ -931,7 +933,11 @@ class IndexView(LoginRequiredMixin, TemplateView):
         # init state 
         seed_current_entry( request ) # ensures there's a value in CurrentEntry
         get_next_image( request ) # gets the next image loaded into CurrentEntry
-        context = initialize_context( request ) # prep context dict
+        
+        # prep context dict
+        context = initialize_context( request ) 
+        context[ 'make_next_batch_button_appear' ] = None
+        context[ 'make_next_reel_button_appear' ] = None
 
         # get current username and current entry
         current_user = request.user
@@ -962,39 +968,53 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
         # get batch information for keyers
         if next_image:
+
             current_batch_position, images_left_in_batch, batch_size = compute_batch_position(current_username)
-
-            context[ 'num_completed' ] = current_batch_position
-            context[ 'num_images' ] = batch_size
-            context[ 'num_todo' ] = images_left_in_batch
+            current_position_in_reel = current_entry.img.image_file.img_position
+            num_images_in_reel = current_reel.image_count            
 
 
-            # if batch_position == 0, is that image complete?
-            if current_batch_position == 0: #and current_image.is_complete == True:
+            # if batch_position == 0, we're at the end of a batch but haven't entered data yet
+            if current_batch_position == 0: 
+                
                 current_batch_position = batch_size
-                batch_done = True
+                images_left_in_batch = batch_size - current_batch_position # should always be 0
+                batch_done = False
+                
+                # set up button to appear when we finish this image
+                current_entry.batch_position = 1 # change to bool later
+                current_entry.save()
 
                 adapter.info(
                     f'{me}: case 3A',
                     {'user': current_username}
                 ) 
 
-            # elif current_batch_position == 0 and current_image.is_complete == False:
-            #     current_batch_position = batch_size
-            #     batch_done = False
+                
+            # if batch_position == 1 and we have the batch flag, then we want the button
+            elif current_batch_position == 1 and current_entry.batch_position == 1:
+                # current_batch_position = batch_size
+                batch_done = True
 
-            #     adapter.info(
-            #         f'{me}: case 3B',
-            #         {'user': current_username}
-            #     ) 
+                adapter.info(
+                    f'{me}: case 3B',
+                    {'user': current_username}
+                ) 
 
+            # we're in the middle of a batch and everything's easy
             else:
+
                 batch_done = False
 
                 adapter.info(
                     f'{me}: case 3C',
                     {'user': current_username}
                 )         
+
+            # now that we've made adjustments, set context variables
+            context[ 'num_completed' ] = current_batch_position
+            context[ 'num_images' ] = batch_size
+            context[ 'num_todo' ] = images_left_in_batch
 
         else:
             context[ 'num_completed' ] = None
@@ -1028,6 +1048,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
         elif current_batch_position == batch_size and batch_done:
             context[ 'make_next_batch_button_appear' ] = True
 
+
         # adapter.info(
         #     f'{me}() context at end of process_request is {context}',
         #     {'user': current_username}
@@ -1059,6 +1080,10 @@ class IndexView(LoginRequiredMixin, TemplateView):
             )
             context[ 'make_next_batch_button_appear' ] = False
             # context = self.action_load_next_batch(context)
+
+            # now we reset the pointer in current entry too
+            current_entry.batch_position = 0
+            current_entry.save()
 
         # got an action but not one in defined list, this is an error
         elif action and action not in INDEX_ACTIONS:
@@ -1168,7 +1193,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
                 image_instance.save()
 
                 # also increment the pointer in CurrentEntry
-                # increment_current_batch_position(request_IN.user.username)
+                make_batch_done_true(request_IN.user.username)
             
             else:
 
@@ -1322,7 +1347,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
                     current.save()
 
                     # increment batch position
-                    # increment_current_batch_position(request_IN.user.username)
+                    make_batch_done_true(request_IN.user.username)
 
                 #-- END check to see if new or existing --#
 
@@ -1596,8 +1621,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
                         image_instance.save()
 
                         # increment current batch position
-                        # increment_current_batch_position(request_IN.user.username)
-
+                        make_batch_done_true(request_IN.user.username)
 
                     #-- END check to see if this is a longform create or update--#
                 
@@ -1705,7 +1729,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
                 image_instance.save()
 
                 # increment current batch position
-                # increment_current_batch_position(request_IN.user.username)
+                make_batch_done_true(request_IN.user.username)
 
             #-- END check to see if other image ID present --#
 

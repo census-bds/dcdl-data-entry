@@ -21,9 +21,6 @@
 
     {% if num_images %}
 
-        <p><b>User {{ user }} is completing data entry for {{ num_completed }} / {{ num_images }} images.</b></p>
-
-
         {% if make_next_batch_button_appear %}
             <form id='load-next-batch' method="POST">
                 {% csrf_token %}
@@ -32,6 +29,9 @@
             </form>
 
         {% elif next_image %}
+
+        <p><b>User {{ user }} is completing data entry for {{ num_completed }} / {{ num_images }} images.</b></p>
+
         <p>
             The current reel is from {{ next_image.year }}. Next image ({{ num_todo }} remaining):
             <br/>
