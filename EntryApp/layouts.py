@@ -183,7 +183,7 @@ FORM_1990 = Layout(
         ),
         Div(
             Field('serial_no'),
-            Field('do_id'),
+            Field('printed_serial_no'),
             Div(
                 Div('serial_no_1', css_class='col-lg-1 col-md-1 col-sm-1'),
                 Div('serial_no_2', css_class='col-lg-1 col-md-1 col-sm-1'),

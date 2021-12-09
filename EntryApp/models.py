@@ -748,8 +748,8 @@ class Record(models.Model):
         null = True,
         blank = True
     )
-    do_id = models.CharField(
-        verbose_name = "DO ID",
+    printed_serial_no = models.CharField(
+        verbose_name = "Printed serial number (if present)",
         max_length = 255,
         null = True,
         blank = True
