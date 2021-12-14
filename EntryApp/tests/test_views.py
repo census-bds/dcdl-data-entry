@@ -135,6 +135,23 @@ class IndexViewTests(BaseTestCase):
         self.assertEqual(img_response.status_code, HTTPStatus.OK)
 
 
+    def test_load_next_batch(self):
+        ''' Test load next batch POST request '''
+        pass
+
+        # verify that the values of num_images, num_completed, num_todo are correct
+        #   - check for middle of reel (i.e. batch size <= # remaining images)
+        #   - check for end of reel (batch_size > # remaining images)
+        # using a fixture at the end of a batch, verify that a post request will advance us
+
+
+    def test_load_next_reel(self):
+        ''' Test load next reel POST request '''
+
+        # use a fixture at the end of a reel, verify that a POST request does advance us
+        # - check that all the correct tables get updated
+
+
 class GetNextTests(BaseTestCase):
 
     def test_method(self):
@@ -220,27 +237,3 @@ class CodeImageTests(BaseTestCase):
         current_image_id = CurrentEntry.objects.get(jbid = TEMP_USERNAME).img_id
         image = Image.objects.get(id = current_image_id)
         self.assertEqual(image.image_type, 'sheet')
-
-
-# class LoginSeleniumTests(StaticLiveServerTestCase):
-    
-#     fixtures = [DEV_FIXTURE]
-
-#     @classmethod
-#     def setUpClass(cls):
-#         super().setUpClass()
-#         cls.selenium = WebDriver()
-#         cls.selenium.implicitly_wait(10)
-
-#     @classmethod
-#     def tearDownClass(cls):
-#         cls.selenium.quit()
-#         super().tearDownClass()
-    
-#     def test_login(self):
-#         self.selenium.get('%s%s' % (self.live_server_url, '/login/'))
-#         username_input = self.selenium.find_element_by_name("username")
-#         username_input.send_keys(TEMP_USERNAME)
-#         password_input = self.selenium.find_element_by_name("password")
-#         password_input.send_keys(TEMP_PW)
-#         self.selenium.find_element_by_xpath('//input[@value="Log in"]').click()

@@ -138,8 +138,6 @@ class Reel(models.Model):
             return ''
 
 
-
-
 class ImageFile(models.Model):
 
     """
@@ -1129,8 +1127,8 @@ class CurrentEntry(models.Model):
     '''
     Model to track current image and breaker for each user.
 
-    This is basically a pointer: one row for each user, with foreign keys to
-    link to data models
+    This is essentialy a table of pointer: one row for each user, 
+    with foreign keys to link to data models
     '''
 
     jbid = models.CharField(max_length=255, default='jbid000')
@@ -1140,9 +1138,15 @@ class CurrentEntry(models.Model):
     breaker = models.ForeignKey(Breaker, on_delete=models.SET_NULL, null=True)
     sheet = models.ForeignKey(Sheet, on_delete=models.CASCADE, null=True) 
 
-    # track reel and image file too.. 
+    # track reel and image file  
     reel = models.ForeignKey(Reel, on_delete=models.CASCADE)
     image_file = models.ForeignKey(ImageFile, on_delete=models.CASCADE)
+
+    # track position in batch for improved user experience
+    batch_position = models.BooleanField(
+        null = False,
+        default = False
+    )
 
     def __str__(self):
         return f'CurrentEntry: {self.jbid} entering {self.img}'
@@ -1172,4 +1176,3 @@ class FormField(models.Model):
 
     def __str__(self):
         return f'FormField {self.year} {self.form_type}: {self.field_name}'
-
