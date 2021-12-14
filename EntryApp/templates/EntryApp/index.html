@@ -43,6 +43,9 @@
             </form>
         </p>
         {% endif %}
+    
+    {% elif out_of_reels %}
+        <p>{{ user }} has finished all available reels.</p>
 
     {% else %}
         <p>No images are available for {{ user }}.</p>

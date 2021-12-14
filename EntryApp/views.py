@@ -38,7 +38,6 @@ from django.views.generic import TemplateView
 from django.views.generic import View
 
 # EntryApp models
-from EntryApp.models import Batch
 from EntryApp.models import Breaker
 from EntryApp.models import CurrentEntry
 from EntryApp.models import FormField
@@ -213,14 +212,14 @@ def make_batch_done_true(keyer_jbid):
     '''
 
     adapter.info(
-        f'incrementing current.batch_position for {keyer_jbid}',
+        f'setting current.batch_position for {keyer_jbid} to True',
         {'user': keyer_jbid}
     )
 
     try:
         # now update CurrentEntry batch position
         current = CurrentEntry.objects.get(jbid = keyer_jbid)
-        current.batch_position = 1 # TODO: change to boolean
+        current.batch_position = True 
         current.save()
 
     except:
@@ -287,8 +286,6 @@ def compute_batch_position(current_username):
                 f'{me}: case 2A: batch_size is {batch_size}',
                 {'user': current_username}
             ) 
-
-
 
     # modular arithmetic to compute where we are in a batch    
     current_batch_position = current_position_in_reel % batch_size
@@ -460,7 +457,7 @@ def assign_reel(keyer):
     Required arguments:
     - keyer 
     Returns: 
-    - assigned reel object
+    - assigned reel object or None (if no reels left for this keyer)
     '''
 
     me = 'assign_reel()'
@@ -479,13 +476,13 @@ def assign_reel(keyer):
             f'{me}: found no reels to assign',
             user = keyer.jbid
         )
-        return
+        return None
 
     # prefer to assign reels that have 1 keyer over those that have none
     # then assign reels with lower IDs (i.e. those loaded earlier) over higher
     # take the one at the top
     this_reel = reel_qs.order_by('-keyer_count').order_by('id')[0]
-    
+ 
     # set the keyer
     if this_reel.keyer_one ==  None:
         this_reel.keyer_one = keyer
@@ -515,20 +512,16 @@ def assign_reel(keyer):
     # loop through and create Image instance w/this keyer 
     for image_file_instance in image_file_qs:
 
-        img, created = Image.objects.get_or_create( 
+        img = Image( 
                 image_file=image_file_instance, \
                 jbid=keyer.jbid, \
                 is_complete=False, \
                 year=year,
                 image_type=None, \
                 problem=False
-        )
+            )
+        img.save()
 
-    if not created:
-        adapter.warn(
-            f"{me}: images already existed, weird",
-            user = keyer.jbid
-        )
 
     #-- END loop over images in the reel --#
 
@@ -598,64 +591,6 @@ def seed_current_entry(request):
     #-- END check to see if we need to create current for new user. --#
 
 #-- END function seed_current_entry() --#
-
-
-def get_next_reel(username):
-    '''
-    Helper method to put next reel in queue for a keyer. It is called from
-    IndexView.process_request(). It populates CurrentEntry with a new reel
-    when a keyer clicks the button. 
-
-    - marks the existing reel in CurrentEntry (if there is one) complete
-    for that keyer
-    - queries DB for a new reel for that keyer
-    - saves that reel in CurrentEntry for that keyer
-    '''
-
-    me = 'get_next_reel()'
-    current = CurrentEntry.objects.get(jbid = username)
-    this_keyer = Keyer.objects.get(jbid = username)
-    this_keyer_jbid = this_keyer.jbid
-
-    adapter.info(
-        f"{me}: loading new reel",
-        user = this_keyer_jbid
-    )
-
-    # is there a reel in CurrentEntry? mark complete if so
-    if current.reel:
-
-        old_reel = current.reel
-
-        adapter.info(
-            f"{me}: replacing {old_reel}",
-            user = this_keyer_jbid
-        )
-        
-        # which keyer is this? mark old reel complete
-        if old_reel.keyer_one.jbid == username:     
-            old_reel.is_complete_keyer_one = True
-            old_reel.save()
-        
-        elif old_reel.keyer_two.jbid == username:
-            old_reel.is_complete_keyer_two = True
-            old_reel.save()
-
-        else:
-            adapter.exception(
-                f"{me}: user is not assigned to either keyer slot in this reel",
-                user = this_keyer_jbid
-            )
-            raise ValueError
-
-    # if not, assign the reel:
-    #   priority goes to reels with one other keyer assigned
-    #   then to reels with lower IDs 
-    this_reel = assign_reel(this_keyer)
-
-    # then update CurrentEntry
-    current.reel = this_reel
-    current.save()
 
 
 def analyze_timing_list(timing_list_IN, label_IN = None, add_to_series_IN = True ):
@@ -782,7 +717,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
     template_name = "EntryApp:index"
 
 
-    def action_load_next_batch(self, context_IN):
+    def action_load_next_batch(self, current_username, context_IN):
         '''
         Modifies context dict to load new "fake" batch of images for keyers.
             - set num_completed images to 0
@@ -796,46 +731,84 @@ class IndexView(LoginRequiredMixin, TemplateView):
         '''
 
         me = 'IndexView:action_load_next_batch()'
-
-
-        # get current values for keyer
         context_OUT = context_IN
-        this_keyer_jbid = context_IN[ "user" ]
+        
+        # now we reset the pointer in current entry too
+        current_entry = CurrentEntry.objects.get(jbid=current_username)
+        current_entry.batch_position = 0
+        current_entry.save()
 
-        adapter.info(
-            f'{me}: begin loading next batch',
-            {'user': this_keyer_jbid}
-        )
-
-        # current_entry = CurrentEntry.objects.get(jbid = this_keyer_jbid)
-        # current_reel = current_entry.reel
-
-        # # how many images in this reel? how many left?
-        # current_reel_image_ct = current_reel.image_count
-        # image_qs = Image.objects.filter(image_file__img_reel =  current_reel)
-        # user_image_qs = image_qs.filter(jbid = this_keyer_jbid)
-        # images_left_in_reel = user_image_qs.count()
-
-        # adapter.info(
-        #     f'{me} context_IN is {context_IN}',
-        #     {'user': this_keyer_jbid}
-        # )
-
-        # # reset values that show progress through batch
-        # current_entry.batch_size = min(images_left_in_reel, self.batch_size)
-        # current_entry.batch_position = 0
-        # current_entry.save() 
-
-        # now return to context
-        # context_OUT[ 'num_completed' ] = 0
-        # context_OUT[ 'num_images' ] = current.batch_size
-        # context_OUT[ 'num_todo' ] = min(self.batch_size, num_images_remaining)
         context_OUT[ 'make_next_batch_button_appear' ] = False
 
-        # reset recent_image_queue
-        context_OUT [ 'recent_image_list' ] = None
-
         return context_OUT
+
+
+    def action_load_next_reel(self, current_username):
+        '''
+        Helper method to put next reel in queue for a keyer. It is called from
+        IndexView.process_request(). It populates CurrentEntry with a new reel
+        when a keyer clicks the button. 
+
+        - marks the existing reel in CurrentEntry (if there is one) complete
+        for that keyer
+        - queries DB for a new reel for that keyer
+        - saves that reel in CurrentEntry for that keyer
+        - returns boolean: True if we're out of reels, False otherwise
+        '''
+
+        me = 'IndexView.get_next_reel()'
+        current = CurrentEntry.objects.get(jbid = current_username)
+        this_keyer = Keyer.objects.get(jbid = current_username)
+
+        adapter.info(
+            f"{me}: loading new reel",
+            user = current_username
+        )
+
+        # is there a reel in CurrentEntry? mark complete if so
+        if current.reel:
+
+            old_reel = current.reel
+
+            adapter.info(
+                f"{me}: replacing {old_reel}",
+                user = current_username
+            )
+            
+            # which keyer is this? mark old reel complete
+            if old_reel.keyer_one.jbid == current_username:     
+                old_reel.is_complete_keyer_one = True
+                old_reel.save()
+            
+            elif old_reel.keyer_two.jbid == current_username:
+                old_reel.is_complete_keyer_two = True
+                old_reel.save()
+
+            else:
+                adapter.exception(
+                    f"{me}: user is not assigned to either keyer slot in this reel",
+                    user = current_username
+                )
+                raise ValueError
+
+        # if not, assign the reel:
+        #   priority goes to reels with one other keyer assigned
+        #   then to reels with lower IDs 
+        this_reel = assign_reel(this_keyer)
+
+        # this is what happens if we got a new reel to assign
+        # boolean seems backwards but it should be False
+        if this_reel:
+
+            # then update CurrentEntry
+            current.reel = this_reel
+            current.save()        
+            return False
+        
+        # handle case where we're out of reels
+        else: 
+
+            return True
 
 
     def get(self, request):
@@ -970,9 +943,6 @@ class IndexView(LoginRequiredMixin, TemplateView):
         if next_image:
 
             current_batch_position, images_left_in_batch, batch_size = compute_batch_position(current_username)
-            current_position_in_reel = current_entry.img.image_file.img_position
-            num_images_in_reel = current_reel.image_count            
-
 
             # if batch_position == 0, we're at the end of a batch but haven't entered data yet
             if current_batch_position == 0: 
@@ -1023,7 +993,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
 
         # timestamps_list.append(('after context stuff before sketchy action section', datetime.datetime.now()))
-                # check if all images in reel or batch are completed
+        # check if all images in reel or batch are completed
         # if so, reveal one of two buttons
         # - advance to next reel if more images needed (takes priority)
         # - advance to "new batch" if batch_position is zero
@@ -1045,14 +1015,9 @@ class IndexView(LoginRequiredMixin, TemplateView):
         
         # this case will reveal a button that has no backend effects but will
         # allow user to trigger reset of count of images to do
-        elif current_batch_position == batch_size and batch_done:
+        elif batch_done:
             context[ 'make_next_batch_button_appear' ] = True
 
-
-        # adapter.info(
-        #     f'{me}() context at end of process_request is {context}',
-        #     {'user': current_username}
-        # )
 
         # do we have an action? if so, do action
         action = request_inputs.get( PARAM_NAME_ACTION, None)
@@ -1069,8 +1034,10 @@ class IndexView(LoginRequiredMixin, TemplateView):
                 {'user': current_username}
             )
 
-            #TODO: make this a class method?
-            get_next_reel(current_username)
+            # load new reel: out_of_reels is a boolean indicating if reel load worked
+            # if it didn't, it's probably because we're out of reels for that keyer 
+            out_of_reels = self.action_load_next_reel(current_username)
+            context[ 'out_of_reels' ] = out_of_reels
 
         elif action == ACTION_LOAD_NEXT_BATCH:
 
@@ -1078,12 +1045,8 @@ class IndexView(LoginRequiredMixin, TemplateView):
                 f'{me} got action: {action}',
                 {'user': current_username}
             )
-            context[ 'make_next_batch_button_appear' ] = False
-            # context = self.action_load_next_batch(context)
 
-            # now we reset the pointer in current entry too
-            current_entry.batch_position = 0
-            current_entry.save()
+            context = self.action_load_next_batch(current_username, context)
 
         # got an action but not one in defined list, this is an error
         elif action and action not in INDEX_ACTIONS:
@@ -1092,7 +1055,6 @@ class IndexView(LoginRequiredMixin, TemplateView):
                 f'{me}() unknown POST action',
                 {'user': request.user.username}
             )
-
 
 
         adapter.info(
@@ -1705,7 +1667,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
                 other_image_instance = OtherImage.objects.get(pk = other_image_id)
 
-                other_image_instance['description'] = inputs_IN['description']
+                other_image_instance.description = inputs_IN['description']
                 other_image_instance.save()
     
             # otherwise create one
