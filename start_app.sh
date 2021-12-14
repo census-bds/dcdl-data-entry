@@ -9,7 +9,7 @@ if [ $APP_DIR = 'dcdl_test' ]
 then
     cd /apps/django/dcdl_test
     # python manage.py runserver 7001
-    gunicorn dcdl.wsgi 127.0.0.1:7001 -w 8 
+    gunicorn dcdl.wsgi -b 127.0.0.1:7001 -w 8 
 
 elif [ $APP_DIR = 'dcdl_train' ]
 then
