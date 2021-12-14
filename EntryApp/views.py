@@ -75,6 +75,9 @@ import EntryApp.choices as choices
 # CONSTANTS-ish
 #==============================================================================#
 
+# image batch size
+BATCH_SIZE = 25
+
 # standard context names
 CONTEXT_BREAKER_INSTANCE = "breaker_instance"
 CONTEXT_BREAKER_FORMSET = "breaker_formset"
@@ -257,8 +260,8 @@ def compute_batch_position(current_username):
 
     # figure out batch size, handling corner case where batch_size > # images left in reel
     # case 1: # images in reel is evenly divisible by batch size, easy
-    if num_images_in_reel % 3 == 0:
-        batch_size = 3
+    if num_images_in_reel % BATCH_SIZE == 0:
+        batch_size = BATCH_SIZE
 
         adapter.info(
             f'{me}: case 1: batch_size is {batch_size}',
@@ -267,21 +270,21 @@ def compute_batch_position(current_username):
 
     # case 2: # images not evenly divisible by batch size, need to compute final batch size and figure out where we are relative to end of the reel
     else:
-        num_standard_batches = num_images_in_reel // 3
+        num_standard_batches = num_images_in_reel // BATCH_SIZE
 
         adapter.info(
             f'{me}: case 2',
             {'user': current_username}
         )
 
-        if current_position_in_reel >= 3 * num_standard_batches:
-            batch_size = num_images_in_reel % 3 + 1 # otherwise off by one error
+        if current_position_in_reel >= BATCH_SIZE * num_standard_batches:
+            batch_size = num_images_in_reel % BATCH_SIZE + 1 # otherwise off by one error
             adapter.info(
                 f'{me}: case 2B: batch_size is {batch_size}',
                 {'user': current_username}
             ) 
         else:
-            batch_size = 3
+            batch_size = BATCH_SIZE
             adapter.info(
                 f'{me}: case 2A: batch_size is {batch_size}',
                 {'user': current_username}
@@ -712,7 +715,6 @@ class IndexView(LoginRequiredMixin, TemplateView):
     """
 
     # some view-specific constants
-    batch_size = 3
     recent_image_limit = 5
     template_name = "EntryApp:index"
 
