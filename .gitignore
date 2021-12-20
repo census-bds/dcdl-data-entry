@@ -7,9 +7,11 @@ start_app.sh
 # actual versions of user info and form field files
 dev_reel_load_spec.csv
 test_reel_load_spec.csv
+train_reel_load_spec.csv
 prod_reel_load_spec.csv
 form_fields.csv
 user_info.csv
+npc_leads.csv
 
 # migrations? yes, for now anyway
 EntryApp/migrations/00*
@@ -158,3 +160,6 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# vim
+*.swp

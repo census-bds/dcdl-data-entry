@@ -13,8 +13,8 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from pathlib import Path
 
-# set config denoting whether this is dev, test, or prod
-APP_INSTANCE = "dev" 
+# set config denoting whether this is dev, test, train, or prod
+APP_INSTANCE = "train" # CHANGE ME
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -77,19 +77,18 @@ LOGGING = {
     },
     
     'root': {
-        'handlers': ['console', 'mail_admin'],
+        'handlers': ['file', 'mail_admin'],
         'level': 'INFO',
     },
 
     'loggers': {
         'django': {
-            'handlers': ['console', 'file', 'mail_admin'],
+            'handlers': ['file', 'mail_admin'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'ERROR'),
             'propagate': True,
         },
     }
 }
-
 
 
 ALLOWED_HOSTS = []
@@ -146,7 +145,7 @@ WSGI_APPLICATION = 'dcdl.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dcdl_dev', 
+        'NAME': 'dcdl_train', # CHANGE ME 
         'USER': 'django_user',                      # Not used with sqlite3.
         'PASSWORD':'', # ADD PASSWORD HERE Not used with sqlite3.
         'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
@@ -194,18 +193,19 @@ LOGIN_REDIRECT_URL = '/EntryApp/'
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/') # where it puts the static files
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
-MEDIA_URL = '/images/' # this is the thing to change
-MEDIA_ROOT = '/data/data/images/dev_images'
+MEDIA_URL = '/images/' # this is what shows up in url
+MEDIA_ROOT = '/data/storage/images/training_images' # this is where files are, CHANGE ME
 
-# where it looks for static files: everything inside these goes into STATIC_ROOT
 STATICFILES_DIRS = (
-    '/data/data/user/django_user/dev/static/',  
+    # os.path.join(BASE_DIR, 'boot'), 
+    f'/data/data/user/django_user/{APP_INSTANCE}/static/',
 )
 
 # globals for loading data
+DEFAULT_REEL_LOAD_SPEC = 'train_reel_load_spec.csv' # CHANGE ME
+IMAGE_DIR = '/data/storage/images/' # CHANGE ME
+
 FORM_FIELDS_CSV = os.path.join(Path(__file__).parent.parent.absolute(), 'form_fields.csv')
-IMAGE_DIR = '/data/data/images/dev_images'
 USER_INFO = os.path.join(Path(__file__).parent.parent.absolute(), 'user_info.csv')
-DEFAULT_REEL_LOAD_SPEC = ""

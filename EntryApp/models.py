@@ -473,7 +473,8 @@ class Breaker(models.Model):
     )
     enumeration_district = models.CharField(
         verbose_name = "Enumeration District (ED)",
-        max_length=255
+        max_length=255,
+        null=True
     )
     mcd = models.CharField(
         verbose_name = "MCD",
@@ -745,8 +746,8 @@ class Record(models.Model):
         null = True,
         blank = True
     )
-    do_id = models.CharField(
-        verbose_name = "DO ID",
+    printed_serial_no = models.CharField(
+        verbose_name = "Printed serial number (if present)",
         max_length = 255,
         null = True,
         blank = True

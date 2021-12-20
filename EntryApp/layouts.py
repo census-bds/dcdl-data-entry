@@ -105,7 +105,7 @@ FORM_1980 = Layout(
                 Field('exact_birth_month'),
                 Div('birth_quarter', css_id='race-1980-vertical-radios'),
             ),
-            Field('exact_birth_year', css_class='row'),
+            Field('exact_birth_year'),
             Div(
                 Div(InlineRadios('birth_year_thousands'), css_class='col-lg-3 col-md-3 col-sm-3'),
                 Div(InlineRadios('birth_year_hundreds'), css_class='col-lg-3 col-md-3 col-sm-3'),
@@ -183,7 +183,7 @@ FORM_1990 = Layout(
         ),
         Div(
             Field('serial_no'),
-            Field('do_id'),
+            Field('printed_serial_no'),
             Div(
                 Div('serial_no_1', css_class='col-lg-1 col-md-1 col-sm-1'),
                 Div('serial_no_2', css_class='col-lg-1 col-md-1 col-sm-1'),

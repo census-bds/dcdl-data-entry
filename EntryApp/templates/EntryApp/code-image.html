@@ -3,7 +3,6 @@
 {% block end_of_head_tag %}
 <script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
 <style>
-
     #form-row-div  {
         flex-flow: row nowrap;
         overflow-x: scroll;
@@ -41,7 +40,6 @@
     }
 
 
-
     /* 1970 */
 
     #form-1970-names-div {
@@ -72,8 +70,7 @@
         gap:5px;
     }
 
-/* 1980 */
-
+    /* 1980 */
     #form-1980-first-name-middle-init {
         display:flex;
         gap:25px;
@@ -98,8 +95,7 @@
     }
 
 
-/* 1990 */
-
+    /* 1990 */
     #form-1990-first-name-middle-init {
         display:flex;
         gap:25px;
@@ -112,9 +108,9 @@
 
     #form-1990-race-radios {
         margin-right: 200px;
-    }
-        
+    }    
 </style>
+
 {% endblock end_of_head_tag %}
 
 {% block header %}
@@ -124,63 +120,53 @@
 {% endblock header %}
 
 {% block content %}
-    <!-- <div class="flex-container"> -->
-    <div class="row row-height">
-        <div class="col-md-5 col-lg-5 col-xl-6">
-            <p>Current image from {{ img.year }}:</p>
-            <div id="openseadragon1" style="width: 95%; height: 600px;"></div>
-            <script type="text/javascript">
-                var Viewer = OpenSeadragon({
-                    id: "openseadragon1",
-                    prefixUrl: "/static/openseadragon_images/",
-                    tileSources: {
-                        type: 'image',
-                        url: "/images/{{ img.year }}/{{ reel_name }}/{{ slug }}"
-                    },
-                    buildPyramid: false
-                });
-            </script>
-        </div>
-        <div class="col-md-7 col-lg-7 col-xl-6 justify-content-center right-col">
-            <div class="row" style="display:block;">            
-                <p class="image_info">
-                    <h2>Basic image info</h2>
-                {% if image_form %}
-                            <form id="image-info" method="POST">
-                                {% csrf_token %}
-                                {{ image_form.as_p }}
-                                <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
-                                <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_image" />
-                                <input type="submit" value="Submit">
-                            </form>
-                {% else %}
-                            <ul>
-                                <li><strong>year</strong>: {{ img.year }}
-                                <li><strong>Image type</strong>: {{ img.image_type }}
-                            </ul>
-                {% endif %}
-                </p>
-            </div>
-            <div class="row">
-                {% if breaker_formset %}
-                    {% include "EntryApp/includes/code-image-edit-breaker.html" %}    
-                {% endif %}
-
-                {% if sheet_form %}
-                    {% include "EntryApp/includes/code-image-edit-sheet.html" %}
-                {% endif %}
-
-                {% if longform_form %}
-                    {% include "EntryApp/includes/code-image-edit-longform.html" %}
-                {% endif %}
-                
-                {% if other_image_form %}
-                    {% include "EntryApp/includes/code-image-edit-other-image.html" %}
-                {% endif %}
-            </div>
-        </div>
+    <div id="openseadragon-image" class='flex-container'>
+        <div id="openseadragon1" style="width: 2000px; height: 500px;"></div>
+        <script type="text/javascript">
+            var Viewer = OpenSeadragon({
+                id: "openseadragon1",
+                prefixUrl: "/static/openseadragon_images/",
+                tileSources: {
+                    type: 'image',
+                    url: "/images/{{ img.year }}/{{ reel_name }}/{{ slug }}"
+                },
+                buildPyramid: false
+            });
+        </script>
     </div>
-    <!-- </div> -->
+
+    <div id="entry-area" style="height:45%; overflow-y:scroll; margin:50px;">
+
+            <h2>Basic image info</h2>
+            {% if image_form %}
+                        <form id="image-info" method="POST">
+                            {% csrf_token %}
+                            {{ image_form.as_p }}
+                            <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
+                            <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_image" />
+                            <input type="submit" value="Submit">
+                        </form>
+            {% else %}
+                        <ul>
+                            <li><strong>year</strong>: {{ img.year }}
+                            <li><strong>Image type</strong>: {{ img.image_type }}
+                        </ul>
+            {% endif %}
+
+            {% if breaker_formset %}
+                    {% include "EntryApp/includes/code-image-edit-breaker.html" %}
+            {% endif %}
+            {% if sheet_form %}
+                    {% include "EntryApp/includes/code-image-edit-sheet.html" %}
+            {% endif %}
+            {% if longform_form %}
+                    {% include "EntryApp/includes/code-image-edit-longform.html" %}
+            {% endif %}
+            {% if other_image_form %}
+                    {% include "EntryApp/includes/code-image-edit-other-image.html" %}
+            {% endif %}
+    </div>
+    
 
 {% endblock content %}
 {% block logout %}

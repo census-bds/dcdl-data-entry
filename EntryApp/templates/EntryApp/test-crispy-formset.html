@@ -125,8 +125,6 @@
 {% block content %}
 
 {% load crispy_forms_tags %}
-<!-- <div class='row row-height'>
-    <div class='col-lg-5'> -->
         <div id="openseadragon1" style="width: 2000px; height: 500px;"></div>
         <script type="text/javascript">
                 var Viewer = OpenSeadragon({
@@ -139,12 +137,8 @@
                     buildPyramid: false
                 });
         </script>    
-    <!-- </div> -->
     
-    <!-- <div class='col-lg-7 justify-content-center right-col'>
-        <div id='the_crispy_formset' class='col-8' style="max-width: 100%;"> -->
             This is the record entry form.
-        <!-- </div> -->
         <div class='row'  style="margin-left: 50px; height:45%; overflow: scroll">
             {% crispy formset helper %}
         </div>
