@@ -273,4 +273,5 @@ RACE_CHOICES_1990 = [
     ('Vietnamese', 'Vietnamese'),
     ('Other API', 'Other API'),
     ('blank', 'Blank'),
+    ('Other race', 'Other race'),
 ]
