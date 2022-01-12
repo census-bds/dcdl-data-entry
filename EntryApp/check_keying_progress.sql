@@ -25,6 +25,14 @@ SELECT year, COUNT(*) AS done
 -- IMAGES 
 
 -- images completed per keyer per year
+SELECT jbid, COUNT(*) as completed_images
+    FROM "EntryApp_image"
+    WHERE is_complete=True
+    GROUP BY jbid
+    ORDER BY completed_images DESC;
+
+
+-- images completed per keyer per year
 SELECT jbid, year, COUNT(*) as completed_images
     FROM "EntryApp_image"
     WHERE is_complete=True
@@ -75,7 +83,26 @@ SELECT year, AVG(person_ct) as avg_person_ct
     GROUP BY year
     ORDER BY year;
 
--- how long does it take to from first record entry to last?
+-- how long is average time from first record entry to last on a sheet?
+WITH timediff AS (
+        SELECT id, create_date, sheet_id, col_no,
+        create_date - LAG(create_date, 1) 
+            OVER (PARTITION BY sheet_id ORDER BY sheet_id, id) AS delta
+        FROM "EntryApp_record"
+    ),completion_time AS (
+        SELECT sheet_id, 
+        COUNT(*) AS num_records,
+        SUM(delta) AS completion_time
+        FROM timediff
+        WHERE delta < INTERVAL '1 hour'
+        GROUP BY sheet_id
+    )
+SELECT AVG(completion_time) AS avg,
+    AVG(completion_time / num_records) AS avg_per_record
+    FROM completion_time;
+
+
+-- how long is average time from first record entry to last on a sheet?
 WITH timediff AS (
         SELECT id, create_date, sheet_id, col_no,
         create_date - LAG(create_date, 1) 
