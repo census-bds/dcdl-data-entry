@@ -105,6 +105,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'crispy_forms',
+    'mod_wsgi.server',
 ]
 
 MIDDLEWARE = [
