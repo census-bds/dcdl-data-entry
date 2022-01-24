@@ -2,9 +2,13 @@
 # MODULE DEFINING FUNCTIONS TO FIND CONFLICTS
 #===============================================================#
 
-import unittest
+import pandas as pd
+import psycopg2 as pg
 
-from EntryApp import Image, Breaker, Sheet, Record
+from EntryApp.models import Breaker
+from EntryApp.models import Image
+from EntryApp.models import Record
+from EntryApp.models import Sheet
 
 
 def test_dbl_records(model, **kwargs):
@@ -34,8 +38,13 @@ def compute_match(model, **kwargs):
     mismatch = []
     for k in entries[0].keys():
 
-        if entries[0][k] == entries[1][k]:
+        # skip certain fields we wouldn't expect to match
+        if k is in ['id', 'jbid', 'create_date', 'last_modified',]:
+            continue
+
+        elif entries[0][k] == entries[1][k]:
             matches += 1
+        
         else:
             mismatch.append(k)
 
