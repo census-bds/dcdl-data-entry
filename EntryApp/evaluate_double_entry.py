@@ -39,7 +39,8 @@ def compute_match(queryset, **kwargs):
     for k in entries[0].keys():
 
         # skip certain fields we wouldn't expect to match
-        fields_to_skip = ['id', 'jbid', 'create_date', 'last_modified',]
+        fields_to_skip = ['id', 'jbid', 'create_date', 'last_modified',
+                        'img_id', 'breaker_id', 'timestamp', ]
         if k in fields_to_skip:
             continue
 
@@ -51,7 +52,7 @@ def compute_match(queryset, **kwargs):
 
     num_fields_checked = len(entries[0].keys()) - len(fields_to_skip)
 
-    return matches, num_fields_checked, mismatch
+    return num_matches, num_fields_checked, mismatch
 
 
 def check_matches_in_reel(reel):
@@ -139,23 +140,34 @@ def check_matches_in_sheet_records(reel):
         image_qs = image_qs.filter(image_type = "sheet")
         image_qs = image_qs.exclude(jbid = 'jbid123')
 
-        for image in image_qs:
-            
-            sheet_qs = Sheet.objects.filter(img = image)
-
+        # get keyer info - TODO this seems suboptimal as written
+        results['keyer_one'].append(image_qs[0].jbid)
+        results['keyer_two'].append(image_qs[1].jbid)
 
         # skip if we don't have exactly two entries 
         if len(image_qs) != 2:
             continue
 
-        # get keyer info - TODO this seems suboptimal as written
-        results['keyer_one'].append(image_qs[0].jbid)
-        results['keyer_two'].append(image_qs[1].jbid)
+        # look at the sheet mismatches
+        sheet_qs = Sheet.objects.filter(img__in = (image_qs[i].id for i in range(len(image_qs))))
+        sheet_matches, sheet_checked, sheet_mismatches = compute_match(sheet_qs)    
 
-        # check matches
-        num_matches, num_fields, mismatch = compute_match(image_qs)
-        results['num_matches'].append(num_matches)
-        results['num_fields'].append(num_fields)
-        results['mismatch'].append(mismatch)
+        # TODO add sheet match check to the output df (or two output dfs?)
+
+        # now look for the record mismatches
+        record_keyer_one_qs = Record.objects.filter(sheet = sheet_qs[0])
+        record_keyer_two_qs = Record.objects.filter(sheet = sheet_qs[1])
+        
+        # some kind of tuple data structure?
+        for record_one, record_two in zip(record_keyer_one_qs, record_keyer_two_qs):
+
+            record_qs = Record.objects.filter(id__in=(record_one.id, record_two.id))
+            record_match, record_checked, record_mismatches = compute_match(record_qs)
+
+            # record matches
+            results['num_matches'].append(num_matches)
+            results['num_fields'].append(num_fields)
+            results['mismatch'].append(mismatch)
+
 
     return pd.DataFrame.from_dict(results)
