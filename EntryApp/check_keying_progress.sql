@@ -20,11 +20,21 @@ SELECT year, COUNT(*) AS done
     WHERE is_complete_keyer_one AND is_complete_keyer_two
     GROUP BY year;
 
-
-
 -- IMAGES 
 
--- images completed per keyer per year
+SELECT COUNT(DISTINCT image_file_id) 
+    FROM "EntryApp_image"
+    WHERE is_complete=True;
+
+
+-- images completed 
+SELECT COUNT(*) as completed_images
+    FROM "EntryApp_image"
+    WHERE is_complete=True
+    ORDER BY completed_images DESC;
+
+
+-- images completed per keyer
 SELECT jbid, COUNT(*) as completed_images
     FROM "EntryApp_image"
     WHERE is_complete=True
