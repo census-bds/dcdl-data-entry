@@ -8,7 +8,7 @@ source /apps/user/${USER}/miniconda3/bin/activate /apps/user/${USER}/conda_envs/
 if [ $APP_DIR = 'dcdl_test' ]
 then
     cd /apps/django/dcdl_test
-    python manage.py runmodwsgi --port 7001
+    python manage.py runmodwsgi --port 7002 --server-root=/tmp/httpd_training --document-root /data/storage/images/test_images/
 
 elif [ $APP_DIR = 'dcdl_train' ]
 then
