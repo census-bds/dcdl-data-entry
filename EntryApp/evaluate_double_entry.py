@@ -2,7 +2,7 @@
 # MODULE DEFINING FUNCTIONS TO FIND CONFLICTS
 #===============================================================#
 
-from numpy import append
+import numpy as np
 import pandas as pd
 
 from EntryApp.models import Breaker
@@ -125,6 +125,21 @@ def append_blanks(d, fields):
         d[f].append('')
 
     return d
+
+
+def clean_results_df(results_df):
+    '''
+    Fill down the blank values in results df
+
+    Takes:
+    - results df
+    Returns:
+    - results df with missing filled in
+    '''
+
+    df = results_df.replace({'': np.nan })
+    return df.fillna(method="ffill")
+
 
 def check_matches_in_sheet_records(reel):
     '''
@@ -279,14 +294,15 @@ def check_matches_in_sheet_records(reel):
                 ]
                 results = append_blanks(results, fields=blank_fields)
 
+    results_df = pd.DataFrame.from_dict(results)
+    results_df = clean_results_df(results_df)
 
+    return results_df #,  row_count
 
-    return results, row_count
 
 
 ## code for shell
 # from EntryApp.models import Reel, ImageFile, Image, Breaker, Sheet, Record, OtherImage
 # import EntryApp.evaluate_double_entry as eval
 # r = Reel.objects.all()[0]
-# results, row_count = eval.check_matches_in_sheet_records(r)
-# [(k, len(v)) for k, v in results.items()]
+# results_df = eval.check_matches_in_sheet_records(r)
