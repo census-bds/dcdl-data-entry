@@ -2257,7 +2257,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         parent_sheet = image_IN.sheet_set.get()  
 
         # look up associated record(s)
-        record_qs = parent_sheet.record_set.all().order_by('line_no')
+        record_qs = parent_sheet.record_set.all().order_by('id')
         record_count = record_qs.count()
 
         # DEBUG
