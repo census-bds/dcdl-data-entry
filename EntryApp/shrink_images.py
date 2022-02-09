@@ -3,19 +3,32 @@
 # 2022-02-08
 #===============================================================#
 
+import os
 from PIL import Image
 
 from EntryApp.models import ImageFile
 from EntryApp.models import Reel
 
 
-# OUTLINE OF PLAN:
-# - query DB to get a list of all the ImageFile filepaths
-# - use this list to read each ImageFile in
-# - use Image.resize() to reduce size by ~half
-# - save file with the same name but _smaller appended
+def make_new_filepath(image_file_path, suffix = "_smaller"):
+    '''
+    Takes the existing image file path and appends suffix
 
-def shrink_image(image_file_path, out_path_suffix = "_smaller"):
+    Takes:
+    - string filepath to image file
+    - optional suffix (default is _smaller)
+    Returns:
+    - None
+
+    '''
+
+    out_path = image_file_path.strip(".jpg") + suffix + ".jpg"
+    out_name = out_path.split("/")[-1]
+
+    return out_path, out_name
+
+
+def shrink_image(image_file_path, out_path):
     '''
     Reduce the size of an image by half and save it with new name
 
@@ -26,6 +39,10 @@ def shrink_image(image_file_path, out_path_suffix = "_smaller"):
     - None
     '''
 
+    # skip this if compressed image already exists
+    if os.path.isfile(out_path):
+        return
+
     image = Image.open(image_file_path)
 
     # cut size in half
@@ -33,8 +50,9 @@ def shrink_image(image_file_path, out_path_suffix = "_smaller"):
     half_size = image.resize(new_dimensions, Image.ANTIALIAS)
 
     # save with new name
-    out_name = image_file_path.strip(".jpg") + out_path_suffix + ".jpg"
-    half_size.save(out_name, optimize=True, quality=30)
+    half_size.save(out_path, optimize=True, quality=30)
+
+    return
 
 
 def apply_shrink_to_images():
@@ -48,5 +66,14 @@ def apply_shrink_to_images():
     image_file_qs = ImageFile.objects.all()
 
     for i in image_file_qs:
-        shrink_image(i.img_path)
+
+        new_out_path, new_out_name = make_new_filepath(i.img_path)
+
+        try:
+            shrink_image(i.img_path, new_out_path)
+            i.smaller_image_file_name = new_out_name
+            i.save()
+        
+        except Exception as e:
+            print(e)
 

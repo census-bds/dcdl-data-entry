@@ -162,6 +162,9 @@ class ImageFile(models.Model):
     img_reel = models.ForeignKey( Reel, on_delete=models.CASCADE, blank = True, null = False)
     img_position = models.IntegerField()
 
+    # name of compressed version
+    smaller_image_file_name = models.CharField( max_length = 255, default = "")
+
     # automatic create and update time stamps.
     create_date = models.DateTimeField( auto_now_add = True )
     last_modified = models.DateTimeField( auto_now = True )
