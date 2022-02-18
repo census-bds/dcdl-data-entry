@@ -19,7 +19,6 @@ def make_new_filepath(image_file_path, suffix = "_smaller"):
     - optional suffix (default is _smaller)
     Returns:
     - None
-
     '''
 
     out_path = image_file_path.strip(".jpg") + suffix + ".jpg"
@@ -39,20 +38,25 @@ def shrink_image(image_file_path, out_path):
     - None
     '''
 
-    # skip this if compressed image already exists
+     # skip this if compressed image already exists
     if os.path.isfile(out_path):
         return
 
-    image = Image.open(image_file_path)
+    try:
+        image = Image.open(image_file_path)
 
-    # cut size in half
-    new_dimensions = (image.size[0] // 2, image.size[1] // 2)
-    half_size = image.resize(new_dimensions, Image.ANTIALIAS)
+        # cut size in half
+        new_dimensions = (image.size[0] // 2, image.size[1] // 2)
+        half_size = image.resize(new_dimensions, Image.ANTIALIAS)
 
-    # save with new name
-    half_size.save(out_path, optimize=True, quality=30)
+        # save with new name
+        half_size.save(out_path, optimize=True, quality=30)
+
+    except Exception as e:
+        print("Exception in shrink_image():", e)
 
     return
+
 
 
 def apply_shrink_to_images():
