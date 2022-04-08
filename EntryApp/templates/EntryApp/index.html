@@ -5,7 +5,26 @@
 {% endblock end_of_head_tag %}
 
 {% block header %}
-    <h2>Decennial Census Digitization and Data Linkage</h2>
+    {% if app_instance == 'dev' %}
+
+    <h2>Decennial Census Digitization and Data Linkage - Data Entry Application (Development) </h2>
+
+    {% elif app_instance == 'test' %}
+
+    <h2>Decennial Census Digitization and Data Linkage - Data Entry Application (Test) </h2>
+
+    {% elif app_instance == 'train' %}
+
+    <h2>Decennial Census Digitization and Data Linkage - Data Entry Application (Training) </h2>
+
+    {% elif app_instance == 'prod' %}
+    <h2>Decennial Census Digitization and Data Linkage - Data Entry Application (Production) </h2>
+
+    {% else %}
+    <h2>Decennial Census Digitization and Data Linkage - Data Entry Application</h2>
+
+    {% endif %}
+
     <p> The Decennial  Census Digitization  and Linkage  project  (DCDL) is an initiative  to  produce  linked restricted  microdata  files  from  the decennial  censuses of 1960  through  1990. This tool enables hand-entry of data from a subset of scanned images of the historical files, an essential part of developing a scalable tool to capture respondent information so that individuals can be studied over time. </p>
 {% endblock header %}
 
