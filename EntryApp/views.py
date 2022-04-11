@@ -7,6 +7,7 @@ import datetime
 import json
 import logging
 import re
+from sqlite3 import IntegrityError
 
 
 # django imports
@@ -1941,13 +1942,28 @@ class CodeImage( LoginRequiredMixin, FormView ):
             #-- END check to see if new or existing --#
 
             # set values and save.
+
             sheet_instance.img = image_instance
             sheet_instance.year = image_instance.year # should do this for all images and sheets automatically
             sheet_instance.jbid = request_IN.user.username
             sheet_instance.timestamp = datetime.datetime.now()
             sheet_instance.breaker = associated_breaker
             sheet_instance.num_records = form.get( 'num_records', None )
-            sheet_instance.save()
+
+            try:
+                sheet_instance.save()
+
+            except IntegrityError:
+                # this case should only occur if they click multiple times on page without sheet ID in context
+
+                adapter.warning(
+                    f"{me}(): IntegrityError in action_update_sheet",
+                    {'user': request_IN.user.username}
+                )
+
+                # no inputs?
+                error_message = "In {method}(): sheet already exists. Please go back to the home page and resume coding this image from there.".format( method = me )
+                error_list_OUT.append( error_message )                
 
             # new sheet?
             if ( is_new_sheet == True ):
