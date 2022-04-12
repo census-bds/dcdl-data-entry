@@ -58,11 +58,11 @@ logger = logging.getLogger('EntryApp.test_views')
 # GLOBALS
 #================================#
 
-DEV_FIXTURE =  'fixtures/dev_data_20211027_1506.json'
-TEMP_USERNAME = 'jbid123'
+DEV_FIXTURE =  'fixtures/dev_data_20220412_1418.json'
+TEMP_USERNAME = 'jbid456'
 TEMP_PW = 'dcdl1980'
 
-EXPECTED = expected.DATA[DEV_FIXTURE]
+EXPECTED = expected.DATA[DEV_FIXTURE][TEMP_USERNAME]
 
 
 #================================#
@@ -81,6 +81,11 @@ class BaseTestCase(TestCase):
     def authenticate_and_get_response(self):
         self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
         return self.client.get(reverse(self.template_name), follow=True)
+
+    def authenticate_and_post(self, context=None):
+        self.client.login(username=TEMP_USERNAME, password=TEMP_PW)
+        return self.client.post(reverse(self.template_name), context, follow=True)
+
 
 #================================#
 # TEST CASES
@@ -131,7 +136,8 @@ class IndexViewTests(BaseTestCase):
 
         self.assertEqual(img_url, EXPECTED['img_url'])
 
-        # this fails right now but works in browser, not sure why
+        # this fails right now but works in browser: 
+        # the path needs to be localhost:8002/images, NOT localhost:8002/EntryApp/images 
         self.assertEqual(img_response.status_code, HTTPStatus.OK)
 
 
@@ -163,10 +169,6 @@ class CodeImageTests(BaseTestCase):
     fixtures = [DEV_FIXTURE]
     template_name = "EntryApp:code_image"
 
-    @classmethod
-    def setUpTestData(cls):
-        pass
-
     def test_url_status_ok(self):
         ''' Test that the html response for this url is HTTPStatus.OK'''
         response = self.authenticate_and_get_response()
@@ -175,7 +177,14 @@ class CodeImageTests(BaseTestCase):
 
     def test_a_image_form_present(self):
         ''' Test that image form is present on first entering page '''
-        response = self.authenticate_and_get_response()
+
+        context = EXPECTED['code_image_test_a_context']
+        context['image_form'] = ImageForm(
+             EXPECTED['year'],
+             EXPECTED['current_reel_name'],
+             EXPECTED['code_image_test_a_context']['image_form_values']
+            )    
+        response = self.authenticate_and_post(context=context)
 
         form_html = '''<form id="image-info"'''
         self.assertTrue(form_html in str(response.content))
