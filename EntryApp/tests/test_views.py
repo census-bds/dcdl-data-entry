@@ -207,8 +207,7 @@ class CodeImageTests(BaseTestCase):
         self.assertEqual(post_response.status_code, HTTPStatus.OK)
 
         # should also update database
-        current_image_id = CurrentEntry.objects.get(jbid = TEMP_USERNAME).img_id
-        image = Image.objects.get(id = current_image_id)
+        image = Image.objects.get(id = EXPECTED['sheet_type_breaker_post']['image_id'])
         self.assertEqual(image.image_type, 'breaker')
 
 
@@ -225,8 +224,7 @@ class CodeImageTests(BaseTestCase):
         self.assertEqual(post_response.status_code, HTTPStatus.OK)
 
         # should also update database
-        current_image_id = CurrentEntry.objects.get(jbid = TEMP_USERNAME).img_id
-        image = Image.objects.get(id = current_image_id)
+        image = Image.objects.get(id = EXPECTED['sheet_type_other_post']['image_id'])
         self.assertEqual(image.image_type, 'other')
 
 
@@ -243,6 +241,5 @@ class CodeImageTests(BaseTestCase):
         self.assertEqual(post_response.status_code, HTTPStatus.OK)
 
         # should also update database
-        current_image_id = CurrentEntry.objects.get(jbid = TEMP_USERNAME).img_id
-        image = Image.objects.get(id = current_image_id)
+        image = Image.objects.get(id = EXPECTED['sheet_type_sheet_post']['image_id'])
         self.assertEqual(image.image_type, 'sheet')

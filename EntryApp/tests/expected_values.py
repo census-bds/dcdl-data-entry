@@ -43,17 +43,17 @@ DATA = {
                 },
                 'sheet_type_breaker_post': {
                     'action': 'update_image',
-                    'image_id': 161,
+                    'image_id': 163,
                     'image_type': 'breaker',
                 },
                 'sheet_type_other_post': {
                     'action': 'update_image',
-                    'image_id': 161,
+                    'image_id': 163,
                     'image_type': 'other',                
                 },
                 'sheet_type_sheet_post': {
                     'action': 'update_image',
-                    'image_id': 161,
+                    'image_id': 163,
                     'image_type': 'sheet',                
                 },
             
