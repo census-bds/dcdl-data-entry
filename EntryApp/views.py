@@ -7,7 +7,6 @@ import datetime
 import json
 import logging
 import re
-from sqlite3 import IntegrityError
 
 
 # django imports
@@ -16,6 +15,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Permission
 from django.contrib.auth.models import User
+from django.db import IntegrityError
+from django.db import transaction
 from django.db.models import Q
 import django.forms as forms
 from django.forms import formset_factory
@@ -1951,7 +1952,8 @@ class CodeImage( LoginRequiredMixin, FormView ):
             sheet_instance.num_records = form.get( 'num_records', None )
 
             try:
-                sheet_instance.save()
+                with transaction.atomic():
+                    sheet_instance.save()
 
             except IntegrityError:
                 # this case should only occur if they click multiple times on page without sheet ID in context
@@ -1961,9 +1963,11 @@ class CodeImage( LoginRequiredMixin, FormView ):
                     {'user': request_IN.user.username}
                 )
 
-                # no inputs?
-                error_message = "In {method}(): sheet already exists. Please go back to the home page and resume coding this image from there.".format( method = me )
+                # we want to exit here gracefully, don't update CurrentEntry
+                is_new_sheet = False
+                error_message = "In {method}(): sheet already exists. If the record entry block did not appear, please go back to the home page and resume coding this image from there.".format( method = me )
                 error_list_OUT.append( error_message )                
+
 
             # new sheet?
             if ( is_new_sheet == True ):
@@ -1978,8 +1982,6 @@ class CodeImage( LoginRequiredMixin, FormView ):
             # return the sheet instance in context?
             context_IN[ CONTEXT_SHEET_INSTANCE ] = sheet_instance
 
-            # TODO: is it time to set Image to complete? Not yet here - once
-            #     all records are complete. Add "finished" flag to record form.
 
         else:
 

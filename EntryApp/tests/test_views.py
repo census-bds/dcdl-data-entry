@@ -9,9 +9,9 @@ from http import HTTPStatus
 
 # django imports
 from django.conf import settings
+from django.db import transaction
 from django.forms import modelformset_factory
 from django.test import TestCase
-from django.urls import get_script_prefix
 from django.urls import reverse
 
 # EntryApp models
@@ -243,3 +243,23 @@ class CodeImageTests(BaseTestCase):
         # should also update database
         image = Image.objects.get(id = EXPECTED['sheet_type_sheet_post']['image_id'])
         self.assertEqual(image.image_type, 'sheet')
+
+
+    def test_f_sheet_integrity_error(self):
+        '''Test what happens if they hit submit twice on sheet info'''
+
+        expected = EXPECTED['code_image_test_f_sheet_integrity_error']
+        context = expected
+
+        # first, create and submit duplicate sheet, trigger IntegrityError
+        context['sheet_form'] = SheetForm()   
+        context['num_records'] = 20 
+        response = self.authenticate_and_post(context=context)
+
+        # then verify that the DB did not update
+        sheet_instance = Sheet.objects.get(id=11)
+        self.assertNotEqual(context['num_records'], sheet_instance.num_records)
+
+        # check that the error message is in the content
+        error_message = "In CodeImage.action_update_sheet(): sheet already exists. If the record entry block did not appear, please go back to the home page and resume coding this image from there."
+        self.assertTrue(error_message in str(response.content))

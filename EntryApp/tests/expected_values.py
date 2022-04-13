@@ -36,9 +36,16 @@ DATA = {
                     'image_form_values': {'year': 1960, 'image_type': ''}, 
                     'username': 'jbid456', 
                     'user': 'jbid456',
-                    # 'reel_name': 'dev_1960',
                     'slug': 'fake_IMG_3_smaller.jpg', 
                     'param_names': {'PARAM_NAME_ACTION': 'action', 'PARAM_NAME_BREAKER_ID': 'breaker_id', 'PARAM_NAME_IMAGE_ID': 'image_id', 'PARAM_NAME_IMAGE_TYPE': 'image_type', 'PARAM_NAME_LONGFORM_ID': 'longform_id', 'PARAM_NAME_OTHER_IMAGE_ID': 'other_image_id', 'PARAM_NAME_RECORD_ID': 'record_id', 'PARAM_NAME_SHEET_ID': 'sheet_id', 'PARAM_NAME_YEAR': 'year'},
+                    'year': 1960 
+                },
+                'code_image_test_f_sheet_integrity_error': {
+                    'action': 'update_sheet_type',
+                    'image_id': 161,
+                    'username': 'jbid456', 
+                    'user': 'jbid456', 
+                    'jbid': 'jbid456', 
                     'year': 1960 
                 },
                 'sheet_type_breaker_post': {
