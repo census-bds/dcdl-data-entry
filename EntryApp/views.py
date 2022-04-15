@@ -911,6 +911,7 @@ class IndexView(LoginRequiredMixin, TemplateView):
         
         # prep context dict
         context = initialize_context( request ) 
+        context[ 'app_instance' ] = settings.APP_INSTANCE
         context[ 'make_next_batch_button_appear' ] = None
         context[ 'make_next_reel_button_appear' ] = None
 

@@ -22,7 +22,25 @@
 
     <body>
 
-        <h2>Decennial Census Digitization and Data Linkage - Data Entry Application</h2>
+        {% if app_instance == 'dev' %}
+
+            <h2>Decennial Census Digitization and Data Linkage - Data Entry Application (Development) </h2>
+
+        {% elif app_instance == 'test' %}
+
+            <h2>Decennial Census Digitization and Data Linkage - Data Entry Application (Test) </h2>
+
+        {% elif app_instance == 'train' %}
+
+            <h2>Decennial Census Digitization and Data Linkage - Data Entry Application (Training) </h2>
+
+        {% elif app_instance == 'prod' %}
+            <h2>Decennial Census Digitization and Data Linkage - Data Entry Application (Production) </h2>
+
+        {% else %}
+            <h2>Decennial Census Digitization and Data Linkage - Data Entry Application</h2>
+
+        {% endif %}
 
         <DIV class="redText" ALIGN=center>
             <BR><B>**WARNING*WARNING*WARNING**</B><BR>
