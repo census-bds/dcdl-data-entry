@@ -332,7 +332,9 @@ def get_next_image(request):
     if next_image:
 
         current = CurrentEntry.objects.get(jbid=request.user)
+        next_image_file = next_image.image_file
         current.img = next_image
+        current.image_file = next_image_file
         current.save()
 
 #-- END function get_next_image() --#
