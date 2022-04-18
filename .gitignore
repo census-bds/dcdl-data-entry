@@ -17,6 +17,7 @@ npc_leads.csv
 EntryApp/migrations/00*
 
 # directories to ignore
+archive/
 fixtures/
 logs/
 static/
