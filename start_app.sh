@@ -8,17 +8,17 @@ source /apps/user/${USER}/miniconda3/bin/activate /apps/user/${USER}/conda_envs/
 if [ $APP_DIR = 'dcdl_data_entry' ]
 then
     cd /apps/django/dcdl_data_entry
-    python manage.py runmodwsgi --port 8000 --server-root=/tmp/httpd_training
+    python manage.py runmodwsgi --port 8000 --server-root=/tmp/httpd_production
 
 elif [ $APP_DIR = 'dcdl_train' ]
 then
     cd /apps/django/training
-    python manage.py runmodwsgi --port 7000 
+    python manage.py runmodwsgi --port 7000 --server-root=/tmp/httpd_training
 
 elif [ $APP_DIR = 'dcdl_test' ]
 then
     cd /apps/django/dcdl_test
-    python manage.py runmodwsgi --port 7002  --document-root /data/storage/images/test_images/
+    python manage.py runmodwsgi --port 7002  --document-root /data/storage/images/test_images/ --server-root=/tmp/httpd_test
 
 fi
 
