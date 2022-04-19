@@ -15,6 +15,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import Permission
 from django.contrib.auth.models import User
+from django.db import IntegrityError
+from django.db import transaction
 from django.db.models import Q
 import django.forms as forms
 from django.forms import formset_factory
@@ -330,7 +332,9 @@ def get_next_image(request):
     if next_image:
 
         current = CurrentEntry.objects.get(jbid=request.user)
+        next_image_file = next_image.image_file
         current.img = next_image
+        current.image_file = next_image_file
         current.save()
 
 #-- END function get_next_image() --#
@@ -1941,13 +1945,31 @@ class CodeImage( LoginRequiredMixin, FormView ):
             #-- END check to see if new or existing --#
 
             # set values and save.
+
             sheet_instance.img = image_instance
             sheet_instance.year = image_instance.year # should do this for all images and sheets automatically
             sheet_instance.jbid = request_IN.user.username
             sheet_instance.timestamp = datetime.datetime.now()
             sheet_instance.breaker = associated_breaker
             sheet_instance.num_records = form.get( 'num_records', None )
-            sheet_instance.save()
+
+            try:
+                with transaction.atomic():
+                    sheet_instance.save()
+
+            except IntegrityError:
+                # this case should only occur if they click multiple times on page without sheet ID in context
+
+                adapter.warning(
+                    f"{me}(): IntegrityError in action_update_sheet",
+                    {'user': request_IN.user.username}
+                )
+
+                # we want to exit here gracefully, don't update CurrentEntry
+                is_new_sheet = False
+                error_message = "In {method}(): sheet already exists. If the record entry block did not appear, please go back to the home page and resume coding this image from there.".format( method = me )
+                error_list_OUT.append( error_message )                
+
 
             # new sheet?
             if ( is_new_sheet == True ):
@@ -1962,8 +1984,6 @@ class CodeImage( LoginRequiredMixin, FormView ):
             # return the sheet instance in context?
             context_IN[ CONTEXT_SHEET_INSTANCE ] = sheet_instance
 
-            # TODO: is it time to set Image to complete? Not yet here - once
-            #     all records are complete. Add "finished" flag to record form.
 
         else:
 
