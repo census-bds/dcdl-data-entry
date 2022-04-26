@@ -48,22 +48,45 @@ DATA = {
                     'jbid': 'jbid456', 
                     'year': 1960 
                 },
-                'sheet_type_breaker_post': {
+                'image_type_options': [
+                    '<input type="radio" name="image_type" value="breaker"',
+                    '<input type="radio" name="image_type" value="sheet"',
+                    '<input type="radio" name="image_type" value="other"',
+                ],
+                'image_type_breaker_post': {
                     'action': 'update_image',
                     'image_id': 163,
                     'image_type': 'breaker',
                 },
-                'sheet_type_other_post': {
+                'image_type_other_post': {
                     'action': 'update_image',
                     'image_id': 163,
                     'image_type': 'other',                
                 },
-                'sheet_type_sheet_post': {
+                'image_type_sheet_post': {
                     'action': 'update_image',
                     'image_id': 163,
                     'image_type': 'sheet',                
                 },
-            
+                'breaker_data_entry': {
+                    'action': '',
+                    'image_id': 160,
+                    # 'breaker_id': 24,
+                    'year': 1960,
+                    'state': 'OH',
+                },
+                'sheet_data_entry': {
+                    'action': 'update_sheet_type',
+                    'image_id': 162,
+                    'user': 'jbid456',
+                    'jbid': 'jbid456',
+                    'year': 1960, 
+                    'num_records': '4',
+                    'sheet_id': 11
+                },
+                'report_problem': {
+                    'image_id': 163
+                }
             },
         },
     }

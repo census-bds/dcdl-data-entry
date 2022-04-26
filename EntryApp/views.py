@@ -2776,6 +2776,12 @@ def report_problem(request):
         # did we get image ID? 
         image_id = inputs_IN.get( PARAM_NAME_IMAGE_ID, None )
 
+        # get referring URL if present
+        try:
+            referring_url = request.META['HTTP_REFERER']
+        except Exception:
+            referring_url = ""
+
         if image_id:
 
             image_instance = Image.objects.get(pk=image_id)
@@ -2785,13 +2791,12 @@ def report_problem(request):
                 {'user': request.user.username}
             )
             adapter.info(
-                f"report_problem referred from {request.META['HTTP_REFERER']}",
+                f"report_problem referred from {referring_url}",
                 {'user': request.user.username}
             )
             
-            
-            flagged_view = parse_http_referral(request.META['HTTP_REFERER'], request.user.username)
-            
+            flagged_view = parse_http_referral(referring_url, request.user.username)
+
             return render(
                     request, \
                     'EntryApp/report-problem.html',
@@ -2810,7 +2815,7 @@ def report_problem(request):
                 {'user': request.user.username}
             )
             adapter.info(
-                f"report_problem referred from {request.META['HTTP_REFERER']}",
+                f"report_problem referred from {referring_url}",
                 {'user': request.user.username}
             )
 
