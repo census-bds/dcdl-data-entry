@@ -554,6 +554,134 @@ class Sheet(models.Model):
         return f'{self.img}: sheet' # FIX THIS
 
 
+class Household1960(models.Model):
+    '''
+    Class defining the entry for household level info for address for 1960
+
+    Attributes:
+    - image object (foreign key)
+    - sheet object (foreign key)
+    - num records? 
+    - sample key
+    - up to two addresses
+    - up to four house numbers
+    - up to four apartment numbers
+    '''
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields = ['jbid', 'sheet_id'], name = 'unique_household1960_entry')
+        ]
+    
+    # foreign keys
+    image_id = models.ForeignKey(Image, on_delete = models.CASCADE)
+    sheet_id = models.ForeignKey(Image, on_delete = models.CASCADE)
+
+    num_records = models.PositiveIntegerField(null=False)
+
+    # addresses
+    address_one = models.CharField(
+        verbose_name = 'First listed street address'
+        max_length = 256,
+        null=True,
+        blank=True,
+    )
+    address_two = models.CharField(
+        verbose_name = 'Second listed street address'
+        max_length = 256,
+        null=True,
+        blank=True,
+    )
+
+    # sample keys
+    sample_key_one = models.CharField(
+        verbose_name = "First sample key",
+        max_length = 255,
+        blank = False,
+        default = None,
+        null = True,
+        choices = choices.SAMPLE_GQ_CHOICES,
+    )
+    sample_key_two = models.CharField(
+        verbose_name = "First sample key",
+        max_length = 255,
+        blank = False,
+        default = None,
+        null = True,
+        choices = choices.SAMPLE_GQ_CHOICES,
+    )
+    sample_key_three = models.CharField(
+        verbose_name = "First sample key",
+        max_length = 255,
+        blank = False,
+        default = None,
+        null = True,
+        choices = choices.SAMPLE_GQ_CHOICES,
+    )
+    sample_key_four = models.CharField(
+        verbose_name = "First sample key",
+        max_length = 255,
+        blank = False,
+        default = None,
+        null = True,
+        choices = choices.SAMPLE_GQ_CHOICES,
+    )
+
+
+    # house numbers
+    house_number_one = models.CharField(
+        verbose_name = 'First house number'
+        max_length = 256,
+        null=True,
+        blank=True,
+    )
+    house_number_two = models.CharField(
+        verbose_name = 'Second house number'
+        max_length = 256,
+        null=True,
+        blank=True,
+    )
+    house_number_three = models.CharField(
+        verbose_name = 'Third house number'
+        max_length = 256,
+        null=True,
+        blank=True,
+    )
+    house_number_four = models.CharField(
+        verbose_name = 'Fourth house number'
+        max_length = 256,
+        null=True,
+        blank=True,
+    )
+
+    # apartment numbers
+    apt_number_one = models.CharField(
+        verbose_name = 'First apartment number'
+        max_length = 256,
+        null=True,
+        blank=True,
+    )
+    apt_number_two = models.CharField(
+        verbose_name = 'Second apartment number'
+        max_length = 256,
+        null=True,
+        blank=True,
+    )
+    apt_number_three = models.CharField(
+        verbose_name = 'Third apartment number'
+        max_length = 256,
+        null=True,
+        blank=True,
+    )
+    apt_number_four = models.CharField(
+        verbose_name = 'Fourth apartment number'
+        max_length = 256,
+        null=True,
+        blank=True,
+    )
+    
+
+
 class LongForm1990(models.Model):
     '''
     Class defining the 1990 long form page containing industry and employer
