@@ -248,6 +248,7 @@ DEV_FORM_DICT = {
 # BREAKER LAYOUTS
 #================================#
 
+
 BREAKER_FORM_1980 = Layout(
     Div(
         Field('enumeration_district'),
@@ -279,3 +280,45 @@ BREAKER_FORM_DICT = {
     1970: BREAKER_FORM_1970,
     1960: BREAKER_FORM_1960
 }
+
+
+#================================#
+# 1960 HOUSEHOLD LAYOUT
+#================================#
+
+HOUSEHOLD_1960 = Layout(
+    Div(
+        Div(
+            Div('address_one'),
+            Div('address_two'),
+            css_class='row'
+        ),
+        Div(
+            Div(
+                Field('sample_key_one'),
+                Field('sample_key_two'),
+                Field('sample_key_three'),
+                Field('sample_key_four'),
+            ),
+            Div(
+                Field('house_number_one'),
+                Field('house_number_two'),
+                Field('house_number_three'),
+                Field('house_number_four'),
+            ),
+            Div(
+                Field('apt_number_one'),
+                Field('apt_number_two'),
+                Field('apt_number_three'),
+                Field('apt_number_four'),
+            ),
+            Div(
+                Field('num_records_one'),
+                Field('num_records_two'),
+                Field('num_records_three'),
+                Field('num_records_four')
+            )
+        ),
+        css_class = 'form-inline'
+    )
+)

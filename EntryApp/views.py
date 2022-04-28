@@ -60,6 +60,7 @@ from EntryApp.forms import BaseRecordFormSet
 from EntryApp.forms import BreakerFormHelper
 from EntryApp.forms import CrispyFormSetHelper
 from EntryApp.forms import CrispyLongFormHelper
+from EntryApp.forms import Household1960Form
 from EntryApp.forms import ImageForm
 from EntryApp.forms import LongForm1990Form
 from EntryApp.forms import LongFormHelper
@@ -163,7 +164,7 @@ class CustomAdapter(logging.LoggerAdapter):
 adapter = CustomAdapter(logger, {'user': "_"})
 
 #==============================================================================#
-# HELPERS + FUNCTIONAL VIEWS
+# HELPER METHODS
 #==============================================================================#
 
 def get_form_fields( year, form_type ):
@@ -2955,3 +2956,17 @@ def test_crispy_formset_view(request, year, form_type):
     }
 
     return render(request, 'EntryApp/test-crispy-formset.html', context)
+
+    
+def test_household1960_form(request):
+    '''
+    Temporary view for developing the 1960 household form layout
+    '''
+
+    household_form = Household1960Form()
+
+    context = {
+        'household_form': household_form,
+    }
+
+    return render(request, 'EntryApp/develop-household1960.html', context)
