@@ -43,6 +43,7 @@ from django.views.generic import View
 from EntryApp.models import Breaker
 from EntryApp.models import CurrentEntry
 from EntryApp.models import FormField
+from EntryApp.models import Household1960
 from EntryApp.models import Image
 from EntryApp.models import ImageFile
 from EntryApp.models import Keyer
@@ -61,6 +62,7 @@ from EntryApp.forms import BreakerFormHelper
 from EntryApp.forms import CrispyFormSetHelper
 from EntryApp.forms import CrispyLongFormHelper
 from EntryApp.forms import Household1960Form
+from EntryApp.forms import Household1960FormHelper
 from EntryApp.forms import ImageForm
 from EntryApp.forms import LongForm1990Form
 from EntryApp.forms import LongFormHelper
@@ -2963,10 +2965,42 @@ def test_household1960_form(request):
     Temporary view for developing the 1960 household form layout
     '''
 
-    household_form = Household1960Form()
+    # set field order
+    fields = [
+        'address_one',
+        'address_two',
+        'num_records_one',
+        'num_records_two',
+        'num_records_three',
+        'num_records_four',
+        'sample_key_one',
+        'sample_key_two',
+        'sample_key_three',
+        'sample_key_four',
+        'house_number_one',
+        'house_number_two',
+        'house_number_three',
+        'house_number_four',
+        'apt_number_one',
+        'apt_number_two',
+        'apt_number_three',
+        'apt_number_four',
+    ]
 
+    # set widgets
+    field_widgets = {f: choices.FORM_WIDGETS[f] for f in fields if f in choices.FORM_WIDGETS}
+
+    # initialize form and helper
+    household_form = modelform_factory(
+        Household1960,
+        fields = fields,
+        widgets = field_widgets
+    )
+    helper = Household1960FormHelper()
+    
     context = {
         'household_form': household_form,
+        'helper': helper
     }
 
     return render(request, 'EntryApp/develop-household1960.html', context)

@@ -257,6 +257,15 @@ class LongFormHelper(RecordFormHelper):
         self.layout = layouts.LONG_FORM_1990
 
 
+class Household1960FormHelper(FormHelper):
+    '''
+    Custom FormHelper for EntryApp.Household1960 model form
+    '''
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.layout = layouts.HOUSEHOLD_1960
+
+
 class CrispyFormSetHelper(FormHelper):
     '''
     Custom FormHelper for Record formset layout

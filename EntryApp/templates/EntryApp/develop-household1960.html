@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% load crispy_forms_tags %}
+
 {% block end_of_head_tag %}
 <script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
 <style>
@@ -25,6 +27,10 @@
 
     }
 
+    .form-column-wide {
+        max-width: 1200px;
+    }
+
     .control-group {
         margin-bottom: 10px;
     }
@@ -37,6 +43,29 @@
 
     .textinput-small {
     width:60px;
+    }
+
+    /* 1960 */
+    #household-1960-address-div {
+        display:block;
+        gap:25px;
+    }
+
+    #household-1960-radios {
+        gap:5px;
+    }
+
+    #household-1960-house-number {
+        gap:5px;
+    }
+
+    #household-1960-apt_number {
+        gap:5px;
+    }
+
+    #household-1960-inputs {
+        justify-content: space-evenly;
+        max-width: 1000px;
     }
 
 
@@ -121,13 +150,13 @@
 
 {% block content %}
 
-    <div id="entry-area" style="height:45%; overflow-y:scroll; margin:50px;">
+    <div id="entry-area" style="margin:50px;">
 
             <h2>Household info</h2>
             {% if household_form %}
                         <form id="household-1960-info" method="POST">
                             {% csrf_token %}
-                            {{ household_form.as_p }}
+                            {% crispy household_form helper %}
                             <input type="submit" value="Submit">
                         </form>
             {% else %}

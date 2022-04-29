@@ -75,6 +75,10 @@ FORM_WIDGETS = {
     'total_persons_tens': forms.RadioSelect,
     'total_persons_ones': forms.RadioSelect,
     'industry_category': forms.RadioSelect,
+    'sample_key_one': forms.RadioSelect,
+    'sample_key_two': forms.RadioSelect,
+    'sample_key_three': forms.RadioSelect,
+    'sample_key_four': forms.RadioSelect,
 }
 
 #================================#

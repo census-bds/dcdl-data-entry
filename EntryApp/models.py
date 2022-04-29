@@ -612,7 +612,6 @@ class Household1960(models.Model):
         - num_records_two: number of names listed in second household 
         - num_records_three: number of names listed in third household 
         - num_records_four: number of names listed in fourth household 
-
     '''
 
     class Meta:
@@ -674,7 +673,7 @@ class Household1960(models.Model):
         choices = choices.SAMPLE_GQ_CHOICES,
     )
     sample_key_two = models.CharField(
-        verbose_name = "First sample key",
+        verbose_name = "Second sample key",
         max_length = 255,
         blank = False,
         default = None,
@@ -682,7 +681,7 @@ class Household1960(models.Model):
         choices = choices.SAMPLE_GQ_CHOICES,
     )
     sample_key_three = models.CharField(
-        verbose_name = "First sample key",
+        verbose_name = "Third sample key",
         max_length = 255,
         blank = False,
         default = None,
@@ -690,7 +689,7 @@ class Household1960(models.Model):
         choices = choices.SAMPLE_GQ_CHOICES,
     )
     sample_key_four = models.CharField(
-        verbose_name = "First sample key",
+        verbose_name = "Fourth sample key",
         max_length = 255,
         blank = False,
         default = None,
