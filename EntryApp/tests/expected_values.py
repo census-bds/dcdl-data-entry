@@ -1,6 +1,6 @@
 
 DATA = {
-    'fixtures/dev_data_20220412_1418.json':
+    'fixtures/dev_data_20220503_1110.json':
         {'jbid123':
             {
                 'current_image_file_id': 174,
@@ -25,7 +25,7 @@ DATA = {
             },
         'jbid456':
             {
-                'current_image_file_id': 174,
+                'current_image_file_id': 176,
                 'current_img_id': 161,
                 'current_reel_id': 26,
                 'current_reel_name': 'dev_1960',

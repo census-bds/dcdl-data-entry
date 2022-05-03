@@ -63,7 +63,7 @@ logger = logging.getLogger('EntryApp.test_views')
 # GLOBALS
 #================================#
 
-DEV_FIXTURE =  'fixtures/dev_data_20220412_1418.json'
+DEV_FIXTURE =  'fixtures/dev_data_20220503_1110.json'
 TEMP_USERNAME = 'jbid456'
 TEMP_PW = 'dcdl1980'
 
@@ -140,6 +140,10 @@ class IndexViewTests(BaseTestCase):
         img_response = self.client.get(img_url)
 
         self.assertEqual(img_url, EXPECTED['img_url'])
+
+        print(img_url)
+
+        # img_response = self.client.get("/data/data/images/dev/1960/dev_1960/fake_IMG_2_smaller.jpg")
 
         # this fails right now but works in browser: 
         # the path needs to be localhost:8002/images, NOT localhost:8002/EntryApp/images 
@@ -381,6 +385,13 @@ class ReportProblem(BaseTestCase):
     
     def test_report_submit(self):
         '''Test that submitted data ends up in DB'''
-        pass
+        
+        context = EXPECTED['report_problem']
+        context['form'] = ProblemForm()
+        response = self.authenticate_and_post(context)
+        # form = response.POST
+
+        print(dir(response))
+
         # also test redirect?
     
