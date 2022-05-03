@@ -11,10 +11,11 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 """
 
 import os
+import logging
 from pathlib import Path
 
-# set config denoting whether this is dev, test, train, or prod
-APP_INSTANCE = "train" # CHANGE ME
+# set config denoting whether this is dev, test, or prod
+APP_INSTANCE = "dev" 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +28,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
+
+#================================#
+# LOGGING SETUP
+#================================#
 
 LOGGING = {
     'version': 1,
@@ -77,13 +82,13 @@ LOGGING = {
     },
     
     'root': {
-        'handlers': ['file', 'mail_admin'],
+        'handlers': ['console', 'mail_admin'],
         'level': 'INFO',
     },
 
     'loggers': {
         'django': {
-            'handlers': ['file', 'mail_admin'],
+            'handlers': ['console', 'file', 'mail_admin'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'ERROR'),
             'propagate': True,
         },
@@ -91,7 +96,10 @@ LOGGING = {
 }
 
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.7.0.0.1',
+]
 
 
 # Application definition
@@ -105,7 +113,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'crispy_forms',
-    'mod_wsgi.server',
 ]
 
 MIDDLEWARE = [
@@ -146,14 +153,12 @@ WSGI_APPLICATION = 'dcdl.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'dcdl_train', # CHANGE ME 
+        'NAME': 'dcdl_dev', 
         'USER': 'django_user',                      # Not used with sqlite3.
         'PASSWORD':'', # ADD PASSWORD HERE Not used with sqlite3.
         'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '5432',                      # Set to empty string for default. Not used with sqlite3.
     }
-}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -194,19 +199,18 @@ LOGIN_REDIRECT_URL = '/EntryApp/'
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/') # where it puts the static files
 
-MEDIA_URL = '/images/' # this is what shows up in url
-MEDIA_ROOT = '/data/storage/images/training_images' # this is where files are, CHANGE ME
+MEDIA_URL = '/images/' # this is the thing to change
+MEDIA_ROOT = '/data/data/images/dev_images'
 
+# where it looks for static files: everything inside these goes into STATIC_ROOT
 STATICFILES_DIRS = (
-    # os.path.join(BASE_DIR, 'boot'), 
-    f'/data/data/user/django_user/{APP_INSTANCE}/static/',
+    '/data/data/user/django_user/dev/static/',  
 )
 
 # globals for loading data
-DEFAULT_REEL_LOAD_SPEC = 'train_reel_load_spec.csv' # CHANGE ME
-IMAGE_DIR = '/data/storage/images/' # CHANGE ME
-
 FORM_FIELDS_CSV = os.path.join(Path(__file__).parent.parent.absolute(), 'form_fields.csv')
+IMAGE_DIR = '/data/data/images/dev_images'
 USER_INFO = os.path.join(Path(__file__).parent.parent.absolute(), 'user_info.csv')
+DEFAULT_REEL_LOAD_SPEC = "dev_reel_load_spec.csv"
