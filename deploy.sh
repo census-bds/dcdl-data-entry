@@ -1,31 +1,25 @@
-### Deploy a change from dev to prod
-
-## DEV: RUN AUTOMATED RESTS
-
-# make sure we're in the right place and that conda is activated
-cd /apps/django/${USER}/dcdl_dev/
-source /apps/user/${USER}/miniconda3/bin/activate /apps/user/${USER}/conda_envs/dcdl
-
-# run tests
-python manage.py tests EntryApp.tests.test_views
-
-# TODO: how do we tell if we pass?
-
-## PASSED TESTS: MOVE TO PROD
+### Deploy a change (assumes PR request is closed)
+set -e 
 
 cd /apps/django/dcdl_data_entry
+source /apps/user/$USER/miniconda3/bin/activate /apps/user/$USER/conda_envs/dcdl
 
-git fetch
-git checkout dev
-git pull origin dev
-git checkout master
-git merge dev
+# do git fetch and merge in gitlab (via PR)
+git pull origin master
+git tag <next version number>
+git push origin tag
+# script can ensure that the tag is applied
+# automatically increment version number by 1 (find bash code for this)
+# git tag runs against a commit (whatever one is checked out)
 
 # run tests again here
-python manage.py tests EntryApp.tests.test_views
-# TODO: do we pass? 
+python manage.py test EntryApp.tests.test_views
 
 # reload application
 touch dcdl/wsgi.py
 
 # TODO: check if prod is running 
+# endpoint on the application that gets the latest git tag and renders it
+# curl localhost:8000 and ensure we get tag number we're expecting
+# do this with a view that doesn't require authentication
+
