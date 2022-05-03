@@ -581,6 +581,7 @@ def seed_current_entry(request):
         
 
         first_imagefile = ImageFile.objects.filter(img_reel = this_reel)[0]
+        # first_imagefile = this_reel.imagefile_set.get_queryset() #TODO test this out
         first_image = Image.objects.get(
             jbid = this_keyer.jbid,
             image_file = first_imagefile
