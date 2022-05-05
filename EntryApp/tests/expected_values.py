@@ -85,7 +85,9 @@ DATA = {
                     'sheet_id': 11
                 },
                 'report_problem': {
-                    'image_id': 163
+                    'image_id': 163,
+                    'problem': ['on'],
+                    'description': ['foo bar baz'],
                 }
             },
         },

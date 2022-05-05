@@ -2768,116 +2768,143 @@ def parse_http_referral(url, username):
 def report_problem(request):
     '''
     View to render problem form so user can record an issue
+
+    This is a functional view that can handle either GET or POST requests. It 
+    will redirect to the index view after the user submits their form.
     '''
 
     current = CurrentEntry.objects.get(jbid=request.user)
-    flagged_view = None
 
+    # get referring URL if present
+    try:
+        referring_url = request.META['HTTP_REFERER']
+    except Exception:
+        referring_url = ""
+
+    flagged_view = parse_http_referral(referring_url, request.user.username)
+
+
+    inputs_IN = get_request_data(request)
+    adapter.info(f"inputs_IN is {inputs_IN}")
+
+    # did we get image ID? 
+    image_id = inputs_IN.get( PARAM_NAME_IMAGE_ID, None )
+    image_instance = None
+
+    if image_id:
+
+        image_instance = Image.objects.get(pk=image_id)
+
+        adapter.info(
+            f'report_problem GET request for {image_id}',
+            {'user': request.user.username}
+        )
+        adapter.info(
+            f"report_problem referred from view {flagged_view} at {referring_url}",
+            {'user': request.user.username}
+        )
+
+    else:
+        
+        adapter.info(
+            f"report_problem GET request with no image id",
+            {'user': request.user.username}
+        )
+        adapter.info(
+            f"report_problem referred from view {flagged_view} and {referring_url}",
+            {'user': request.user.username}
+        )
+
+            
     if request.method == "GET":
 
-        inputs_IN = get_request_data(request)
-
-        # did we get image ID? 
-        image_id = inputs_IN.get( PARAM_NAME_IMAGE_ID, None )
-
-        # get referring URL if present
-        try:
-            referring_url = request.META['HTTP_REFERER']
-        except Exception:
-            referring_url = ""
-
-        if image_id:
-
-            image_instance = Image.objects.get(pk=image_id)
-
-            adapter.info(
-                f'report_problem GET request for {image_id}',
-                {'user': request.user.username}
-            )
-            adapter.info(
-                f"report_problem referred from {referring_url}",
-                {'user': request.user.username}
-            )
-            
-            flagged_view = parse_http_referral(referring_url, request.user.username)
-
-            return render(
-                    request, \
-                    'EntryApp/report-problem.html',
-                    {
-                        'image': image_instance,
-                        'form': ProblemForm(),
-                        'reel_name': image_instance.image_file.img_reel.reel_name,
-                        'slug': image_instance.image_file.smaller_image_file_name,
-                        'year': image_instance.year
-                    }
-            )
-        else:
-            
-            adapter.info(
-                f"report_problem GET request with no image id",
-                {'user': request.user.username}
-            )
-            adapter.info(
-                f"report_problem referred from {referring_url}",
-                {'user': request.user.username}
-            )
-
-            return render(
-                request,
+        return render(
+                request, \
                 'EntryApp/report-problem.html',
                 {
-                    'form': ProblemForm()
+                    'image_id': image_id,
+                    'image': image_instance,
+                    'form': ProblemForm(),
+                    'reel_name': image_instance.image_file.img_reel.reel_name,
+                    'slug': image_instance.image_file.smaller_image_file_name,
+                    'year': image_instance.year
                 }
             )
 
     elif request.method == "POST":
 
-        form = request.POST
-        problem_image_id = current.img_id
-        problem_image = Image.objects.get(id=problem_image_id)
+        adapter.info(f"report_problem: request.POST is {request.POST}")
 
-        adapter.info(
-            f'report_problem POST request for file {problem_image.image_file.img_file_name}',
-            {'user': request.user.username}
-        )
-        adapter.info(
-            f'report_problem problem_image id is {problem_image.id}',
-            {'user': request.user.username}
-        )
+        form = ProblemForm(inputs_IN)
 
-        # do I need to figure out what kind of image it is?
-        try:
-        
-            problem_image = Image.objects.get(id = problem_image.id)
 
-            # flag the problem at the image level
-            is_problem = True if 'problem' in form.keys() else False
+        if form.is_valid():
 
-            problem_image.problem = is_problem
-            problem_image.save()
-            
-            return redirect(reverse('EntryApp:index'))
+            form_data = form.cleaned_data
+            # adapter.info(f'form.is_valid() is {form.is_valid()}')
+            # adapter.info(f'form.data is {form_data}')
+            adapter.info(f'form.cleaned_data is {form.cleaned_data}')
 
-        except Exception as e:
+            problem_image_id = image_id
+            problem_image = image_instance
 
-            adapter.error(
-                f"Exception in report_problem: ", 
-                {'user': request.user.username},
-                e
+            adapter.info(
+                f'report_problem POST request for file {problem_image.image_file.img_file_name}',
+                {'user': request.user.username}
+            )
+            adapter.info(
+                f'report_problem problem_image id is {problem_image.id}',
+                {'user': request.user.username}
             )
 
-            return render(
-                request, \
-                'EntryApp/report-problem.html',
-                {
-                    'image': current.img,
-                    'form': ProblemForm(),
-                    'reel_name': current.reel.reel_name,
-                    'slug': current.img.image_file.smaller_image_file_name,
-                    'year': problem_image.year
-                }
-        )
+            try:
+            
+                # get instance of problematic image
+                problem_image = Image.objects.get(id = problem_image.id)
+
+                # get the info out of the form
+                is_problem = form_data.get('problem', False)
+                prob_description = form_data.get('description', None)
+                # is_problem = True if 'problem' in form.fields.keys() else False
+                # prob_description = form.fields.get('description', None)
+
+                adapter.info(f'is_problem is {is_problem}', {'user': ''})
+                adapter.info(f'prob_description is {prob_description}', {'user': ''})
+
+                with transaction.atomic():
+
+                    # update image instance
+                    problem_image.problem = is_problem
+                    problem_image.prob_description = prob_description
+                    problem_image.save()
+
+
+                adapter.info(f'problem_image.problem is {problem_image.problem}')
+                adapter.info(f'problem_image.prob_description is {problem_image.prob_description}')
+                
+                return redirect(reverse('EntryApp:index'))
+
+
+            # if this raises an exception, we stay on this page with an empty problem form
+            except Exception as e:
+
+                adapter.error(
+                    f"Exception in report_problem: ", 
+                    {'user': request.user.username},
+                    e
+                )
+
+                return render(
+                    request, \
+                    'EntryApp/report-problem.html',
+                    {
+                        'image': current.img,
+                        'form': ProblemForm(),
+                        'reel_name': current.reel.reel_name,
+                        'slug': current.img.image_file.smaller_image_file_name,
+                        'year': problem_image.year
+                    }
+            )
 
 #------------------------------------------------------------------------------#
 # AUTHENTICATION VIEWS

@@ -350,7 +350,7 @@ class CodeImageSheetTests(BaseTestCase):
         self.assertEqual(sheet.num_records, EXPECTED['sheet_data_entry']['num_records'])
 
 
-class ReportProblem(BaseTestCase):
+class ReportProblemTests(BaseTestCase):
 
     fixtures = [DEV_FIXTURE]
     template_name = "EntryApp:report_problem"
@@ -386,12 +386,16 @@ class ReportProblem(BaseTestCase):
     def test_report_submit(self):
         '''Test that submitted data ends up in DB'''
         
-        context = EXPECTED['report_problem']
-        context['form'] = ProblemForm()
+        expected = EXPECTED['report_problem']
+        context = expected
+
         response = self.authenticate_and_post(context)
-        # form = response.POST
+        
+        self.assertEqual(response.status_code, HTTPStatus.OK)
 
-        print(dir(response))
+        # now get image out of DB
+        image = Image.objects.get(id=expected['image_id'])
 
-        # also test redirect?
+        self.assertTrue(image.problem)
+        self.assertEqual(image.prob_description, expected.get('description')[0])
     
