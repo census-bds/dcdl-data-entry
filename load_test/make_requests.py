@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-import dcdl.settings as settings
+# import dcdl.settings as settings
 
 """
 Load test script to make GET and POST requests to test server ability
@@ -25,8 +25,8 @@ USER_INFO = {
     'jbid456': {
         'username': 'jbid456',
         'password': 'dcdl1980',
-        'image_id': '47',
-        'sheet_id': '8',
+        'image_id': '48',
+        'sheet_id': '99',
         'num_records': '11',
         'last_name': 'F',
         'first_name': 'T',
@@ -35,8 +35,8 @@ USER_INFO = {
     'jbid789': {
         'username': 'jbid789',
         'password': 'dcdl1980',
-        'image_id': '46',
-        'sheet_id': '9',
+        'image_id': '52',
+        'sheet_id': '12',
         'num_records': '11',
         'last_name': 'T',
         'first_name': 'F',
@@ -45,8 +45,8 @@ USER_INFO = {
     'jbid999': {
         'username': 'jbid999',
         'password': 'genadek001',
-        'image_id': '46',
-        'sheet_id': '9',
+        'image_id': '49',
+        'sheet_id': '16',
         'num_records': '11',
         'last_name': 'F',
         'first_name': 'T',
@@ -66,7 +66,7 @@ def make_url(page_name):
     - string url
     '''
 
-    instance = settings.APP_INSTANCE
+    instance = "test" #settings.APP_INSTANCE
 
     if instance == 'dev':
         return 'http://localhost:8002/EntryApp/' + page_name
@@ -182,7 +182,7 @@ if __name__ == '__main__':
     code_image_get = s.get(code_image_url)
     
     # POSTS 
-    post = make_post(s, code_image_url, {'image_id': '45'})
+    post = make_post(s, code_image_url, {'image_id': user_info['image_id']})
 
     # update image type
     image_data = {
