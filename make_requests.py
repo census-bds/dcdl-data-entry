@@ -1,3 +1,4 @@
+import argparse
 import requests
 
 from bs4 import BeautifulSoup
@@ -9,6 +10,51 @@ import dcdl.settings as settings
 Load test script to make GET and POST requests to test server ability
 to handle more concurrent users.
 """
+
+USER_INFO = {
+    'jbid123': {
+        'username': 'jbid123',
+        'password': 'dcdl1980',
+        'image_id': '45',
+        'sheet_id': '7',
+        'num_records': '12',
+        'last_name': 'Frank',
+        'first_name': 'T',
+        'age': 97,
+    },
+    'jbid456': {
+        'username': 'jbid456',
+        'password': 'dcdl1980',
+        'image_id': '47',
+        'sheet_id': '8',
+        'num_records': '11',
+        'last_name': 'F',
+        'first_name': 'T',
+        'age': 97,
+    },
+    'jbid789': {
+        'username': 'jbid789',
+        'password': 'dcdl1980',
+        'image_id': '46',
+        'sheet_id': '9',
+        'num_records': '11',
+        'last_name': 'T',
+        'first_name': 'F',
+        'age': 97,
+    },
+    'jbid999': {
+        'username': 'jbid999',
+        'password': 'genadek001',
+        'image_id': '46',
+        'sheet_id': '9',
+        'num_records': '11',
+        'last_name': 'F',
+        'first_name': 'T',
+        'age': 97,
+    },
+}
+
+
 
 def make_url(page_name):
     '''
@@ -84,7 +130,6 @@ def make_post(s, url, extra_data={}):
     post = s.post(
         'http://localhost:7002/EntryApp/code-image/',
         data=post_data,
-        # headers=header_data,
     )
 
     return post
@@ -92,7 +137,19 @@ def make_post(s, url, extra_data={}):
 
 if __name__ == '__main__':
 
+
+    parser = argparse.ArgumentParser(description='Get username input')
+    parser.add_argument('username', 
+                        help='keyer username')
+
+    args = parser.parse_args()
+    jbid = args.username
+
+
     s = requests.Session()
+
+    # get user
+    user_info = USER_INFO[jbid]
 
     # URLs
     index_url = make_url('')
@@ -108,8 +165,8 @@ if __name__ == '__main__':
 
     post_data = {
         'csrfmiddlewaretoken': csrf_token,
-        'username':'jbid123',
-        'password': 'dcdl1980',
+        'username': user_info['username'],
+        'password': user_info['password']
     }
 
     # now POST to login
@@ -129,7 +186,7 @@ if __name__ == '__main__':
 
     # update image type
     image_data = {
-        'image_id': '45',
+        'image_id': user_info['image_id'],
         'image_type': 'sheet',
         'action': 'update_image',
     }
@@ -137,27 +194,27 @@ if __name__ == '__main__':
 
     # update sheet info
     sheet_data = {
-        'image_id': '45',
+        'image_id': user_info['image_id'],
         'action': 'update_sheet_type',
-        'num_records': 12,
+        'num_records':  user_info['num_records'],
     }
     post3 = make_post(s, code_image_url, sheet_data)
 
     # add record info
     record_data = {
-        'image_id': '45',
-        'sheet_id': '7',
+        'image_id':  user_info['image_id'],
+        'sheet_id':  user_info['sheet_id'],
         'action': 'update_record',
-        'last_name': 'Frank',
-        'first_name': 'T',
-        'age': 97
+        'last_name':  user_info['last_name'],
+        'first_name': user_info['first_name'],
+        'age':  user_info['age'],
     }
     post4 = make_post(s, code_image_url, record_data)
 
     # mark image as complete
     complete_data = {
-        'image_id': '45',
-        'sheet_id': '7',
+        'image_id':  user_info['image_id'],
+        'sheet_id':  user_info['sheet_id'],
         'action': 'complete_image'
     }
     post5 = make_post(s, code_image_url, complete_data)
