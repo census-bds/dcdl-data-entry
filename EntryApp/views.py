@@ -2997,10 +2997,6 @@ def test_household1960_form(request):
     fields = [
         'address_one',
         'address_two',
-        'num_records_one',
-        'num_records_two',
-        'num_records_three',
-        'num_records_four',
         'sample_key_one',
         'sample_key_two',
         'sample_key_three',

@@ -104,6 +104,7 @@
 {% endblock content %}
 
 {% block problem %}
+{% if app_instance == "dev" %}
     <p>Click this button to see 1960 household form in development.</p>
     <form action={% url 'EntryApp:test_household_1960' %}>
         {% csrf_token %}
@@ -141,6 +142,6 @@
     </form>
     <br>
     <br>
-
+{% endif %}
 
 {% endblock problem %}

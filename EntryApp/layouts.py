@@ -316,55 +316,8 @@ HOUSEHOLD_1960 = Layout(
                 Field('apt_number_four', css_class='numberinput-small'),
                 # css_id = 'household-1960-apt_number'
             ),
-            Div(
-                Field('num_records_one', css_class='numberinput-small'),
-                Field('num_records_two', css_class='numberinput-small'),
-                Field('num_records_three', css_class='numberinput-small'),
-                Field('num_records_four', css_class='numberinput-small'),
-                # css_id = 'household-1960-num_persons'
-            ),
             css_id = 'household-1960-inputs',
             css_class="row"
         ),
     )
 )
-
-# HOUSEHOLD_1960 = Layout(
-#     Div(
-#         Div(
-#             Field('address_one'),
-#             Field('address_two'),
-#             css_id="household-1960-address-div",
-#             css_class="row"
-#             ),
-#         Div(
-#             Div(
-#                 Field(('sample_key_one')),
-#                 Field(('sample_key_two')),
-#                 Field(('sample_key_three')),
-#                 Field(('sample_key_four')),
-#                 # css_id = 'household-1960-radios'
-#             ),
-#             Div(
-#                 Field('house_number_one', css_class='numberinput-small'),
-#                 Field('house_number_two', css_class='numberinput-small'),
-#                 Field('house_number_three', css_class='numberinput-small'),
-#                 Field('house_number_four', css_class='numberinput-small'),
-#             ),
-#             Div(
-#                 Field('apt_number_one', css_class='numberinput-small'),
-#                 Field('apt_number_two', css_class='numberinput-small'),
-#                 Field('apt_number_three', css_class='numberinput-small'),
-#                 Field('apt_number_four', css_class='numberinput-small'),
-#             ),
-#             Div(
-#                 Field('num_records_one', css_class='numberinput-small'),
-#                 Field('num_records_two', css_class='numberinput-small'),
-#                 Field('num_records_three', css_class='numberinput-small'),
-#                 Field('num_records_four', css_class='numberinput-small')
-#             ),
-#             css_class="row"
-#         ),
-#         css_class = 'form-inline form-inline-nowrap'
-#     )
-# )

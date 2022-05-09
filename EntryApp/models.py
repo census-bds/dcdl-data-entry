@@ -607,11 +607,6 @@ class Household1960(models.Model):
         - apt_number_two: apartment number for second entry
         - apt_number_three: apartment number for third entry
         - apt_number_four: apartment number for fourth entry
-        Additional data collected
-        - num_records_one: number of names listed in first household 
-        - num_records_two: number of names listed in second household 
-        - num_records_three: number of names listed in third household 
-        - num_records_four: number of names listed in fourth household 
     '''
 
     class Meta:
@@ -631,23 +626,6 @@ class Household1960(models.Model):
         max_length = 255,
         default = 'jbid000'
     ) 
-
-    num_records_one = models.PositiveIntegerField(
-        verbose_name = 'Number of persons in household 1',
-        null=False
-    )
-    num_records_two = models.PositiveIntegerField(
-        verbose_name = 'Number of persons in household 2',
-        null=False
-    )
-    num_records_three = models.PositiveIntegerField(
-        verbose_name = 'Number of persons in household 3',
-        null=False
-    )
-    num_records_four = models.PositiveIntegerField(
-        verbose_name = 'Number of persons in household 4',
-        null=False
-    )
 
     # addresses
     address_one = models.CharField(
