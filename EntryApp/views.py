@@ -2789,7 +2789,6 @@ def report_problem(request):
 
     # did we get image ID? 
     image_id = inputs_IN.get( PARAM_NAME_IMAGE_ID, None )
-    image_instance = None
 
     if image_id:
 
@@ -2806,6 +2805,7 @@ def report_problem(request):
 
     else:
         
+        image_instance = None
         adapter.info(
             f"report_problem GET request with no image id",
             {'user': request.user.username}
