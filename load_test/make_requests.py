@@ -145,6 +145,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
     jbid = args.username
 
+    # timing
+    start_time = datetime.now()
 
     s = requests.Session()
 
@@ -161,7 +163,6 @@ if __name__ == '__main__':
     login_get = s.get('http://localhost:7002/accounts/login')
 
     csrf_token = get_csrf_from_html(login_get.content)
-    print("CSRF token from content is", csrf_token)
 
     post_data = {
         'csrfmiddlewaretoken': csrf_token,
@@ -218,3 +219,7 @@ if __name__ == '__main__':
         'action': 'complete_image'
     }
     post5 = make_post(s, code_image_url, complete_data)
+
+    finish_time = datetime.now()
+
+    print("run time:",  finish_time-start_time)
