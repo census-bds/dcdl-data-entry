@@ -13,6 +13,8 @@ from django.conf import settings
 from django.contrib.auth.models import Group
 from django.db import connection
 
+from EntryApp.shrink_images import shrink_reel_images_before_db
+
 from EntryApp.models import Breaker
 from EntryApp.models import CurrentEntry
 from EntryApp.models import ImageFile
@@ -445,11 +447,18 @@ def refresh_db():
     create_1990_dummy_breakers()
 
 
-def bulk_load_db():
+def bulk_load_db(shrink_images=False):
     '''
     Function to load form fields, images, and dummy 1990 breakers
     FOR PRODUCTION
+
+    Takes:
+    - optional boolean to shrink images prior to loading into DB
     '''
+
+    if shrink_images:
+        shrink_reel_images_before_db(settings.DEFAULT_REEL_LOAD_SPEC)
+
     load_form_fields(settings.FORM_FIELDS_CSV)
     load_reels_from_csv(settings.DEFAULT_REEL_LOAD_SPEC)
     create_1990_dummy_breakers([])

@@ -3,7 +3,9 @@
 # 2022-02-08
 #===============================================================#
 
+import glob
 import os
+import pandas as pd
 from PIL import Image
 
 from EntryApp.models import ImageFile
@@ -59,7 +61,7 @@ def shrink_image(image_file_path, out_path):
 
 
 
-def apply_shrink_to_images():
+def apply_shrink_to_db_images():
     '''
     Method to loop through all ImageFiles and shrink them
 
@@ -81,3 +83,38 @@ def apply_shrink_to_images():
         except Exception as e:
             print(e)
 
+
+def shrink_reel_images_before_db(reel_path):
+    '''
+    Method to shrink images in a reel before they are loaded in to DB
+
+    Takes: 
+    - string of path to reel, e.g. /data/storage/images/1970/this_1970_reel 
+    Returns: None
+    '''
+
+    image_file_list = glob.glob(reel_path + "/*.jpg")
+    print(image_file_list)
+
+    for i in image_file_list:
+
+        new_out_path, new_out_name = make_new_filepath(i)
+
+        try:
+            shrink_image(i, new_out_path)
+        
+        except Exception as e:
+            print(e)
+
+
+def shrink_images_before_db_in_bulk(csv_path):
+    '''
+    Shrink images in bulk from a csv file with the paths
+
+    Takes:
+    - string path to the csv
+    Returns: None
+    '''
+
+    to_shrink = pd.read_csv(csv_path)
+    to_shrink.apply(lambda x: shrink_reel_images_before_db(x.reel_name), axis=1)
