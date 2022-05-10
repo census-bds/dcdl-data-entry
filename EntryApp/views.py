@@ -461,8 +461,9 @@ def initialize_context( request_IN, dict_IN = None ):
 def assign_reel(keyer):
     '''
     Helper method for IndexView to assign a keyer the images from a given reel
-     by loading image info into Image model for a keyer. This method populates
-     the Image model.
+     by loading image info into Image model for a keyer. In other words, when
+     this method is called, it creates a row for each image in the assigned
+     reel for the given keyer.
 
     Required arguments:
     - keyer 
@@ -488,10 +489,14 @@ def assign_reel(keyer):
         )
         return None
 
-    # prefer to assign reels that have 1 keyer over those that have none
+    # prefer to assign reels that have 0 keyers over those that have 1
     # then assign reels with lower IDs (i.e. those loaded earlier) over higher
     # take the one at the top
-    this_reel = reel_qs.order_by('-keyer_count').order_by('id')[0]
+    ordered_reel_qs = reel_qs.order_by('id').order_by('keyer_count')
+    adapter.info(
+        f'reel queue is {list(ordered_reel_qs)}'
+    )
+    this_reel = ordered_reel_qs[0]
  
     # set the keyer
     if this_reel.keyer_one ==  None:
