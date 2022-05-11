@@ -119,10 +119,6 @@ FORM_1990 = Layout(
             css_class='col-lg-6 col-md-6 col-sm-6'
         ),
         Div(
-            Field('exact_birth_year', css_class='numberinput-small'),
-            css_class='col-lg-6 col-md-6 col-sm-6'
-        ),
-        Div(
             Field('total_persons', css_class='numberinput-small'), 
         ),
         Div(
