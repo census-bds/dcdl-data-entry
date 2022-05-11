@@ -63,7 +63,7 @@ logger = logging.getLogger('EntryApp.test_views')
 # GLOBALS
 #================================#
 
-DEV_FIXTURE =  'fixtures/dev_data_20220503_1110.json'
+DEV_FIXTURE =  'fixtures/dev_data_2022-05-11.json'
 TEMP_USERNAME = 'jbid456'
 TEMP_PW = 'dcdl1980'
 
@@ -330,7 +330,7 @@ class CodeImageSheetTests(BaseTestCase):
         response = self.authenticate_and_post(context=context)
 
         # then verify that the DB did not update
-        sheet_instance = Sheet.objects.get(id=11)
+        sheet_instance = Sheet.objects.get(id=expected['sheet_id'])
         self.assertNotEqual(context['num_records'], sheet_instance.num_records)
 
         # check that the error message is in the content

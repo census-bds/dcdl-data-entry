@@ -181,7 +181,7 @@ def get_form_fields( year, form_type ):
     '''
 
     allowed_years = [1960, 1970, 1980, 1990, ]
-    allowed_forms = ['breaker', 'short', 'long']
+    allowed_forms = ['breaker', 'short', 'long', 'household', ]
     
     adapter.info(
         f"get_form_fields got {year}, {form_type}",
