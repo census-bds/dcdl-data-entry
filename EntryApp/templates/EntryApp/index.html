@@ -104,6 +104,16 @@
 {% endblock content %}
 
 {% block problem %}
+{% if app_instance == "dev" %}
+    <p>Click this button to see 1960 household form in development.</p>
+    <form action={% url 'EntryApp:test_household_1960' %}>
+        {% csrf_token %}
+        <input type="submit" value="View Household 1960">
+    </form>
+    <br>
+    <br>
+    
+    
     <p>Click the buttons below to view sample record entry pages for each year.</p>
     <br>
     <form action={% url 'EntryApp:test_crispy_formset' year=1960 form_type='short'%}>
@@ -132,5 +142,6 @@
     </form>
     <br>
     <br>
+{% endif %}
 
-    {% endblock problem %}
+{% endblock problem %}

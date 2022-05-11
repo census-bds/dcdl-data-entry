@@ -1,8 +1,5 @@
 """
 FORMS FOR DCDL DATA ENTRY
-
-TO DO:
--Validation methods
 """
 
 from django import forms
@@ -11,24 +8,30 @@ from crispy_forms.layout import Submit
 
 import EntryApp.choices as choices
 import EntryApp.layouts as layouts
+
 from EntryApp.models import Breaker
+from EntryApp.models import Household1960
 from EntryApp.models import Image
+from EntryApp.models import LongForm1990 
+from EntryApp.models import OtherImage
 from EntryApp.models import Record
 from EntryApp.models import Sheet
-from EntryApp.models import OtherImage
-from EntryApp.models import LongForm1990 
-from EntryApp.models import FormField
-from EntryApp.models import CurrentEntry
 
 
 #================================#
 # FORMS FOR DATA ENTRY
 #================================#
 
+# this section is organized in the order of entry, then alphabetically
 
 class ImageForm(forms.ModelForm):
     """
-    Model form version of the Image form
+    Model form for images. 
+    Custom __init__ identifies images from 1990 reels and longform reels.
+    These adjust the choice set for image type.
+
+    Fields shown:
+    - image_type, as a radio button
     """
 
     class Meta:
@@ -54,20 +57,15 @@ class ImageForm(forms.ModelForm):
         self.fields.get('image_type').choices = choices_list
 
 
-
-class SheetForm(forms.ModelForm):
-    """
-    Define form to enter sheet data: # of records
-    """
-
-    class Meta:
-        model = Sheet
-        fields = ['num_records']
-
-
 class LongForm1990Form(forms.ModelForm):
     """
-    Define form to enter data from 1990 long forms w/employer info
+    Model form for EntryApp.LongForm1990, 
+    These are the 1990 long forms, which have employer data
+
+    Fields: do not show the following
+    - image foreign key
+    - keyer jbid
+    - timestamps 
     """
 
     class Meta:
@@ -83,7 +81,13 @@ class LongForm1990Form(forms.ModelForm):
 
 class OtherImageForm(forms.ModelForm):
     """
-    Define form to capture data about 'other' images where no data entered
+    Model form for EntryApp.OtherImage
+
+    Fields: do not show the following
+    - image foreign key
+    - keyer jbid
+    - year (we know this from knowing the reel)
+    - timestamps
     """
 
     class Meta:
@@ -98,17 +102,56 @@ class OtherImageForm(forms.ModelForm):
         ]
 
 
+class SheetForm(forms.ModelForm):
+    """
+    Model form for EntryApp.Sheet model.
+    
+    Fields specified:
+    - # of records, i.e. # of people listed on page
+    """
+
+    class Meta:
+        model = Sheet
+        fields = ['num_records']
+
+
+class Household1960Form(forms.ModelForm):
+    '''
+    Model form for EntryApp.Household1960 model
+
+    Fields: do not show
+    - image foreign key
+    - sheet foreign key
+    - keyer jbid
+    '''
+
+    class Meta:
+        model = Household1960
+        exclude = [
+            'image',
+            'sheet',
+            'jbid'
+        ]
+
+
+
 class RecordForm(forms.ModelForm):
-    """
-    Define form to enter record data (i.e. individual data)
-    """
+    '''
+    Model form for EntryApp.Record model
+
+    Fields: 
+    - these are set dynamically by the view with a lookup in EntryApp.FormField
+    - we never show:
+        - keyer jbid
+        - timestamps
+        - completion status 
+    '''
     
     class Meta:
         model = Record
         exclude = [
             'jbid',
             'timestamp',
-            'is_illegible',
             'is_complete',
         ]
 
@@ -119,7 +162,14 @@ class RecordForm(forms.ModelForm):
 
 class ProblemForm(forms.Form):
     '''
-    Define form where users can record a problem with a data entry task
+    Generic form for recording a problem with an image.
+    These map to fields in EntryApp.Image
+
+    Fields:
+    - problem: boolean for presence of problem (checkbox), maps to 
+        EntryApp.Image.problem
+    - description: text box for description of issue, maps to 
+        EntryApp.Image.problem_description 
     '''
 
     problem = forms.BooleanField(
@@ -157,12 +207,12 @@ class BaseEmptyRecordFormSet(forms.BaseModelFormSet):
 
 class BaseBreakerFormSet(forms.BaseModelFormSet):
     '''
-    Subclass for BreakerFormSet so that it returns no existing data
+    Subclass for BreakerFormSet so that formset returns no existing data
     '''
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        #self.queryset = Breaker.objects.none()
+
 
 #================================#
 # FORM HELPERS
@@ -205,6 +255,15 @@ class LongFormHelper(RecordFormHelper):
     def __init__(self, year, *args, **kwargs):
         super().__init__(year, *args, **kwargs)
         self.layout = layouts.LONG_FORM_1990
+
+
+class Household1960FormHelper(FormHelper):
+    '''
+    Custom FormHelper for EntryApp.Household1960 model form
+    '''
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.layout = layouts.HOUSEHOLD_1960
 
 
 class CrispyFormSetHelper(FormHelper):

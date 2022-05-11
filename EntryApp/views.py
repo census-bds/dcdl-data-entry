@@ -43,6 +43,7 @@ from django.views.generic import View
 from EntryApp.models import Breaker
 from EntryApp.models import CurrentEntry
 from EntryApp.models import FormField
+from EntryApp.models import Household1960
 from EntryApp.models import Image
 from EntryApp.models import ImageFile
 from EntryApp.models import Keyer
@@ -60,6 +61,8 @@ from EntryApp.forms import BaseRecordFormSet
 from EntryApp.forms import BreakerFormHelper
 from EntryApp.forms import CrispyFormSetHelper
 from EntryApp.forms import CrispyLongFormHelper
+from EntryApp.forms import Household1960Form
+from EntryApp.forms import Household1960FormHelper
 from EntryApp.forms import ImageForm
 from EntryApp.forms import LongForm1990Form
 from EntryApp.forms import LongFormHelper
@@ -163,7 +166,7 @@ class CustomAdapter(logging.LoggerAdapter):
 adapter = CustomAdapter(logger, {'user': "_"})
 
 #==============================================================================#
-# HELPERS + FUNCTIONAL VIEWS
+# HELPER METHODS
 #==============================================================================#
 
 def get_form_fields( year, form_type ):
@@ -178,7 +181,7 @@ def get_form_fields( year, form_type ):
     '''
 
     allowed_years = [1960, 1970, 1980, 1990, ]
-    allowed_forms = ['breaker', 'short', 'long']
+    allowed_forms = ['breaker', 'short', 'long', 'household', ]
     
     adapter.info(
         f"get_form_fields got {year}, {form_type}",
@@ -458,8 +461,9 @@ def initialize_context( request_IN, dict_IN = None ):
 def assign_reel(keyer):
     '''
     Helper method for IndexView to assign a keyer the images from a given reel
-     by loading image info into Image model for a keyer. This method populates
-     the Image model.
+     by loading image info into Image model for a keyer. In other words, when
+     this method is called, it creates a row for each image in the assigned
+     reel for the given keyer.
 
     Required arguments:
     - keyer 
@@ -485,10 +489,14 @@ def assign_reel(keyer):
         )
         return None
 
-    # prefer to assign reels that have 1 keyer over those that have none
+    # prefer to assign reels that have 0 keyers over those that have 1
     # then assign reels with lower IDs (i.e. those loaded earlier) over higher
     # take the one at the top
-    this_reel = reel_qs.order_by('-keyer_count').order_by('id')[0]
+    ordered_reel_qs = reel_qs.order_by('id').order_by('keyer_count')
+    adapter.info(
+        f'reel queue is {list(ordered_reel_qs)}'
+    )
+    this_reel = ordered_reel_qs[0]
  
     # set the keyer
     if this_reel.keyer_one ==  None:
@@ -578,6 +586,7 @@ def seed_current_entry(request):
         
 
         first_imagefile = ImageFile.objects.filter(img_reel = this_reel)[0]
+        # first_imagefile = this_reel.imagefile_set.get_queryset() #TODO test this out
         first_image = Image.objects.get(
             jbid = this_keyer.jbid,
             image_file = first_imagefile
@@ -2764,111 +2773,143 @@ def parse_http_referral(url, username):
 def report_problem(request):
     '''
     View to render problem form so user can record an issue
+
+    This is a functional view that can handle either GET or POST requests. It 
+    will redirect to the index view after the user submits their form.
     '''
 
     current = CurrentEntry.objects.get(jbid=request.user)
-    flagged_view = None
 
+    # get referring URL if present
+    try:
+        referring_url = request.META['HTTP_REFERER']
+    except Exception:
+        referring_url = ""
+
+    flagged_view = parse_http_referral(referring_url, request.user.username)
+
+
+    inputs_IN = get_request_data(request)
+    adapter.info(f"inputs_IN is {inputs_IN}")
+
+    # did we get image ID? 
+    image_id = inputs_IN.get( PARAM_NAME_IMAGE_ID, None )
+
+    if image_id:
+
+        image_instance = Image.objects.get(pk=image_id)
+
+        adapter.info(
+            f'report_problem GET request for {image_id}',
+            {'user': request.user.username}
+        )
+        adapter.info(
+            f"report_problem referred from view {flagged_view} at {referring_url}",
+            {'user': request.user.username}
+        )
+
+    else:
+        
+        image_instance = None
+        adapter.info(
+            f"report_problem GET request with no image id",
+            {'user': request.user.username}
+        )
+        adapter.info(
+            f"report_problem referred from view {flagged_view} and {referring_url}",
+            {'user': request.user.username}
+        )
+
+            
     if request.method == "GET":
 
-        inputs_IN = get_request_data(request)
-
-        # did we get image ID? 
-        image_id = inputs_IN.get( PARAM_NAME_IMAGE_ID, None )
-
-        if image_id:
-
-            image_instance = Image.objects.get(pk=image_id)
-
-            adapter.info(
-                f'report_problem GET request for {image_id}',
-                {'user': request.user.username}
-            )
-            adapter.info(
-                f"report_problem referred from {request.META['HTTP_REFERER']}",
-                {'user': request.user.username}
-            )
-            
-            
-            flagged_view = parse_http_referral(request.META['HTTP_REFERER'], request.user.username)
-            
-            return render(
-                    request, \
-                    'EntryApp/report-problem.html',
-                    {
-                        'image': image_instance,
-                        'form': ProblemForm(),
-                        'reel_name': image_instance.image_file.img_reel.reel_name,
-                        'slug': image_instance.image_file.smaller_image_file_name,
-                        'year': image_instance.year
-                    }
-            )
-        else:
-            
-            adapter.info(
-                f"report_problem GET request with no image id",
-                {'user': request.user.username}
-            )
-            adapter.info(
-                f"report_problem referred from {request.META['HTTP_REFERER']}",
-                {'user': request.user.username}
-            )
-
-            return render(
-                request,
+        return render(
+                request, \
                 'EntryApp/report-problem.html',
                 {
-                    'form': ProblemForm()
+                    'image_id': image_id,
+                    'image': image_instance,
+                    'form': ProblemForm(),
+                    'reel_name': image_instance.image_file.img_reel.reel_name,
+                    'slug': image_instance.image_file.smaller_image_file_name,
+                    'year': image_instance.year
                 }
             )
 
     elif request.method == "POST":
 
-        form = request.POST
-        problem_image_id = current.img_id
-        problem_image = Image.objects.get(id=problem_image_id)
+        adapter.info(f"report_problem: request.POST is {request.POST}")
 
-        adapter.info(
-            f'report_problem POST request for file {problem_image.image_file.img_file_name}',
-            {'user': request.user.username}
-        )
-        adapter.info(
-            f'report_problem problem_image id is {problem_image.id}',
-            {'user': request.user.username}
-        )
+        form = ProblemForm(inputs_IN)
 
-        # do I need to figure out what kind of image it is?
-        try:
-        
-            problem_image = Image.objects.get(id = problem_image.id)
 
-            # flag the problem at the image level
-            is_problem = True if 'problem' in form.keys() else False
+        if form.is_valid():
 
-            problem_image.problem = is_problem
-            problem_image.save()
-            
-            return redirect(reverse('EntryApp:index'))
+            form_data = form.cleaned_data
+            # adapter.info(f'form.is_valid() is {form.is_valid()}')
+            # adapter.info(f'form.data is {form_data}')
+            adapter.info(f'form.cleaned_data is {form.cleaned_data}')
 
-        except Exception as e:
+            problem_image_id = image_id
+            problem_image = image_instance
 
-            adapter.error(
-                f"Exception in report_problem: ", 
-                {'user': request.user.username},
-                e
+            adapter.info(
+                f'report_problem POST request for file {problem_image.image_file.img_file_name}',
+                {'user': request.user.username}
+            )
+            adapter.info(
+                f'report_problem problem_image id is {problem_image.id}',
+                {'user': request.user.username}
             )
 
-            return render(
-                request, \
-                'EntryApp/report-problem.html',
-                {
-                    'image': current.img,
-                    'form': ProblemForm(),
-                    'reel_name': current.reel.reel_name,
-                    'slug': current.img.image_file.smaller_image_file_name,
-                    'year': problem_image.year
-                }
-        )
+            try:
+            
+                # get instance of problematic image
+                problem_image = Image.objects.get(id = problem_image.id)
+
+                # get the info out of the form
+                is_problem = form_data.get('problem', False)
+                prob_description = form_data.get('description', None)
+                # is_problem = True if 'problem' in form.fields.keys() else False
+                # prob_description = form.fields.get('description', None)
+
+                adapter.info(f'is_problem is {is_problem}', {'user': ''})
+                adapter.info(f'prob_description is {prob_description}', {'user': ''})
+
+                with transaction.atomic():
+
+                    # update image instance
+                    problem_image.problem = is_problem
+                    problem_image.prob_description = prob_description
+                    problem_image.save()
+
+
+                adapter.info(f'problem_image.problem is {problem_image.problem}')
+                adapter.info(f'problem_image.prob_description is {problem_image.prob_description}')
+                
+                return redirect(reverse('EntryApp:index'))
+
+
+            # if this raises an exception, we stay on this page with an empty problem form
+            except Exception as e:
+
+                adapter.error(
+                    f"Exception in report_problem: ", 
+                    {'user': request.user.username},
+                    e
+                )
+
+                return render(
+                    request, \
+                    'EntryApp/report-problem.html',
+                    {
+                        'image': current.img,
+                        'form': ProblemForm(),
+                        'reel_name': current.reel.reel_name,
+                        'slug': current.img.image_file.smaller_image_file_name,
+                        'year': problem_image.year
+                    }
+            )
 
 #------------------------------------------------------------------------------#
 # AUTHENTICATION VIEWS
@@ -2950,3 +2991,45 @@ def test_crispy_formset_view(request, year, form_type):
     }
 
     return render(request, 'EntryApp/test-crispy-formset.html', context)
+
+    
+def test_household1960_form(request):
+    '''
+    Temporary view for developing the 1960 household form layout
+    '''
+
+    # set field order
+    fields = [
+        'address_one',
+        'address_two',
+        'sample_key_one',
+        'sample_key_two',
+        'sample_key_three',
+        'sample_key_four',
+        'house_number_one',
+        'house_number_two',
+        'house_number_three',
+        'house_number_four',
+        'apt_number_one',
+        'apt_number_two',
+        'apt_number_three',
+        'apt_number_four',
+    ]
+
+    # set widgets
+    field_widgets = {f: choices.FORM_WIDGETS[f] for f in fields if f in choices.FORM_WIDGETS}
+
+    # initialize form and helper
+    household_form = modelform_factory(
+        Household1960,
+        fields = fields,
+        widgets = field_widgets
+    )
+    helper = Household1960FormHelper()
+    
+    context = {
+        'household_form': household_form,
+        'helper': helper
+    }
+
+    return render(request, 'EntryApp/develop-household1960.html', context)
