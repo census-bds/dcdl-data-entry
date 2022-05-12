@@ -2170,6 +2170,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
             reel_name = current.reel.reel_name 
 
             # create image form(s).
+            # note we do want reel_name here because this is how we check for long form 1990
             image_form = ImageForm( image_IN.year, reel_name, image_form_values )
 
             # send them to template.
