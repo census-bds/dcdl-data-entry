@@ -74,6 +74,7 @@ class Reel(models.Model):
         - last modified: date at which any reel attribute was last changed (auto-update)
         - load date: date on which reel instance was created here (auto-update)
         - reel_name: name of reel directory, e.g. 1980_Texas_3951
+        - reel_chunk_name: name of 500ish image chunk in a reel, e.g. 1980_Texas_3951_1
         - reel_path: full file path to reel images on disk
         - state: state covered for 1960-1980
         - year: year of reel
@@ -90,6 +91,7 @@ class Reel(models.Model):
 
     # metadata that comes in from load
     reel_name = models.CharField(max_length = 255, null = False)
+    reel_chunk_name = models.CharField(max_length = 255, null = False)
     year = models.IntegerField(blank = True, null = False)
     reel_path = models.CharField(max_length = 255, null = False)
     state = models.CharField(max_length = 255, null = False, default = "--")    
@@ -124,7 +126,7 @@ class Reel(models.Model):
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields = ['reel_path', 'year'],
+                fields = ['reel_path', 'reel_chunk_name', 'year'],
                 name='unique_reel'
             ),
             models.CheckConstraint(
