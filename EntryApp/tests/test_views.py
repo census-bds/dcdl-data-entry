@@ -63,7 +63,7 @@ logger = logging.getLogger('EntryApp.test_views')
 # GLOBALS
 #================================#
 
-DEV_FIXTURE =  'fixtures/dev_data_2022-05-11.json'
+DEV_FIXTURE =  'fixtures/dev_data_2022-05-12.json'
 TEMP_USERNAME = 'jbid456'
 TEMP_PW = 'dcdl1980'
 

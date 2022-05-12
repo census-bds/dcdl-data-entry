@@ -944,6 +944,26 @@ class Record(models.Model):
         blank = True
     )
 
+    # write ins
+    relp_writein = models.CharField(
+        verbose_name = "Relationship to householder (if written)",
+        max_length = 255,
+        null = True,
+        blank = True
+    )
+    race_writein = models.CharField(
+        verbose_name = "Other race (if written)",
+        max_length = 255,
+        null = True,
+        blank = True
+    )
+    tribe_writein = models.CharField(
+        verbose_name = "Indian (Amer.) (if written)",
+        max_length = 255,
+        null = True,
+        blank = True
+    )
+
     # bubble fields
     block_1 = models.CharField(
         null = True,

@@ -1,6 +1,6 @@
 
 DATA = {
-    'fixtures/dev_data_2022-05-11.json':
+    'fixtures/dev_data_2022-05-12.json':
         {'jbid123':
             {
                 'current_image_file_id': 174,
@@ -32,11 +32,11 @@ DATA = {
                 'year': 1970,
                 'img_url': '/images/1970/dev_1970/test_image_30_smaller_smaller.jpg',
                 'code_image_test_a_context': {
-                    'image_id': 271,
+                    'image_id': 272,
                     'image_form_values': {'year': 1970, 'image_type': ''}, 
                     'username': 'jbid456', 
                     'user': 'jbid456',
-                    'slug': 'test_image_31.jpg', 
+                    'slug': 'test_image_32.jpg', 
                     'param_names': {'PARAM_NAME_ACTION': 'action', 'PARAM_NAME_BREAKER_ID': 'breaker_id', 'PARAM_NAME_IMAGE_ID': 'image_id', 'PARAM_NAME_IMAGE_TYPE': 'image_type', 'PARAM_NAME_LONGFORM_ID': 'longform_id', 'PARAM_NAME_OTHER_IMAGE_ID': 'other_image_id', 'PARAM_NAME_RECORD_ID': 'record_id', 'PARAM_NAME_SHEET_ID': 'sheet_id', 'PARAM_NAME_YEAR': 'year'},
                     'year': 1970
                 },
@@ -61,12 +61,12 @@ DATA = {
                 },
                 'image_type_other_post': {
                     'action': 'update_image',
-                    'image_id': 271,
+                    'image_id': 273,
                     'image_type': 'other',                
                 },
                 'image_type_sheet_post': { 
                     'action': 'update_image',
-                    'image_id': 271,
+                    'image_id': 272,
                     'image_type': 'sheet',                
                 },
                 'breaker_data_entry': {
