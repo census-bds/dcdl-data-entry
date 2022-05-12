@@ -40,9 +40,9 @@ def shrink_image(image_file_path, out_path):
     - None
     '''
 
-     # skip this if compressed image already exists
-    if os.path.isfile(out_path):
-        return
+    #  # skip this if compressed image already exists
+    # if os.path.isfile(out_path):
+    #     return
 
     try:
         image = Image.open(image_file_path)
@@ -52,7 +52,7 @@ def shrink_image(image_file_path, out_path):
         half_size = image.resize(new_dimensions, Image.ANTIALIAS)
 
         # save with new name
-        half_size.save(out_path, optimize=True, quality=30)
+        half_size.save(out_path, optimize=True, quality=70)
 
     except Exception as e:
         print("Exception in shrink_image():", e)
@@ -61,15 +61,16 @@ def shrink_image(image_file_path, out_path):
 
 
 
-def apply_shrink_to_db_images():
+def apply_shrink_to_images(image_file_qs = None):
     '''
     Method to loop through all ImageFiles and shrink them
 
-    Takes: None
+    Takes: optional queryset of images
     Returns: None
     '''
 
-    image_file_qs = ImageFile.objects.all()
+    if not image_file_qs:
+        image_file_qs = ImageFile.objects.all()
 
     for i in image_file_qs:
 
