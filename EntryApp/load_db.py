@@ -216,7 +216,8 @@ def create_1990_dummy_breakers(keyer_jbids=[]):
             year=1990,
             jbid=k,
             img=img,
-            state=dummy_reel.state
+            state=dummy_reel.state,
+            enumeration_district='1234',
         )
 
 #-- END function create_1990_dummy_breakers() --#

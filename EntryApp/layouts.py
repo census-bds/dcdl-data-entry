@@ -22,6 +22,8 @@ FORM_1960 = Layout(
         Field(InlineRadios('sample_key_gq')),
         Field('last_name'),
         Field('first_name'),
+        Field('relp_writein'),
+        Field('race_writein'),
         Field('middle_init', css_class='textinput-small'),
         Field('suffix', css_class='textinput-small'),
         css_id = 'form-row-div',
@@ -46,6 +48,8 @@ FORM_1970 = Layout(
             ),
             css_id='form-1970-names-div'
         ),
+        Field('relp_writein'),
+        Field('race_writein'),
         Div(
             Field('age'),
             css_id="form-1970-age-block"
@@ -79,6 +83,8 @@ FORM_1980 = Layout(
             Field('suffix', css_class='textinput-small'),
             css_id='form-1980-first-name-middle-init'
         ),
+        Field('relp_writein'),
+        Field('race_writein'),
         Div(
             Div(
                 Field('age'),
@@ -114,16 +120,12 @@ FORM_1990 = Layout(
             Field('suffix', css_class='textinput-small'),
             css_id='form-1990-first-name-middle-init'
         ),
-        Div(
-            Field('age', css_class='numberinput-small'),
-            css_class='col-lg-6 col-md-6 col-sm-6'
-        ),
-        Div(
-            Field('total_persons', css_class='numberinput-small'), 
-        ),
+        Field('relp_writein'),
+        Field('tribe_writein'),
+        Field('race_writein'),
+        Field('total_persons'),
         Div(
             Field('serial_no'),
-            # Field('printed_serial_no'),
             Div(
                 Div('serial_no_1', css_class='col-lg-1 col-md-1 col-sm-1'),
                 Div('serial_no_2', css_class='col-lg-1 col-md-1 col-sm-1'),

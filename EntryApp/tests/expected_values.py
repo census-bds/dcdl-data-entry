@@ -1,6 +1,6 @@
 
 DATA = {
-    'fixtures/dev_data_2022-05-11.json':
+    'fixtures/dev_data_2022-05-12.json':
         {'jbid123':
             {
                 'current_image_file_id': 174,
