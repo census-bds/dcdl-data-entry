@@ -24,7 +24,7 @@ from EntryApp.models import Record
 from EntryApp.models import Reel
 from EntryApp.models import Sheet
 
-CHUNK_SIZE = 500
+CHUNK_SIZE = 5
 
 
 def load_imagefiles(reel_path, year, chunk_name, image_chunk):
@@ -99,7 +99,7 @@ def load_imagefiles(reel_path, year, chunk_name, image_chunk):
 #-- END function load_imagefiles() --#
 
 
-def chunk_images(image_list, N):
+def chunk_images(image_list, num_images, num_chunks):
     '''
     Cut original list of images into reel into list of N chunks.
     Helper method for reel loading.
@@ -113,32 +113,33 @@ def chunk_images(image_list, N):
 
     # if we only need one chunk, we don't need to do anything except wrap
     # the existing list in another list
-    if N == 1:
+    if num_chunks == 1:
         return [image_list]
 
-    # otherwise break image list into num_chunks chunks
+    # otherwise break image list into chunks
+    N = CHUNK_SIZE
     chunked = [image_list[i:i + N] for i in range(0, len(image_list), N)] 
     
     print(f"N is {N} and len(chunked) is {len(chunked)}")
 
     # most likely, # of images in reel is not evenly divisible by chunk size
     # => one extra item in chunked above.
-    if len(chunked) > N:
+    # however, if it IS evenly divisible, we want to skip this step
+    if len(chunked) > num_chunks and num_images % N != 0:
 
-        chunked_final = chunked[0:N-1]
-        combined_last_two_lists = chunked[N-1] + chunked[-1] 
+        chunked_final = chunked[0:num_chunks-1]
+        combined_last_two_lists = chunked[num_chunks-1] + chunked[-1] 
         chunked_final.append(combined_last_two_lists)
 
     else:
         chunked_final = chunked
 
-    # let's make sure we have expected number of items in list
-    assert len(chunked_final) == N
-
     # as long as there is more than one chunk, we should know the following...
     if len(chunked_final) > 1:
         
         for c in chunked_final:
+
+            print(len(c))
             # must be at least minimum size, otherwise wouldn't have been broken up
             assert len(c) >= CHUNK_SIZE
             # should never be more than 2x chunk size images
@@ -173,14 +174,14 @@ def load_reel(reel_path, year, state):
     image_list = glob.glob(reel_path + "/*_smaller.jpg")
     num_images = len(image_list)
     num_chunks = max(num_images // CHUNK_SIZE, 1)
-    print(f"Splitting {reel_path} into {num_chunks} chunks...")
+    print(f"Splitting {reel_path}  with {num_images} images into {num_chunks} chunks...")
 
 
     # make chunk names
     chunk_names = [path_head.rstrip("/") + "_" + str(n) for n in range(num_chunks)]
 
     # break images into chunks
-    chunks = chunk_images(image_list, num_chunks)
+    chunks = chunk_images(image_list, num_images, num_chunks)
 
     # loop through them
     for name, chunk in zip(chunk_names, chunks):
