@@ -492,7 +492,7 @@ def assign_reel(keyer):
     # prefer to assign reels that have 0 keyers over those that have 1
     # then assign reels with lower IDs (i.e. those loaded earlier) over higher
     # take the one at the top
-    ordered_reel_qs = reel_qs.order_by('id').order_by('keyer_count')
+    ordered_reel_qs = reel_qs.order_by('id', 'keyer_count')
     adapter.info(
         f'reel queue is {list(ordered_reel_qs)}'
     )
