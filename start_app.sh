@@ -19,7 +19,7 @@ then
 elif [ $APP_DIR = 'dcdl_test' ]
 then
     cd /apps/django/dcdl_test
-    python manage.py runmodwsgi --port 7002  --document-root /data/storage/images/test_images/ --server-root=/tmp/httpd_test --url-alias /images/ /data/storage/images/test_images
+    python manage.py runmodwsgi --port 7002  --document-root /data/storage/images/test_images/ --server-root=/tmp/httpd_test --url-alias /images /data/storage/images/test_images
 
 fi
 
