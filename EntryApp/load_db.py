@@ -26,7 +26,7 @@ from EntryApp.models import Record
 from EntryApp.models import Reel
 from EntryApp.models import Sheet
 
-CHUNK_SIZE = 5
+CHUNK_SIZE = 10000
 
 
 def load_imagefiles(reel_path, year, chunk_name, image_chunk):
@@ -49,8 +49,8 @@ def load_imagefiles(reel_path, year, chunk_name, image_chunk):
     image_file_count = None
     image_file = None
 
-    # 
-    files = image_chunk
+    # sort the files in this chunk
+    files = sorted(image_chunk)
 
     # get reel associated with this filepath and year
     parent_reel = Reel.objects.filter(year=year).filter(reel_chunk_name=chunk_name).get()
