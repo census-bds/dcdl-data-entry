@@ -13,6 +13,8 @@ from django.conf import settings
 from django.contrib.auth.models import Group
 from django.db import connection
 
+from EntryApp.shrink_images import shrink_reel_images_before_db
+
 from EntryApp.models import Breaker
 from EntryApp.models import CurrentEntry
 from EntryApp.models import ImageFile
@@ -24,8 +26,10 @@ from EntryApp.models import Record
 from EntryApp.models import Reel
 from EntryApp.models import Sheet
 
+CHUNK_SIZE = 5
 
-def load_imagefiles(reel_path, year):
+
+def load_imagefiles(reel_path, year, chunk_name, image_chunk):
     '''
     Loads images from a given reel into ImageFile model.
     Expects .jpg images.
@@ -33,6 +37,8 @@ def load_imagefiles(reel_path, year):
     Takes:
     - reel filepath
     - year
+    - name of the chunk of images
+    - lsit of image filepaths
     Returns: None
     '''
 
@@ -43,12 +49,11 @@ def load_imagefiles(reel_path, year):
     image_file_count = None
     image_file = None
 
-
-    files = sorted(glob.glob(reel_path + "/*.jpg"))
-    print(f'load_imagefiles() files on {reel_path} are: {files}')
+    # 
+    files = image_chunk
 
     # get reel associated with this filepath and year
-    parent_reel = Reel.objects.filter(year=year).filter(reel_path=reel_path).get()
+    parent_reel = Reel.objects.filter(year=year).filter(reel_chunk_name=chunk_name).get()
 
     # loop over files in current path.
     file_counter = 0
@@ -68,6 +73,7 @@ def load_imagefiles(reel_path, year):
             image_file_instance.img_position = file_counter
             image_file_instance.year = year
             image_file_instance.img_reel = parent_reel
+            image_file_instance.smaller_image_file_name = image_file_instance.img_file_name #TODO: improve this
             image_file_instance.save()
             
 
@@ -95,6 +101,64 @@ def load_imagefiles(reel_path, year):
 #-- END function load_imagefiles() --#
 
 
+def chunk_images(image_list, num_images, num_chunks):
+    '''
+    Cut original list of images into reel into list of N chunks.
+    Helper method for reel loading.
+
+    Takes:
+    - list of images inside the directory
+    - number of chunks to split into
+    Returns: 
+    - list of N chunks, each containing [CHUNK_SIZE, 2*CHUNK_SIZE) images
+    '''
+
+    # if we only need one chunk, we don't need to do anything except wrap
+    # the existing list in another list
+    if num_chunks == 1:
+        chunked_final = [image_list]
+
+    # otherwise break image list into chunks
+    else:
+
+        N = CHUNK_SIZE
+
+        # first attempt: cut it into chunks of size N, maybe with a leftover
+        chunked = [image_list[i:i + N] for i in range(0, len(image_list), N)] 
+        
+        print(f"N is {N} and len(chunked) is {len(chunked)}")
+
+        # most likely, # of images in reel is not evenly divisible by chunk size
+        # => one extra item in chunked above.
+        # however, if it IS evenly divisible, we want to skip this step
+        if len(chunked) > num_chunks and num_images % N != 0:
+
+            chunked_final = chunked[0:num_chunks-1]
+
+            combined_last_two_lists = chunked[num_chunks-1] + chunked[-1] 
+            chunked_final.append(combined_last_two_lists)
+
+        else:
+            
+            chunked_final = chunked
+
+        # as long as there is more than one chunk, we should know that:
+        # 1. the # of images in any chunk should be at least the specified chunk size
+        # 2. the # of images in any chunk should not be more than 2X the chunk size
+        #       (otherwise we should have split that into two chunks)
+        if len(chunked_final) > 1:
+            
+            for c in chunked_final:
+
+                print(len(c))
+                # must be at least minimum size, otherwise wouldn't have been broken up
+                assert len(c) >= CHUNK_SIZE
+                # should never be more than 2x chunk size images
+                assert len(c) < (2 * CHUNK_SIZE)
+        
+    return chunked_final
+
+
 def load_reel(reel_path, year, state):
     '''
     Wrapper method to load a reel into the DB
@@ -117,16 +181,36 @@ def load_reel(reel_path, year, state):
     print(f'os.path.split is {os.path.split(reel_path)}')
     print(f'path_head is {path_head}')
     
-    # add to Reel model 
-    this_reel, _ = Reel.objects.get_or_create(
-        reel_path = reel_path,    
-        year = year,
-        reel_name = path_head,
-        state = state
-    )
+    # how many images are in here?
+    image_list = glob.glob(reel_path + "/*_smaller.jpg")
+    num_images = len(image_list)
+    num_chunks = max(num_images // CHUNK_SIZE, 1)
+    print(f"Splitting {reel_path}  with {num_images} images into {num_chunks} chunks...")
 
-    # call load_imagefiles
-    load_imagefiles(reel_path, year)
+
+    # make chunk names
+    chunk_names = [path_head.rstrip("/") + "_" + str(n) for n in range(num_chunks)]
+
+    # break images into chunks
+    chunks = chunk_images(image_list, num_images, num_chunks)
+
+    # loop through them
+    for name, chunk in zip(chunk_names, chunks):
+
+        print(f"name is {name} and chunk is {chunk}")
+
+        # add to Reel model 
+        this_reel, _ = Reel.objects.get_or_create(
+            reel_path = reel_path,    
+            year = year,
+            reel_name = path_head,
+            reel_chunk_name = name,
+            state = state
+        )
+
+        # call load_imagefiles
+        load_imagefiles(reel_path, year, name, chunk)
+
 
     return
 
@@ -166,6 +250,7 @@ def create_1990_dummy_breakers(keyer_jbids=[]):
     # get or create reel for dummy breaker
     dummy_reel, _ = Reel.objects.get_or_create(
         reel_name = 'dummy_breaker_reel',
+        reel_chunk_name = 'dummy_breaker_reel',
         reel_path = '/data/data/images/dev_images/1990breaker/',
         year = 1990,
         state = 'DC',
@@ -202,7 +287,7 @@ def create_1990_dummy_breakers(keyer_jbids=[]):
 
     for k in keyer_jbids:
 
-        img = Image.objects.create(
+        image = Image.objects.create(
             image_file = image_file_instance,
             jbid=k,
             is_complete=True,
@@ -213,8 +298,9 @@ def create_1990_dummy_breakers(keyer_jbids=[]):
         breaker = Breaker.objects.create(
             year=1990,
             jbid=k,
-            img=img,
-            state=dummy_reel.state
+            img=image,
+            state=dummy_reel.state,
+            enumeration_district='1234',
         )
 
 #-- END function create_1990_dummy_breakers() --#
@@ -445,11 +531,18 @@ def refresh_db():
     create_1990_dummy_breakers()
 
 
-def bulk_load_db():
+def bulk_load_db(shrink_images=False):
     '''
     Function to load form fields, images, and dummy 1990 breakers
     FOR PRODUCTION
+
+    Takes:
+    - optional boolean to shrink images prior to loading into DB
     '''
+
+    if shrink_images:
+        shrink_reel_images_before_db(settings.DEFAULT_REEL_LOAD_SPEC)
+
     load_form_fields(settings.FORM_FIELDS_CSV)
     load_reels_from_csv(settings.DEFAULT_REEL_LOAD_SPEC)
     create_1990_dummy_breakers([])

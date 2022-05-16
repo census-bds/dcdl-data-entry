@@ -35,7 +35,14 @@ adapter = CustomAdapter(logger, {'user': '_'})
 
 class Keyer(models.Model):
     '''
-    Model to track keyer work: who is next in line to take new reels?
+    Model to track keyer work and determine reel assignment
+
+    Attributes:
+    - user: foreign key to Django auth_user model
+    - jbid: string of keyer James Bond ID
+    - reel_count: count of complete reels assigned
+
+    __str__ shows the keyer's JBID
     '''
 
     user = models.ForeignKey(User, on_delete = models.CASCADE)
@@ -48,56 +55,78 @@ class Keyer(models.Model):
 
 
 class Reel(models.Model):
-    """
-    Class to track assignment of reels to users and completion. Captures reel 
-        name, year, load date, number of images, assigned users, and completion 
-        status for each user.
+    '''
+    Model to track assignment of reels to users and reel completion. 
 
-    Problem: I probably need two rows for each reel, one per user
-    """
+    Constraints:
+    - unique on reel_path and year
+    - specified state must be in valid list of postal abbreviations
+
+    Methods:
+    - get_keyer_one(): prints jbid or '' for first assigned keyer
+    - get_keyer_two(): prints jbid or '' for second assigned keyer
+    
+    Attributes:
+        Upon load:
+        - image_count: number of images (aka files) in the reel
+        - is_complete_keyer_one: boolean == True when keyer one finishes entry
+        - is_complete_keyer_one: boolean == True when keyer two finishes entry
+        - last modified: date at which any reel attribute was last changed (auto-update)
+        - load date: date on which reel instance was created here (auto-update)
+        - reel_name: name of reel directory, e.g. 1980_Texas_3951
+        - reel_chunk_name: name of 500ish image chunk in a reel, e.g. 1980_Texas_3951_1
+        - reel_path: full file path to reel images on disk
+        - state: state covered for 1960-1980
+        - year: year of reel
+        At reel assignment:
+        - keyer_count: number of keyers currently assigned to reel
+        - keyer_one: foreign key to EntryApp.Keyer, first assigned keyer
+        - keyer_two: foreign key to EntryApp.Keyer, second assigned keyer
+        Extra metadata:
+        - reel_index: space for a numeric index
+        - reel_label: space for some annotation
+
+    __str__ prints a string like "Reel <reel_name> <year>"
+    '''
 
     # metadata that comes in from load
     reel_name = models.CharField(max_length = 255, null = False)
+    reel_chunk_name = models.CharField(max_length = 255, null = False)
     year = models.IntegerField(blank = True, null = False)
     reel_path = models.CharField(max_length = 255, null = False)
     state = models.CharField(max_length = 255, null = False, default = "--")    
-
-    # optional extra metadata
-    reel_index = models.IntegerField(blank = True, null = True )
-    reel_label = models.TextField()
+    image_count = models.PositiveIntegerField(null = True)
+    keyer_count = models.PositiveIntegerField(null = False, default = 0)
 
     # automatic create and update time stamps.
     create_date = models.DateTimeField( auto_now_add = True )
     last_modified = models.DateTimeField( auto_now = True )
 
-    # useful, but when to populate this? load_image?
-    image_count = models.PositiveIntegerField(null = True)
-    keyer_count = models.PositiveIntegerField(null = False, default = 0)
-
-    # user info: set foreign key to auth user table?
-    # or would it be better to set it to the app-specific one?
+    # set these when the reel is assigned to first and second keyer
     keyer_one = models.ForeignKey(
         Keyer,
         on_delete = models.CASCADE,
         related_name = 'keyer_one',
         null = True
     )  
+    is_complete_keyer_one = models.BooleanField(null=False, default=False)
+ 
     keyer_two = models.ForeignKey(
         Keyer,
         on_delete = models.CASCADE,
         related_name = 'keyer_two',
         null = True
     )  
-
-    # is this helpful?
-    is_complete_keyer_one = models.BooleanField(null=False, default=False)
     is_complete_keyer_two = models.BooleanField(null=False, default=False)
 
+    # optional extra metadata
+    reel_index = models.IntegerField(blank = True, null = True )
+    reel_label = models.TextField()
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields = ['reel_path', 'year'],
+                fields = ['reel_path', 'reel_chunk_name', 'year'],
                 name='unique_reel'
             ),
             models.CheckConstraint(
@@ -315,8 +344,10 @@ class Image(models.Model):
     )
 
     # metadata
-    is_complete = models.BooleanField( blank = True, null = True ) # need a validation constraint here
+    is_complete = models.BooleanField( blank = True, null = True ) 
     timestamp = models.DateTimeField( blank = True, null = True )
+
+    # fields that come in from reporting a problem 
     problem = models.BooleanField( default = False )
     prob_description = models.TextField(
         verbose_name="Please describe the problem.",
@@ -553,6 +584,153 @@ class Sheet(models.Model):
         return f'{self.img}: sheet' # FIX THIS
 
 
+class Household1960(models.Model):
+    '''
+    Class defining the entry for household level info for address for 1960
+
+    Constraints:
+    - unique on keyer jbid and sheet ID 
+
+    Attributes:
+        - keyer jbid
+        Foreign keys
+        - image: foreign key to EntryApp.Image model
+        - sheet object: foreign key to EntryApp.Sheet model
+        Form data:
+        - sample_key: contains sample key radio data
+        - address_one: contains text from top long address box
+        - address_two: contains text from small bottom address box
+        - house_number_one : house number field for top entry
+        - house_number_two : house number field for second entry
+        - house_number_three : house number field for third entry
+        - house_number_four : house number field for fourth entry
+        - apt_number_one: apartment number for top entry
+        - apt_number_two: apartment number for second entry
+        - apt_number_three: apartment number for third entry
+        - apt_number_four: apartment number for fourth entry
+    '''
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields = ['jbid', 'sheet_id'],
+                 name = 'unique_household1960_entry'
+            )
+        ]
+    
+    # foreign keys
+    image = models.ForeignKey(Image, on_delete = models.CASCADE)
+    sheet = models.ForeignKey(Sheet, on_delete = models.CASCADE)
+
+    # keyer id
+    jbid = models.CharField(
+        max_length = 255,
+        default = 'jbid000'
+    ) 
+
+    # addresses
+    address_one = models.CharField(
+        verbose_name = 'First listed street address',
+        max_length = 256,
+        null=True,
+        blank=True,
+    )
+    address_two = models.CharField(
+        verbose_name = 'Second listed street address',
+        max_length = 256,
+        null=True,
+        blank=True,
+    )
+
+    # sample keys
+    sample_key_one = models.CharField(
+        verbose_name = "First sample key",
+        max_length = 255,
+        blank = False,
+        default = None,
+        null = True,
+        choices = choices.SAMPLE_GQ_CHOICES,
+    )
+    sample_key_two = models.CharField(
+        verbose_name = "Second sample key",
+        max_length = 255,
+        blank = False,
+        default = None,
+        null = True,
+        choices = choices.SAMPLE_GQ_CHOICES,
+    )
+    sample_key_three = models.CharField(
+        verbose_name = "Third sample key",
+        max_length = 255,
+        blank = False,
+        default = None,
+        null = True,
+        choices = choices.SAMPLE_GQ_CHOICES,
+    )
+    sample_key_four = models.CharField(
+        verbose_name = "Fourth sample key",
+        max_length = 255,
+        blank = False,
+        default = None,
+        null = True,
+        choices = choices.SAMPLE_GQ_CHOICES,
+    )
+
+
+    # house numbers
+    house_number_one = models.CharField(
+        verbose_name = 'First house number',
+        max_length = 256,
+        null=True,
+        blank=True,
+    )
+    house_number_two = models.CharField(
+        verbose_name = 'Second house number',
+        max_length = 256,
+        null=True,
+        blank=True,
+    )
+    house_number_three = models.CharField(
+        verbose_name = 'Third house number',
+        max_length = 256,
+        null=True,
+        blank=True,
+    )
+    house_number_four = models.CharField(
+        verbose_name = 'Fourth house number',
+        max_length = 256,
+        null=True,
+        blank=True,
+    )
+
+    # apartment numbers
+    apt_number_one = models.CharField(
+        verbose_name = 'First apartment number',
+        max_length = 256,
+        null=True,
+        blank=True,
+    )
+    apt_number_two = models.CharField(
+        verbose_name = 'Second apartment number',
+        max_length = 256,
+        null=True,
+        blank=True,
+    )
+    apt_number_three = models.CharField(
+        verbose_name = 'Third apartment number',
+        max_length = 256,
+        null=True,
+        blank=True,
+    )
+    apt_number_four = models.CharField(
+        verbose_name = 'Fourth apartment number',
+        max_length = 256,
+        null=True,
+        blank=True,
+    )
+    
+
+
 class LongForm1990(models.Model):
     '''
     Class defining the 1990 long form page containing industry and employer
@@ -729,19 +907,6 @@ class Record(models.Model):
             null = True
         )
 
-    # fields that appear in some year-forms but not all
-    page_no = models.CharField(
-        verbose_name = "Page number",
-        max_length = 255,
-        null = True,
-        blank = True
-    )
-    person_no = models.CharField(
-            verbose_name = "Person number",
-            max_length = 255,
-            null = True,
-            blank = True
-        )
     serial_no = models.CharField(
         verbose_name = "Serial number",
         max_length = 255,
@@ -767,200 +932,41 @@ class Record(models.Model):
         null = True,
         choices = choices.SAMPLE_GQ_CHOICES,
     )
-    street_name = models.CharField(
-        max_length = 255,
-        null = True,
-        blank = True
-    )
-    house_no = models.CharField(
-        verbose_name = "House number",
-        max_length = 255,
-        null = True,
-        blank = True
-    )
-    apt_no = models.CharField(
-            verbose_name = "Apartment number",
-            max_length = 255,
-            null = True,
-            blank = True
-    )
-
-    # relp options vary by year
-    relp_1960 = models.CharField(
-        max_length = 255,
-        blank = False,
-        default = None,
-        null = True,
-        choices = choices.RELP_CHOICES_1960,
-        verbose_name = "Relationship to household head"
-    )
-    relp_1970 = models.CharField(
-        max_length = 255,
-        blank = False,
-        default = None,
-        null = True,
-        choices = choices.RELP_CHOICES_1970,
-        verbose_name = "Relationship to household head"
-    )
-    relp_1980 = models.CharField(
-        max_length = 255,
-        blank = False,
-        default = None,
-        null = True,
-        choices = choices.RELP_CHOICES_1980,
-        verbose_name = "Relationship to household head"
-    )
-    relp_1990 = models.CharField(
-        max_length = 255,
-        blank = False,
-        default = None,
-        null = True,
-        choices = choices.RELP_CHOICES_1990,
-        verbose_name = "Relationship to household head"
-    )
-    race_1960 = models.CharField(
-        max_length = 255,
-        blank = False,
-        default = None,
-        null = True,
-        choices = choices.RACE_CHOICES_1960,
-        verbose_name = "Race"
-    )
-    race_1970 = models.CharField(
-        max_length = 255,
-        blank = False,
-        default = None,
-        null = True,
-        choices = choices.RACE_CHOICES_1970,
-        verbose_name = "Race"
-    )
-    race_1980 = models.CharField(
-        max_length = 255,
-        blank = False,
-        default = None,
-        null = True,
-        choices = choices.RACE_CHOICES_1980,
-        verbose_name = "Race"
-    )
-    race_1990 = models.CharField(
-        max_length = 255,
-        blank = False,
-        default = None,
-        null = True,
-        choices = choices.RACE_CHOICES_1990,
-        verbose_name = "Race"
-    )
-    exact_birth_year = models.CharField(
-        verbose_name = 'Year of birth',
-        max_length = 255,
-        null = True,
-        blank = True
-    )
-    exact_birth_month = models.CharField(
-        verbose_name = 'Month of birth',
-        max_length = 255,
-        null = True,
-        blank = True
-    )
-    birth_year = models.CharField(
-        verbose_name = "Specific year of birth",
-        max_length = 255,
-        blank = False,
-        default = None,
-        null = True,
-        choices = choices.SINGLE_DIGIT_CHOICES
-    )
-    birth_quarter = models.CharField(
-        max_length = 255,
-        blank = False,
-        default = None,
-        null = True,
-        choices = choices.BIRTH_QUARTER_CHOICES,
-        verbose_name = "Month of birth"
-    )
-    birth_decade = models.CharField(
-        max_length = 255,
-        blank = False,
-        default = None,
-        null = True,
-        choices = choices.BIRTH_DECADE_CHOICES,
-        verbose_name = "Decade of birth"
-    )
-
-    marital_status = models.CharField(
-        max_length = 255,
-        blank = False,
-        default = None,
-        null = True,
-        choices = choices.MARITAL_STATUS_CHOICES
-    )
-
     total_persons = models.CharField(
         max_length = 255,
         null = True,
         blank = True 
     )
 
+    # 1960 only
+    page_no = models.CharField(
+        verbose_name = "Page number",
+        max_length = 255,
+        null = True,
+        blank = True
+    )
+
+    # write ins
+    relp_writein = models.CharField(
+        verbose_name = "Relationship to householder (if written)",
+        max_length = 255,
+        null = True,
+        blank = True
+    )
+    race_writein = models.CharField(
+        verbose_name = "Other race (if written)",
+        max_length = 255,
+        null = True,
+        blank = True
+    )
+    tribe_writein = models.CharField(
+        verbose_name = "Indian (Amer.) (if written)",
+        max_length = 255,
+        null = True,
+        blank = True
+    )
+
     # bubble fields
-
-    age_hundreds = models.CharField(
-        null = True,
-        blank = False,
-        max_length = 255,
-        verbose_name = "",
-        choices = choices.SINGLE_DIGIT_CHOICES,
-        default = None
-    )
-    age_tens = models.CharField(
-        null = True,
-        blank = False,
-        max_length = 255,
-        verbose_name = "",
-        choices = choices.SINGLE_DIGIT_CHOICES,
-        default = None
-    )
-    age_ones = models.CharField(
-        null = True,
-        blank = False,
-        max_length = 255,
-        verbose_name = "",
-        choices = choices.SINGLE_DIGIT_CHOICES,
-        default = None
-    )
-
-    birth_year_thousands = models.CharField(
-        null = True,
-        blank = False,
-        max_length = 255,
-        verbose_name = "",
-        choices = choices.SINGLE_DIGIT_CHOICES,
-        default = None
-    )
-    birth_year_hundreds = models.CharField(
-        null = True,
-        blank = False,
-        max_length = 255,
-        verbose_name = "",
-        choices = choices.SINGLE_DIGIT_CHOICES,
-        default = None
-    )
-    birth_year_tens = models.CharField(
-        null = True,
-        blank = False,
-        max_length = 255,
-        verbose_name = "",
-        choices = choices.SINGLE_DIGIT_CHOICES,
-        default = None
-    )
-    birth_year_ones = models.CharField(
-        null = True,
-        blank = False,
-        max_length = 255,
-        verbose_name = "",
-        choices = choices.SINGLE_DIGIT_CHOICES,
-        default = None
-    )
-
     block_1 = models.CharField(
         null = True,
         blank = False,
@@ -985,7 +991,6 @@ class Record(models.Model):
         choices = choices.SINGLE_DIGIT_CHOICES,
         default = None
     )
-
 
     serial_no_1 = models.CharField(
         null = True,
@@ -1076,31 +1081,6 @@ class Record(models.Model):
         default = None
     )
     serial_no_11 = models.CharField(
-        null = True,
-        blank = False,
-        max_length = 255,
-        verbose_name = "",
-        choices = choices.SINGLE_DIGIT_CHOICES,
-        default = None
-    )
-
-    total_persons_hundreds = models.CharField(
-        null = True,
-        blank = False,
-        max_length = 255,
-        verbose_name = "",
-        choices = choices.SINGLE_DIGIT_CHOICES,
-        default = None
-    )
-    total_persons_tens = models.CharField(
-        null = True,
-        blank = False,
-        max_length = 255,
-        verbose_name = "",
-        choices = choices.SINGLE_DIGIT_CHOICES,
-        default = None
-    )
-    total_persons_ones = models.CharField(
         null = True,
         blank = False,
         max_length = 255,
