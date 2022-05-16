@@ -116,36 +116,45 @@ def chunk_images(image_list, num_images, num_chunks):
     # if we only need one chunk, we don't need to do anything except wrap
     # the existing list in another list
     if num_chunks == 1:
-        return [image_list]
+        chunked_final = [image_list]
 
     # otherwise break image list into chunks
-    N = CHUNK_SIZE
-    chunked = [image_list[i:i + N] for i in range(0, len(image_list), N)] 
-    
-    print(f"N is {N} and len(chunked) is {len(chunked)}")
-
-    # most likely, # of images in reel is not evenly divisible by chunk size
-    # => one extra item in chunked above.
-    # however, if it IS evenly divisible, we want to skip this step
-    if len(chunked) > num_chunks and num_images % N != 0:
-
-        chunked_final = chunked[0:num_chunks-1]
-        combined_last_two_lists = chunked[num_chunks-1] + chunked[-1] 
-        chunked_final.append(combined_last_two_lists)
-
     else:
-        chunked_final = chunked
 
-    # as long as there is more than one chunk, we should know the following...
-    if len(chunked_final) > 1:
+        N = CHUNK_SIZE
+
+        # first attempt: cut it into chunks of size N, maybe with a leftover
+        chunked = [image_list[i:i + N] for i in range(0, len(image_list), N)] 
         
-        for c in chunked_final:
+        print(f"N is {N} and len(chunked) is {len(chunked)}")
 
-            print(len(c))
-            # must be at least minimum size, otherwise wouldn't have been broken up
-            assert len(c) >= CHUNK_SIZE
-            # should never be more than 2x chunk size images
-            assert len(c) < (2 * CHUNK_SIZE)
+        # most likely, # of images in reel is not evenly divisible by chunk size
+        # => one extra item in chunked above.
+        # however, if it IS evenly divisible, we want to skip this step
+        if len(chunked) > num_chunks and num_images % N != 0:
+
+            chunked_final = chunked[0:num_chunks-1]
+
+            combined_last_two_lists = chunked[num_chunks-1] + chunked[-1] 
+            chunked_final.append(combined_last_two_lists)
+
+        else:
+            
+            chunked_final = chunked
+
+        # as long as there is more than one chunk, we should know that:
+        # 1. the # of images in any chunk should be at least the specified chunk size
+        # 2. the # of images in any chunk should not be more than 2X the chunk size
+        #       (otherwise we should have split that into two chunks)
+        if len(chunked_final) > 1:
+            
+            for c in chunked_final:
+
+                print(len(c))
+                # must be at least minimum size, otherwise wouldn't have been broken up
+                assert len(c) >= CHUNK_SIZE
+                # should never be more than 2x chunk size images
+                assert len(c) < (2 * CHUNK_SIZE)
         
     return chunked_final
 
