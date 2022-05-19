@@ -2,6 +2,7 @@ import argparse
 import glob
 import os
 import pandas as pd
+import re
 
 
 from EntryApp.shrink_images import shrink_reel_images_before_db
@@ -19,8 +20,6 @@ It will:
 - provide a final count of images in directory
 """
 
-FILE_SIZE_THRESHOLD = 2000000
-
 
 
 def shrink_wrapper(dir_name):
@@ -35,7 +34,7 @@ def shrink_wrapper(dir_name):
 
     try:
         shrink_reel_images_before_db(dir_name)
-        print(f"\t\tShrunk images in {dir_name}.")
+        print(f"\tShrunk images in {dir_name}.")
 
         return True
 
@@ -51,11 +50,16 @@ def remove_fullsize_images(dir_name):
 
     Takes:
     - directory filepath
+    - expected # of images to remove 
     Returns: None
     '''
 
     all_images = [dir_name + '/' + i for i in os.listdir(dir_name)]
-    images_to_remove = [i for i in all_images if os.path.getsize(i) > FILE_SIZE_THRESHOLD]
+    images_to_remove = [i for i in all_images if re.search('[0-9].jpg$', i)]
+
+    print(f"\tRemoving {len(images_to_remove)} images...")
+
+    assert len(images_to_remove) == (len(all_images) / 2)
 
     for i in images_to_remove:
         os.remove(i)
@@ -76,7 +80,7 @@ if __name__ == "__main__":
 
         path_to_dir = start_filepath + d
         num_images = len(glob.glob(path_to_dir + '/*.jpg'))
-        num_smaller_images = len(glob.glob(d + "/*_smaller.jpg"))
+        num_smaller_images = len(glob.glob(path_to_dir + "/*_smaller.jpg"))
 
         print(f"Reel directory {d} has {num_smaller_images} shrunk images out of {num_images}.")
 
@@ -91,9 +95,9 @@ if __name__ == "__main__":
             print(f"\tDirectory {d} has {num_images} but it looks like we haven't shrunk them yet.")
             shrunk_success = shrink_wrapper(path_to_dir)
 
-            if shrunk_success:
+            # if shrunk_success:
 
-                remove_fullsize_images(path_to_dir)
+            #     remove_fullsize_images(path_to_dir)
 
 
         elif num_images == num_smaller_images:

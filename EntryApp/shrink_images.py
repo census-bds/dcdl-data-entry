@@ -93,18 +93,29 @@ def shrink_reel_images_before_db(reel_path):
     Returns: None
     '''
 
-    image_file_list = glob.glob(reel_path + "/*.jpg")
-    print("\t\t" + image_file_list)
+    image_file_list = glob.glob(reel_path + "/gr*.jpg")
 
-    for i in image_file_list:
-
-        new_out_path, new_out_name = make_new_filepath(i)
-
-        try:
-            shrink_image(i, new_out_path)
+    # check whether images are already shrunk
+    small_image_list = glob.glob(reel_path + "/*_smaller.jpg")
+ 
+    if len(small_image_list) != 0:
         
-        except Exception as e:
-            print(e)
+        print(f"\t\t{len(small_image_list)} images in here are already small, doing nothing.")
+        return
+
+    else:
+
+        print(f"\t\tShrinking {len(image_file_list)} files, beginning with {image_file_list[0]}...")
+
+        for i in image_file_list:
+
+            new_out_path, new_out_name = make_new_filepath(i)
+
+            try:
+                shrink_image(i, new_out_path)
+            
+            except Exception as e:
+                print(e)
 
 
 def shrink_images_before_db_in_bulk(csv_path):
