@@ -2287,8 +2287,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
         # look up parent sheet instance (relying on Jon's error check in prepare_sheet_context)
         parent_sheet = image_IN.sheet_set.get()  
 
-        # look up associated record(s)
-        record_qs = parent_sheet.record_set.all().order_by('id')
+        # look up associated record(s) and sort in order of keyed row/column
+        # line_no is filled in for 1960/1970; col_no for 1980/1990, but whichever
+        # is null will be null for all records on sheet -> does not affect sort
+        record_qs = parent_sheet.record_set.all().order_by('line_no', 'col_no')
         record_count = record_qs.count()
 
         # DEBUG

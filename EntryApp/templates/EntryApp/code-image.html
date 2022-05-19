@@ -138,10 +138,14 @@
     <div id="entry-area" style="height:45%; overflow-y:scroll; margin:50px;">
 
             <h2>Basic image info</h2>
+                <ul>
+                    <li><strong>Reel</strong>: {{ reel_name }}
+                    <li><strong>Image filename</strong>: {{ img.image_file.img_file_name }}
+                </ul>
             {% if image_form %}
                         <form id="image-info" method="POST">
                             {% csrf_token %}
-                            {{ image_form.as_p }}
+                            {{ image_form }}
                             <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
                             <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_image" />
                             <input type="submit" value="Submit">
@@ -151,6 +155,7 @@
                             <li><strong>year</strong>: {{ img.year }}
                             <li><strong>Image type</strong>: {{ img.image_type }}
                         </ul>
+
             {% endif %}
 
             {% if breaker_formset %}
