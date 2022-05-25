@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+  <head>
+<script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
+  </head>
+  <body>
+   ?!?
+   {{ imgpath }}
+    <div id="openseadragon-image" class='flex-container'>
+        <div id="openseadragon1" style="width: 2000px; height: 500px;"></div>
+        <script type="text/javascript">
+            var Viewer = OpenSeadragon({
+                id: "openseadragon1",
+                prefixUrl: "/static/openseadragon_images/",
+                tileSources: {
+                    type: 'image',
+                    url:"{{ imgpath }}" 
+                },
+                buildPyramid: false
+            });
+        </script>
+    </div>
+  </body>
+</html>
