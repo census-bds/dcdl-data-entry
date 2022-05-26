@@ -102,19 +102,18 @@
         </table>
     </p>
     <script>
-    var urlparams = new URLSearchParams(window.location.search);
-    console.log(window.location.search);
-    var popOutExists = urlparams.get('popOut');
-    console.log(popOutExists)
-    if (popOutExists) {
-      console.log("yes")
+      var urlparams = new URLSearchParams(window.location.search);
+      console.log(window.location.search);
+      var popOutExists = urlparams.get('popOut');
+      if (popOutExists) {
+        var newWin = open("/static/waiting.html", "image");
 
-      var forms = document.querySelectorAll('form[action="/EntryApp/code-image/"]')
-      console.log(forms)
-      for(var i=0; i < forms.length; i++){
-         forms[i].action = forms[i].action + '?popOut=true'
-      } 
-    }
+	var forms = document.querySelectorAll('form[action="/EntryApp/code-image/"]')
+	console.log(forms)
+	for(var i=0; i < forms.length; i++){
+	   forms[i].action = forms[i].action + '?popOut=true'
+	}
+      }
     </script>
 {% endblock content %}
 

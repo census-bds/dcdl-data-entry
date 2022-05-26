@@ -3006,6 +3006,7 @@ def test_crispy_formset_view(request, year, form_type):
 def render_image(request):
     imgpath = request.GET["imgpath"]
     return render(request, 'EntryApp/render-image.html', {"imgpath": imgpath})
+
 def test_household1960_form(request):
     '''
     Temporary view for developing the 1960 household form layout
