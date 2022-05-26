@@ -123,10 +123,27 @@
     <script>
     let params = "scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,width=600,height=300,left=100,top=100";
     var newWin = null;
-    function popOut(imgpath){
+    function popOut(imgpath, alreadyOpen){
+       window.history.replaceState(null, null, "?popOut=true");
        newWin = open(imgpath, "image", params);
+       var firstUnloadFired = false;
+       newWin.onunload = function() {
+	 newWin.opener.console.log("closing");
+         if (!firstUnloadFired) {
+           firstUnloadFired = true;
+           return;
+         }
+	 newWin.opener.window.history.pushState({}, document.title, window.location.pathname);
+       }
     }
-    window.addEventListener('unload', function(){ newWin.close() });
+    var urlparams = new URLSearchParams(window.location.search);
+    var popOutExists = urlparams.get('popOut');
+    if (popOutExists) {
+      console.log("wut");
+      popOut('/images/{{ img.year }}/{{ reel_name }}/{{ slug }}', true)
+    }
+
+    //window.addEventListener('unload', function(){ newWin.close() });
     </script>
     <div id="openseadragon-image" class='flex-container'>
         <div id="openseadragon1" style="width: 2000px; height: 500px;"></div>
@@ -142,7 +159,7 @@
             });
         </script>
     </div>
-    <button onclick="popOut('/images/{{ img.year }}/{{ reel_name }}/{{ slug }}')">Pop out</button>
+    <button onclick="popOut('/images/{{ img.year }}/{{ reel_name }}/{{ slug }}', false)">Pop out</button>
 
     <div id="entry-area" style="height:45%; overflow-y:scroll; margin:50px;">
 

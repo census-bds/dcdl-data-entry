@@ -2019,7 +2019,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
         # render response
         response_OUT = self.process_request( request )
-
+        print("response: ", response_OUT)
         return response_OUT
 
     #-- END method get() --#
@@ -2037,6 +2037,7 @@ class CodeImage( LoginRequiredMixin, FormView ):
         # render response
         response_OUT = self.process_request( request )
 
+        print("response: ", response_OUT)
         return response_OUT
 
     #-- END method post() --#
@@ -2559,6 +2560,10 @@ class CodeImage( LoginRequiredMixin, FormView ):
 
 
     def process_request( self, request ):
+        print("===params===")
+        print(request.GET)
+        print(request.POST)
+        print("===params===")
 
         # return reference
         response_OUT = None
@@ -2642,7 +2647,9 @@ class CodeImage( LoginRequiredMixin, FormView ):
                     ACTION_UPDATE_BREAKER_TYPE
                 ]:
                     
-                    return redirect(reverse("EntryApp:index"))
+                    print("redirecting!!")
+                    popout = "popOut=true" if "popOut" in request.GET else ""
+                    return redirect("{}?{}".format(reverse("EntryApp:index"), popout))
                 
                 #-- END check to see if action is completing image --#
 
