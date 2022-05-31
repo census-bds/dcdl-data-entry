@@ -46,7 +46,7 @@ class ImageForm(forms.ModelForm):
         super(ImageForm, self).__init__(*args, **kwargs)
         
         if year == 1990 and reel_name[6] == '6':
-            choice_list = ('longform', '1990 long form')
+            choices_list = [('longform', '1990 long form'), ('other', 'Other')]
         
         elif year == 1990 and reel_name[6] != '6':
             choices_list = [c for c in choices.IMAGE_TYPE_CHOICES if c != ('breaker', 'Breaker')]
