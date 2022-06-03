@@ -135,6 +135,27 @@ Here's how to create dummy breakers:
 
 ```
 
+### Provisioning images
+
+The application expects to serve images from a nested directory structure within a path specified as the `MEDIA_ROOT` in `settings.py`. You will need to move the images you want to key onto your machine and set up that directory structure. Images are scanned in reels, so each reel contains images from the same year in a geographic area. The app expects files to be stored based on this structure.  For example:
+
+```
+/path/to/images/
+-1960
+    \_reel1_1960
+    \_reel2_1960
+-1970
+    \_reel1_1970
+    \_reel2_1970
+-1980
+    \_reel1_1980
+    \_reel2_1980
+-1990
+    \_reel1_1990
+    \_reel2_1990
+```
+
+
 ### How to load images into the database
 
 Loading a reel populates the Reel model as well as the ImageFile model. Initially, reels are not assigned to keyers, and the Image model does not get populated until a reel is assigned. Please refer to the section on reel assignment for instructions on how to assign a reel to a specific keyer.
