@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block end_of_head_tag %}
+<script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
+<script type="text/javascript" src="/static/EntryApp/image.js"></script>
+<style>
+
+    .flex-container {
+        display: flex;
+        flex-flow: row wrap;
+    }
+
+    #form-row-div  {
+        flex-flow: row nowrap;
+        overflow-x: scroll;
+        align-items: flex-start;
+        gap: 25px;
+    }
+
+    .form-inline label {
+        justify-content:flex-start;
+    }
+
+    .control-label {
+        display: inline-block;
+        width:max-content;   /*auto Prevent labels from stacking above inputs in `.form-group` */
+        font-weight:bold;
+    }
+
+    .form-column {
+        max-width: 300px;
+
+    }
+
+    .control-group {
+        margin-bottom: 10px;
+    }
+
+    /* For inputs */
+
+    .numberinput-small {
+    width:60px;
+    }
+
+    .textinput-small {
+    width:60px;
+    }
+
+    
+    /* 1960 */
+    #household-1960-address-div {
+        display:block;
+        gap:25px;
+        margin-left:inherit;
+    }
+
+    #household-1960-radios {
+        gap:5px;
+    }
+
+    #household-1960-house-number {
+        gap:5px;
+    }
+
+    #household-1960-apt_number {
+        gap:5px;
+    }
+
+    #household-1960-inputs {
+        justify-content: space-evenly;
+        max-width: 1000px;
+    }
+
+
+    /* 1970 */
+
+    #form-1970-names-div {
+        display:block;
+    }
+
+    #form-1970-last-name-suffix {
+        display:flex;
+        gap:25px;
+    }
+
+    #form-1970-first-name-middle-init {
+        display:flex;
+        gap:25px;
+    }
+
+    #form-1970-age-block {
+        display:block;
+    }
+
+    #form-1970-block-radios {
+        display:flex;
+        gap:5px;
+    }
+
+    #form-1970-serial-radios {
+        display:flex;
+        gap:5px;
+    }
+
+    /* 1980 */
+    #form-1980-first-name-middle-init {
+        display:flex;
+        gap:25px;
+    }
+
+    #form-1980-sex-radios {
+        display:flex;
+        margin-right:200px;
+    }
+
+    #form-1980-race-radios {
+        margin-right: 200px;
+    }
+
+    #form-1980-birth-year-radios {
+        margin-right:100px;
+    }
+
+    #form-1980-age-block {
+        display: flex;
+        gap:25px;
+    }
+
+
+    /* 1990 */
+    #form-1990-first-name-middle-init {
+        display:flex;
+        gap:25px;
+    }
+
+    #form-1990-sex-radios {
+        display:flex;
+        margin-right:200px;
+    }
+
+    #form-1990-race-radios {
+        margin-right: 200px;
+    }    
+
+    #entry-area {
+        overflow-y: scroll;
+        margin: 50px;
+        flex-grow: 1;
+        height: 20vw;
+    }
+
+</style>
+
+{% endblock end_of_head_tag %}
+
+{% block header %}
+
+<h1>Code Image</h1>
+
+{% endblock header %}
+
+{% block content %}
+    <div id="openseadragon-image" class='flex-container'>
+        <div id="openseadragon1" style="width: 1800px; height: 500px;"></div>
+    </div>
+      
+    <button onclick="popOut('/EntryApp/render-image', '{{ img.year }}/{{ reel_name }}/{{ slug }}', false)">Pop out</button>
+
+    
+    <div id="entry-area">
+
+            <h2>Basic image info</h2>
+                <ul>
+                    <li><strong>Reel</strong>: {{ reel_name }}
+                    <li><strong>Image filename</strong>: {{ img.image_file.img_file_name }}
+                </ul>
+            {% if image_form %}
+                        <form id="image-info" method="POST">
+                            {% csrf_token %}
+                            {{ image_form }}
+                            <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
+                            <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_image" />
+                            <input type="submit" value="Submit">
+                        </form>
+            {% else %}
+                        <ul>
+                            <li><strong>year</strong>: {{ img.year }}
+                            <li><strong>Image type</strong>: {{ img.image_type }}
+                        </ul>
+
+            {% endif %}
+
+            {% if breaker_formset %}
+                    {% include "EntryApp/includes/code-image-edit-breaker.html" %}
+            {% endif %}
+            {% if sheet_form %}
+                    {% include "EntryApp/includes/code-image-edit-sheet.html" %}
+            {% endif %}
+            {% if longform_form %}
+                    {% include "EntryApp/includes/code-image-edit-longform.html" %}
+            {% endif %}
+            {% if other_image_form %}
+                    {% include "EntryApp/includes/code-image-edit-other-image.html" %}
+            {% endif %}
+    </div>
+    
+    <div id="image_state" style="display: none;">
+      <input type='hidden' id='orig_state_x' value='{{ image_state.x }}' />
+      <input type='hidden' id='orig_state_y' value='{{ image_state.y }}' />
+      <input type='hidden' id='orig_state_zoom' value='{{ image_state.zoom }}' />
+      <input type='hidden' id='latest_state_x' value='{{ image_state.x }}' />
+      <input type='hidden' id='latest_state_y' value='{{ image_state.y }}' />
+      <input type='hidden' id='latest_state_zoom' value='{{ image_state.zoom }}' />
+      <input type='hidden' id='orig_state_popOut' value='{{ image_state.popOut }}' />
+    </div>
+
+{% endblock content %}
+
+{% block logout %}
+{% endblock %}
+
+{% block post_body %}
+<script>
+  initSeaDragon("/images/{{ img.year }}/{{ reel_name }}/{{ slug }}");
+</script>
+<script>
+  initPopOut("{{ img.year }}/{{ reel_name }}/{{ slug }}");
+</script>
+{% endblock post_body %}
+

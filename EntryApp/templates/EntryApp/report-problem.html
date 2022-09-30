@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block header %}
+    <h2>Report a problem</h2>
+{% endblock header %}
+{% block content %}
+    <div id="problem-form">
+        Please check the box below if data that has already been entered and saved for this image is incorrect. Please use the text box to describe the issue.
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <input type="hidden" name="image_id" value="{{ image_id }}" />
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    <br>
+    {% if slug %}
+    <div id="openseadragon1" style="width: 800px; height: 600px;"></div>
+    <script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
+   <script type="text/javascript">
+        var Viewer = OpenSeadragon({
+            id: "openseadragon1",
+            prefixUrl: "/static/openseadragon_images/",
+            tileSources: {
+                type: 'image',
+                url: "/images/{{ year }}/{{ reel_name }}/{{ slug }}"
+            },
+            buildPyramid: false
+        });
+    </script>
+    {% endif %}
+{% endblock content %}
+{% block problem %}
+{% endblock problem %}
+{% block logout %}
+{% endblock logout %}

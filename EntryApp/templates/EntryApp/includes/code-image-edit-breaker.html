@@ -1,0 +1,20 @@
+{% load crispy_forms_tags %}
+
+    <div id = "breaker_info">
+        <h2>Breaker info</h2>
+    </div>
+    <div>
+        <form method="post">
+            {{ breaker_formset.management_form }}
+            <table>
+                {% csrf_token %}
+                {% crispy breaker_formset breaker_helper %}
+            </table>
+            <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
+            <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_breaker_type" />
+            {% if breaker_instance %}
+                <input type="hidden" name="{{ param_names.PARAM_NAME_BREAKER_ID }}" value="{{ breaker_instance.id }}" />
+            {% endif %}
+            <input type="submit" value="Submit">
+        </form>
+    </div>

@@ -1,0 +1,122 @@
+<!-- SOURCE: Mozilla developers tutorial https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django/Authentication -->
+
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]>      <html class="no-js"> <!--<![endif]-->
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    </head>
+    <style>
+    .redText {
+        color: var(--lumo-error-color);
+        }
+    </style>
+
+    <body>
+
+        {% if app_instance == 'dev' %}
+
+            <h2>Decennial Census Digitization and Data Linkage - Data Entry Application (Development) </h2>
+
+        {% elif app_instance == 'test' %}
+
+            <h2>Decennial Census Digitization and Data Linkage - Data Entry Application (Test) </h2>
+
+        {% elif app_instance == 'train' %}
+
+            <h2>Decennial Census Digitization and Data Linkage - Data Entry Application (Training) </h2>
+
+        {% elif app_instance == 'prod' %}
+            <h2>Decennial Census Digitization and Data Linkage - Data Entry Application (Production) </h2>
+
+        {% else %}
+            <h2>Decennial Census Digitization and Data Linkage - Data Entry Application</h2>
+
+        {% endif %}
+
+        <DIV class="redText" ALIGN=center>
+            <BR><B>**WARNING*WARNING*WARNING**</B><BR>
+        </DIV>
+        <DIV ALIGN=center>
+                <B><I>ONLY AUTHORIZED USERS MAY ACCESS THIS SYSTEM</I></B>
+        </DIV>
+        <table width="50%" align="center">	
+        <tr>
+            <td>
+                <P>
+                <FONT SIZE="-2">You are accessing a U.S. Government information system, which includes:
+                                <ul style="list-style-type:none;"> 
+                                <li>1) this computer</li>
+                                <li>2) this computer network</li>
+                                <li>3) all Government-furnished computers connected to this network, and </li>
+                                <li>4) all Government-furnished devices and storage media attached to this network or to a computer on this
+                                network.</li> 
+                                </ul>
+                                You understand and consent to the following: you may access this information system for
+                                authorized use only; unauthorized use of the system is prohibited and subject to criminal and civil
+                                penalties; you have no reasonable expectation of privacy regarding any communication or data
+                                transiting or stored on this information system at any time and for any lawful Government purpose,
+                                the Government may monitor, intercept, audit, and search and seize any communication or data
+                                transiting or stored on this information system; and any communications or data transiting or
+                                stored on this information system may be disclosed or used for any lawful Government purpose.
+                                This information system may contain Controlled Unclassified Information (CUI) that is subject to
+                                safeguarding or dissemination controls in accordance with law, regulation, or Government-wide
+                                policy. Accessing and using this system indicate your understanding of this warning.</FONT>
+                </P>
+            </td>
+        </tr>
+        </table>
+        <DIV class="redText" ALIGN=center>
+                <B>**WARNING*WARNING*WARNING**</B><BR>
+        </DIV>
+    
+    <br>
+
+    <div align='center'>
+    {% if form.errors %}
+    <p>Your username and password didn't match. Please try again.</p>
+    {% endif %}
+
+    {% if next %}
+        {% if user.is_authenticated %}
+        <p>Your account doesn't have access to this page. To proceed,
+        please login with an account that has access.</p>
+        {% else %}
+        <p>Please login to see this page.</p>
+        {% endif %}
+    {% endif %}
+    
+    <form method="post" action="{% url 'login' %}">
+    {% csrf_token %}
+    <table>
+    <tr>
+        <td>{{ form.username.label_tag }}</td>
+        <td>{{ form.username }}</td>
+    </tr>
+    <tr>
+        <td>{{ form.password.label_tag }}</td>
+        <td>{{ form.password }}</td>
+    </tr>
+    </table>
+
+    <input type="submit" value="Log in">
+    <input type="hidden" name="next" value="{{ next }}">
+    </form>
+
+    {# Assumes you setup the password_reset view in your URLconf #}
+    <p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+
+
+        <script src="" async defer></script>
+        </body>
+    </div>
+</html>
+

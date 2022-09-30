@@ -1,0 +1,29 @@
+{% load crispy_forms_tags %}
+
+<div id = "longform_info">
+    <div>
+        <h2>1990 long form data entry</h2>
+    </div>
+
+    <div>
+        Enter data from the 1990 long form below.
+    </div>
+    
+    <div id='longform-entry' style="margin-left: 20px;">
+        <form method="GET">
+            {% csrf_token %}
+            {% crispy longform_form helper %}
+            <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
+            <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_longform" />
+{% if longform_instance %}
+            <input type="hidden" name="{{ param_names.PARAM_NAME_LONGFORM_ID }}" value="{{ longform_instance.id }}" />
+{% endif %}
+            <input type="submit" value="Submit">
+        </form>
+    
+<br>
+
+{% include "EntryApp/includes/code-image-mark-complete.html" %}
+
+    </div>
+</div>

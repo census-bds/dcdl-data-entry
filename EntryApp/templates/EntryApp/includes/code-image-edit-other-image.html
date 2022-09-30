@@ -1,0 +1,23 @@
+<div class = "otherimage_info">
+    <div>
+        <h2>Other image data entry</h2>
+    </div>
+
+    <div id='other-image-entry'>
+        <p>
+            Please provide a brief description of the image.
+        </p>
+        <div>
+            <form method="GET" class='form-horizontal'>
+                {% csrf_token %}
+                {{ other_image_form.as_p }}
+                    <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
+                    <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="update_other_image" />
+                {% if other_image_instance %}
+                    <input type="hidden" name="{{ param_names.PARAM_NAME_OTHER_IMAGE_ID }}" value="{{ other_image_instance.id }}" />
+                {% endif %}
+                    <input type="submit" value="Submit">
+            </form>
+        </div>
+    </div>
+</div>

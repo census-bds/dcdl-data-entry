@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% load crispy_forms_tags %}
+
+{% block end_of_head_tag %}
+<script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
+<style>
+    #form-row-div  {
+        flex-flow: row nowrap;
+        overflow-x: scroll;
+        align-items: flex-start;
+        gap: 25px;
+    }
+
+    .form-inline label {
+        justify-content:flex-start;
+    }
+
+    .control-label {
+        display: inline-block;
+        width:max-content;   /*auto Prevent labels from stacking above inputs in `.form-group` */
+        font-weight:bold;
+    }
+
+    .form-column {
+        max-width: 300px;
+
+    }
+
+    .form-column-wide {
+        max-width: 1200px;
+    }
+
+    .control-group {
+        margin-bottom: 10px;
+    }
+
+    /* For inputs */
+
+    .numberinput-small {
+    width:60px;
+    }
+
+    .textinput-small {
+    width:60px;
+    }
+
+    /* 1960 */
+    #household-1960-address-div {
+        display:block;
+        gap:25px;
+    }
+
+    #household-1960-radios {
+        gap:5px;
+    }
+
+    #household-1960-house-number {
+        gap:5px;
+    }
+
+    #household-1960-apt_number {
+        gap:5px;
+    }
+
+    #household-1960-inputs {
+        justify-content: space-evenly;
+        max-width: 1000px;
+    }
+
+
+    /* 1970 */
+
+    #form-1970-names-div {
+        display:block;
+    }
+
+    #form-1970-last-name-suffix {
+        display:flex;
+        gap:25px;
+    }
+
+    #form-1970-first-name-middle-init {
+        display:flex;
+        gap:25px;
+    }
+
+    #form-1970-age-block {
+        display:block;
+    }
+
+    #form-1970-block-radios {
+        display:flex;
+        gap:5px;
+    }
+
+    #form-1970-serial-radios {
+        display:flex;
+        gap:5px;
+    }
+
+    /* 1980 */
+    #form-1980-first-name-middle-init {
+        display:flex;
+        gap:25px;
+    }
+
+    #form-1980-sex-radios {
+        display:flex;
+        margin-right:200px;
+    }
+
+    #form-1980-race-radios {
+        margin-right: 200px;
+    }
+
+    #form-1980-birth-year-radios {
+        margin-right:100px;
+    }
+
+    #form-1980-age-block {
+        display: flex;
+        gap:25px;
+    }
+
+
+    /* 1990 */
+    #form-1990-first-name-middle-init {
+        display:flex;
+        gap:25px;
+    }
+
+    #form-1990-sex-radios {
+        display:flex;
+        margin-right:200px;
+    }
+
+    #form-1990-race-radios {
+        margin-right: 200px;
+    }    
+</style>
+
+{% endblock end_of_head_tag %}
+
+{% block header %}
+
+<h1>1960 Household Form Development</h1>
+
+{% endblock header %}
+
+{% block content %}
+
+    <div id="entry-area" style="margin:50px;">
+
+            <h2>Household info</h2>
+            {% if household_form %}
+                        <form id="household-1960-info" method="POST">
+                            {% csrf_token %}
+                            {% crispy household_form helper %}
+                            <input type="submit" value="Submit">
+                        </form>
+            {% else %}
+                Household form is not present.
+            {% endif %}
+    </div>
+    
+{% endblock content %}
+{% block logout %}
+{% endblock logout %}

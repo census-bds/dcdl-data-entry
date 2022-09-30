@@ -1,0 +1,9 @@
+    <div id="image-complete">
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
+            <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="complete_image" />
+            <input type="submit" value="Mark image complete">
+        </form>
+    </div>
+

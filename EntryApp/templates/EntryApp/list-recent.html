@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+<style>
+.flex-container {
+        display:flex;
+        flex-flow: column wrap;
+        /* justify-content: start; */
+        /* align-items: auto; */
+        align-content: start;
+    }
+
+</style>
+{% block header %}
+
+    <h2>View recent entries</h2>
+    <p>Review your most recent entries.</p>
+
+{% endblock header %}
+{% block content %}
+
+    {% if object_list %}
+    <ul>
+        {% for object in object_list %}
+        <li>
+            <div class='flex-container'>
+                <div id="objectname" class='row'>
+                    {{ object.img_path }}: {{ object.year }} {{object.image_type}}
+                </div>
+                <ul>
+                    <li><a href>Edit image year or type</a></li>
+                    {% if object.image_type == 'sheet' %}
+                    <li><a href>Edit sheet data</a></li>
+                    <li><a href>Edit record data</a></li>
+                    {% endif %}
+                </ul>
+                <div id="openseadragon1" style="width: 40%; height: 300px;" class='row'>
+                    <script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
+                    <script type="text/javascript">
+                            var Viewer = OpenSeadragon({
+                                id: "openseadragon1",
+                                prefixUrl: "/static/deepzoom/js/vendor/openseadragon/images/",
+                                tileSources: {
+                                    type: 'image',
+                                    url: "/images/{{ object.img_path }}"
+                                },
+                                buildPyramid: false
+                            });
+                            </script>
+                </div>
+            </div>
+        </li>
+            <br>
+        {% endfor %}
+    </ul>
+    {% else %}
+        <p>There are no recent images to display.</p>
+    {% endif %} 
+    <br>
+{% endblock content %}
+

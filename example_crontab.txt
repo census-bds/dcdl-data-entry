@@ -1,0 +1,19 @@
+SHELL=/bin/bash
+HOME=/
+EMAIL="cecile.m.murray@census.gov"
+# Start postgres and start prod, training, and test app on reboot 
+@reboot /data/data/postgresql/start_pgsql.sh >> /data/data/postgresql/cronlog.out 2>&1
+@reboot /apps/django/dcdl_data_entry/start_app.sh 'dcdl_data_entry' >> /data/data/user/django_user/prod/logs/cronlog.out 2>&1
+@reboot /apps/django/dcdl_test/start_app.sh 'dcdl_test' >> /data/data/user/django_user/test/logs/cronlog.out 2>&1
+@reboot /apps/django/dcdl_train/start_app.sh 'dcdl_train' >> /data/data/user/django_user/train/logs/cronlog.out 2>&1
+
+# check prod error log every 10 minutes
+*/10 * * * * /apps/django/dcdl_data_entry/watch_error_log.sh prod >> /data/data/user/django_user/prod/logs/cronlog.out
+# check train error log every 15 minutes
+*/15 * * * * /apps/django/dcdl_train/watch_error_log.sh train >> /data/data/user/django_user/train/logs/cronlog.out
+
+# run backup
+4 6 * * * /apps/django/dcdl_data_entry/run_backup.sh '/apps/django/dcdl_data_entry/' >> /data/data/user/django_user/prod/logs/backup.log 2>&1
+
+# email reminder to move backups weekly
+8 6 * * 5 /apps/django/dcdl_test/backup_reminder.sh 

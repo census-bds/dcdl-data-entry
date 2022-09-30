@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block header %}
+<h2>Test hardcoded custom layout of {{ year }} form</h2>
+{% endblock header %}
+
+{% block content %}
+
+    {% if year == 1960 %}
+
+        {% include "EntryApp/includes/test-1960-form.html" %}
+
+    {% elif year == 1970 %}
+
+        {% include "EntryApp/includes/test-1970-form.html" %}
+    
+    {% endif %}
+
+{% endblock content %}

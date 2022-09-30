@@ -1,0 +1,160 @@
+
+<style>
+    .numberinput-small {
+        width:60px;
+    }
+    .textinput-small {
+        width:60px;
+    }
+
+</style>
+
+<div class='right-col'>
+    <div id='the_crispy_formset' class='container-fluid col-8'>
+        This is some text.
+    </div>
+    
+{% csrf_token %}
+
+<div class='flex-container'>
+    <div class='form-inline form-inline-nowrap'>
+        <div id='test_form-0-page_no' class='form-group form-group-padded'>
+            <label for="id_form-0-page_no" class="control-label requiredField">Page no<span class="asteriskField">*</span> </label> 
+            <div class="controls"> 
+                <input type="number" name="form-0-page_no" min="0" class="input numberinput-small" id="id_form-0-page_no">
+            </div> 
+        </div>
+        <div id='test_form-0-line_no' class='form-group form-group-padded'>
+            <label for="id_form-0-line_no" class="control-label requiredField">Line number<span class="asteriskField">*</span> </label> 
+            <div class="controls"> <input type="number" name="form-0-line_no" min="0" class="numberinput-small" id="id_form-0-line_no"> </div> 
+        </div>
+        <div id="div_id_form-0-sample_key_gq" class="form-group form-group-padded"> <label for="id_form-0-sample_key_gq"  class="control-label requiredField"> Sample key<span class="asteriskField">*</span> </label> 
+            <div class="controls"> 
+                <label for="id_form-0-sample_key_gq_1" class="radio inline"> <input type="radio" name="form-0-sample_key_gq" id="id_form-0-sample_key_gq_1" value="A"  >A</label> 
+                <label for="id_form-0-sample_key_gq_2" class="radio inline"> <input type="radio" name="form-0-sample_key_gq" id="id_form-0-sample_key_gq_2" value="B"  >B</label> 
+                <label for="id_form-0-sample_key_gq_3" class="radio inline"> <input type="radio" name="form-0-sample_key_gq" id="id_form-0-sample_key_gq_3" value="C"  >C</label> 
+                <label for="id_form-0-sample_key_gq_4" class="radio inline"> <input type="radio" name="form-0-sample_key_gq" id="id_form-0-sample_key_gq_4" value="D"  >D</label> 
+                <label for="id_form-0-sample_key_gq_5" class="radio inline"> <input type="radio" name="form-0-sample_key_gq" id="id_form-0-sample_key_gq_5" value="GQ"  >GQ</label> 
+            </div> 
+        </div> 
+        <div id="div_id_form-0-last_name" class="form-group form-group-padded"> 
+            <label for="id_form-0-last_name" class="control-label requiredField">Last name<span class="asteriskField">*</span> </label> 
+            <div class="controls"> <input type="text" name="form-0-last_name" maxlength="255" class="textinput textInput" id="id_form-0-last_name"> </div> 
+        </div>
+        <div id="div_id_form-0-first_name" class="form-group form-group-padded"> 
+            <label for="id_form-0-first_name" class="control-label requiredField">First name<span class="asteriskField">*</span> </label> 
+            <div class="controls"> <input type="text" name="form-0-first_name" maxlength="255" class="textinput textInput" id="id_form-0-first_name"> </div> 
+        </div>
+        <div id="div_id_form-0-middle_init" class="form-group form-group-padded"> 
+            <label for="id_form-0-middle_init" class="control-label requiredField">Middle initial<span class="asteriskField">*</span> </label> 
+            <div class="controls"> <input type="text" name="form-0-middle_init" maxlength="255" class="textinput textInput textinput-small" id="id_form-0-middle_init"> </div> 
+        </div>
+        <div id="div_id_form-0-relp_1960" class="form-group form-group-padded"> 
+            <div class="row-padded"><label for="id_form-0-relp_1960"  class="control-label requiredField">Relationship to household head<span class="asteriskField">*</span> </label> </div>
+            <div class="controls form-group form-group-padded"> 
+                <div class="row-padded"><label for="id_form-0-relp_1960_1" class="radio"> <input type="radio" name="form-0-relp_1960" id="id_form-0-relp_1960_1" value="hh_head"  >Head of household</label></div> 
+                <div class="row-padded"><label for="id_form-0-relp_1960_2" class="radio"> <input type="radio" name="form-0-relp_1960" id="id_form-0-relp_1960_2" value="spouse"  >Wife</label> </div>
+                <div class="row-padded"><label for="id_form-0-relp_1960_3" class="radio"> <input type="radio" name="form-0-relp_1960" id="id_form-0-relp_1960_3" value="child"  >Child</label> </div>
+                <div class="row-padded"><label for="id_form-0-relp_1960_4" class="radio"> <input type="radio" name="form-0-relp_1960" id="id_form-0-relp_1960_4" value="other_relative"  >Other relative</label></div> 
+                <div class="row-padded"><label for="id_form-0-relp_1960_5" class="radio"> <input type="radio" name="form-0-relp_1960" id="id_form-0-relp_1960_5" value="roomer/boarder"  >Roomer, boarder, lodger</label> </div>
+                <div class="row-padded"><label for="id_form-0-relp_1960_6" class="radio"> <input type="radio" name="form-0-relp_1960" id="id_form-0-relp_1960_6" value="patient/inmate"  >Patient or inmate</label></div>
+                <div class="row-padded"><label for="id_form-0-relp_1960_7" class="radio"> <input type="radio" name="form-0-relp_1960" id="id_form-0-relp_1960_7" value="other"  >Other not related to head</label> </div>
+            </div> 
+        </div>
+        <div id="div_id_form-0-sex" class="form-group form-group-padded"> 
+            <label for="id_form-0-sex_0" class="control-label requiredField">Sex<span class="asteriskField">*</span> </label> 
+            <div class="controls"> 
+                <label for="id_form-0-sex_1" class="radio"> <input type="radio" name="form-0-sex" id="id_form-0-sex_1" value="male"  >Male</label> 
+                <label for="id_form-0-sex_2" class="radio"> <input type="radio" name="form-0-sex" id="id_form-0-sex_2" value="female"  >Female</label>
+            </div>
+        </div>
+        <div id="div_id_form-0-race_1960" class="form-group form-group-padded"> 
+            <div class='row-padded'><label for="id_form-0-race_1960"  class="control-label requiredField">Race<span class="asteriskField">*</span> </label></div> 
+            <div class="controls"> 
+                <div class='row-padded'><label for="id_form-0-race_1960_1" class="radio inline"> <input type="radio" name="form-0-race_1960" id="id_form-0-race_1960_1" value="White"  >White</label></div>
+                <div class='row-padded'><label for="id_form-0-race_1960_2" class="radio inline"> <input type="radio" name="form-0-race_1960" id="id_form-0-race_1960_2" value="Negro"  >Negro</label></div>
+                <div class='row-padded'><label for="id_form-0-race_1960_3" class="radio inline"> <input type="radio" name="form-0-race_1960" id="id_form-0-race_1960_3" value="American Indian"  >American Indian</label></div>
+                <div class='row-padded'><label for="id_form-0-race_1960_4" class="radio inline"> <input type="radio" name="form-0-race_1960" id="id_form-0-race_1960_4" value="Japanese"  >Japanese</label></div>
+                <div class='row-padded'><label for="id_form-0-race_1960_5" class="radio inline"> <input type="radio" name="form-0-race_1960" id="id_form-0-race_1960_5" value="Chinese"  >Chinese</label> </div>
+                <div class='row-padded'><label for="id_form-0-race_1960_6" class="radio inline"> <input type="radio" name="form-0-race_1960" id="id_form-0-race_1960_6" value="Filipino"  >Filipino</label></div>
+                <div class='row-padded'><label for="id_form-0-race_1960_7" class="radio inline"> <input type="radio" name="form-0-race_1960" id="id_form-0-race_1960_7" value="Other"  >Other</label></div>
+            </div> 
+        </div>
+        <div id='div_id_form_0-birth_quarter' class='form-group form-group-padded'> 
+            <div class='row-padded'><div id="div_id_form-0-birth_quarter" class="form-group form-group-padded"> <label for="id_form-0-birth_quarter_0" class="control-label requiredField"> Month of birth<span class="asteriskField">*</span> </label></div> 
+                    <div class="controls"> 
+                <div class='row-padded'><label for="id_form-0-birth_quarter_1" class="radio"> <input type="radio" name="form-0-birth_quarter" id="id_form-0-birth_quarter_1" value="Jan-Mar"  >Jan-Mar</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_quarter_2" class="radio"> <input type="radio" name="form-0-birth_quarter" id="id_form-0-birth_quarter_2" value="Apr-June"  >Apr-June</label></div> 
+                <div class='row-padded'><label for="id_form-0-birth_quarter_3" class="radio"> <input type="radio" name="form-0-birth_quarter" id="id_form-0-birth_quarter_3" value="July-Sept"  >July-Sept</label></div> 
+                <div class='row-padded'><label for="id_form-0-birth_quarter_4" class="radio"> <input type="radio" name="form-0-birth_quarter" id="id_form-0-birth_quarter_4" value="Oct-Dec"  >Jan-Mar</label></div> 
+                </div>
+            </div>
+        </div>
+        <div id="div_id_form-0-birth_decade" class="form-group form-group-padded"> 
+            <div class='row-padded'><label for="id_form-0-birth_decade"  class="control-label requiredField">Decade of birth<span class="asteriskField">*</span> </label></div> 
+            <div class="controls"> 
+                <div class='row-padded'><label for="id_form-0-birth_decade_1" class="radio inline"> <input type="radio" name="form-0-birth_decade" id="id_form-0-birth_decade_1" value="1850"  >185-</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_decade_2" class="radio inline"> <input type="radio" name="form-0-birth_decade" id="id_form-0-birth_decade_2" value="1860"  >186-</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_decade_3" class="radio inline"> <input type="radio" name="form-0-birth_decade" id="id_form-0-birth_decade_3" value="1870"  >187-</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_decade_4" class="radio inline"> <input type="radio" name="form-0-birth_decade" id="id_form-0-birth_decade_4" value="1880"  >188-</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_decade_5" class="radio inline"> <input type="radio" name="form-0-birth_decade" id="id_form-0-birth_decade_5" value="1890"  >189-</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_decade_6" class="radio inline"> <input type="radio" name="form-0-birth_decade" id="id_form-0-birth_decade_6" value="1900"  >190-</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_decade_7" class="radio inline"> <input type="radio" name="form-0-birth_decade" id="id_form-0-birth_decade_7" value="1910"  >191-</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_decade_8" class="radio inline"> <input type="radio" name="form-0-birth_decade" id="id_form-0-birth_decade_8" value="1920"  >192-</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_decade_9" class="radio inline"> <input type="radio" name="form-0-birth_decade" id="id_form-0-birth_decade_9" value="1930"  >193-</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_decade_10" class="radio inline"> <input type="radio" name="form-0-birth_decade" id="id_form-0-birth_decade_10" value="1940"  >194-</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_decade_11" class="radio inline"> <input type="radio" name="form-0-birth_decade" id="id_form-0-birth_decade_11" value="1950"  >195-</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_decade_12" class="radio inline"> <input type="radio" name="form-0-birth_decade" id="id_form-0-birth_decade_12" value="1960"  >196-</label></div>
+            </div> 
+        </div> 
+        <div id="div_id_form-0-birth_year" class="form-group form-group-padded"> 
+            <div class='row-padded'><label for="id_form-0-birth_year"  class="control-label requiredField">Specific year of birth<span class="asteriskField">*</span> </label></div> 
+            <div class="controls"> 
+                <div class='row-padded'><label for="id_form-0-birth_year_1" class="radio inline"> <input type="radio" name="form-0-birth_year" id="id_form-0-birth_year_1" value="0"  >0</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_year_2" class="radio inline"> <input type="radio" name="form-0-birth_year" id="id_form-0-birth_year_2" value="1"  >1</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_year_3" class="radio inline"> <input type="radio" name="form-0-birth_year" id="id_form-0-birth_year_3" value="2"  >2</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_year_4" class="radio inline"> <input type="radio" name="form-0-birth_year" id="id_form-0-birth_year_4" value="3"  >3</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_year_5" class="radio inline"> <input type="radio" name="form-0-birth_year" id="id_form-0-birth_year_5" value="4"  >4</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_year_6" class="radio inline"> <input type="radio" name="form-0-birth_year" id="id_form-0-birth_year_6" value="5"  >5</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_year_7" class="radio inline"> <input type="radio" name="form-0-birth_year" id="id_form-0-birth_year_7" value="6"  >6</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_year_8" class="radio inline"> <input type="radio" name="form-0-birth_year" id="id_form-0-birth_year_8" value="7"  >7</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_year_9" class="radio inline"> <input type="radio" name="form-0-birth_year" id="id_form-0-birth_year_9" value="8"  >8</label></div>
+                <div class='row-padded'><label for="id_form-0-birth_year_10" class="radio inline"> <input type="radio" name="form-0-birth_year" id="id_form-0-birth_year_10" value="9"  >9</label></div>
+            </div> 
+        </div>
+        <div id="div_id_form-0-marital_status" class="form-group form-group-padded"> 
+            <div class='row-padded'><label for="id_form-0-marital_status"  class="control-label requiredField">Marital status<span class="asteriskField">*</span> </label></div> 
+            <div class="controls"> 
+                <div class='row-padded'><label for="id_form-0-marital_status_1" class="radio inline"> <input type="radio" name="form-0-marital_status" id="id_form-0-marital_status_1" value="Married"  >Married</label></div>
+                <div class='row-padded'><label for="id_form-0-marital_status_2" class="radio inline"> <input type="radio" name="form-0-marital_status" id="id_form-0-marital_status_2" value="Widowed"  >Widowed</label></div>
+                <div class='row-padded'><label for="id_form-0-marital_status_3" class="radio inline"> <input type="radio" name="form-0-marital_status" id="id_form-0-marital_status_3" value="Divorced"  >Divorced</label></div>
+                <div class='row-padded'><label for="id_form-0-marital_status_4" class="radio inline"> <input type="radio" name="form-0-marital_status" id="id_form-0-marital_status_4" value="Separated"  >Separated</label></div>
+                <div class='row-padded'><label for="id_form-0-marital_status_5" class="radio inline"> <input type="radio" name="form-0-marital_status" id="id_form-0-marital_status_5" value="Never married"  >Never married</label></div>
+            </div> 
+        </div>
+        <div id="div_id_form-0-street_name" class="form-group form-group-padded">
+            <label for="id_form-0-street_name" class="control-label ">Street name</label> 
+            <div class="controls"> 
+                <input type="text" name="form-0-street_name" maxlength="255" class="textinput textInput" id="id_form-0-street_name">
+            </div> 
+        </div> 
+        <div id="div_id_form-0-house_no" class="form-group form-group-padded"> 
+            <label for="id_form-0-house_no" class="control-label ">House number</label> 
+            <div class="controls"> 
+                <input type="text" name="form-0-house_no" maxlength="255" class="textinput textInput textinput-small" id="id_form-0-house_no">
+            </div> 
+        </div>
+        <div id="div_id_form-0-apt_no" class="form-group form-group-padded">
+            <label for="id_form-0-apt_no" class="control-label ">Apartment number</label> 
+            <div class="controls"> 
+                <input type="text" name="form-0-apt_no" maxlength="255" class="textinput textInput textinput-small" id="id_form-0-apt_no"> 
+            </div> 
+        </div>      
+    </div>
+</div>
+
+
+<br>
+<br>
+<br>
+

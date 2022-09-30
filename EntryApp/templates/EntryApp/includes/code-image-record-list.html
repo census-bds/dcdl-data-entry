@@ -1,0 +1,43 @@
+<p class="record-list">
+    {% if record_list %}
+    <table class="gridtable">
+        <div>
+            <div id="record-table-header">
+                <tr>
+                    {% if img.year <= 1970 %}
+                        <th>Line number</th>
+                    {% else %}
+                        <th>Column number</th>
+                    {% endif %}                
+                    <th>Last name</th>
+                    <th>First name</th>
+                    <th>Middle initial</th>
+                    <th>Make changes</th>
+                </tr>
+                {% for record in record_list %}
+                    <tr>
+                        {% if img.year <= 1970 %}
+                            <td>{{ record.line_no }}</td>
+                        {% else %}
+                            <td>{{ record.col_no }}</td>
+                        {% endif %}                
+                        <td>{{ record.last_name }}</td>
+                        <td>{{ record.first_name }}</td>
+                        <td>{{ record.middle_init }}</td>
+                        <td>
+                            <form method="POST">
+                                {% csrf_token %}
+                                <input type="hidden" name="{{ param_names.PARAM_NAME_IMAGE_ID }}" value="{{ img.id }}" />
+                                <input type="hidden" name="{{ param_names.PARAM_NAME_SHEET_ID }}" value="{{ sheet_instance.id }}" />
+                                <input type="hidden" name="{{ param_names.PARAM_NAME_RECORD_ID }}" value="{{ record.id }}" />
+                                <input type="hidden" name="{{ param_names.PARAM_NAME_ACTION }}" value="edit_record" />
+                                <input type="submit" value="Edit">
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </div>
+        </div>
+    </table>
+    {% endif %}
+</p>

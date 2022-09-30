@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block end_of_head_tag %}
+<script src="https://cdn.jsdelivr.net/npm/openseadragon@2.4/build/openseadragon/openseadragon.min.js"></script>
+<script type="text/javascript" src="/static/EntryApp/image.js"></script>
+{% endblock end_of_head_tag %}
+
+{% block header %}
+    {% if app_instance == 'dev' %}
+
+    <h2>Decennial Census Digitization and Data Linkage - Data Entry Application (Development) </h2>
+
+    {% elif app_instance == 'test' %}
+
+    <h2>Decennial Census Digitization and Data Linkage - Data Entry Application (Test) </h2>
+
+    {% elif app_instance == 'train' %}
+
+    <h2>Decennial Census Digitization and Data Linkage - Data Entry Application (Training) </h2>
+
+    {% elif app_instance == 'prod' %}
+    <h2>Decennial Census Digitization and Data Linkage - Data Entry Application (Production) </h2>
+
+    {% else %}
+    <h2>Decennial Census Digitization and Data Linkage - Data Entry Application</h2>
+
+    {% endif %}
+
+    <p> The Decennial  Census Digitization  and Linkage  project  (DCDL) is an initiative  to  produce  linked restricted  microdata  files  from  the decennial  censuses of 1960  through  1990. This tool enables hand-entry of data from a subset of scanned images of the historical files, an essential part of developing a scalable tool to capture respondent information so that individuals can be studied over time. </p>
+{% endblock header %}
+
+{% block content %}
+    
+    {% if make_next_reel_button_appear %}
+    <form id='load-next-reel' method="POST">
+        {% csrf_token %}
+        <input type='hidden' name="{{ param_names.PARAM_NAME_ACTION }}" value="load_next_reel"/>
+        <input type="submit" value="Load next reel">
+    </form>
+    {% endif %}
+
+    {% if num_images %}
+
+        {% if make_next_batch_button_appear %}
+            <form id='load-next-batch' method="POST">
+                {% csrf_token %}
+                <input type='hidden' name="{{ param_names.PARAM_NAME_ACTION }}" value='load_next_batch'>
+                <input type="submit" value="Load next batch">
+            </form>
+
+        {% elif next_image %}
+
+        <p><b>User {{ user }} is completing data entry for {{ num_completed }} / {{ num_images }} images.</b></p>
+
+        <p>
+            The current reel is from {{ next_image.year }}. Next image ({{ num_todo }} remaining):
+            <br/>
+            <div id="next_thumbnail" style="background-image: url(/images/{{next_image.year}}/{{next_image.image_file.img_reel.reel_name}}/{{next_image.image_file.smaller_image_file_name}}); background-repeat:no-repeat; background-size: contain; background-position-x: left;"><br><br>&nbsp;</div>
+            <br/>
+            <form action={% url 'EntryApp:code_image' %} method="GET">
+                {% csrf_token %}
+                <input type="hidden" name="image_id" value="{{ next_image.id }}" />
+                <input type="submit" value="Code Image">
+            </form>
+        </p>
+        {% endif %}
+    
+    {% elif out_of_reels %}
+        <p>{{ user }} has finished all available reels.</p>
+
+    {% else %}
+        <p>No images are available for {{ user }}.</p>
+    {% endif %}
+
+    <h3>Recent images</h3>
+    <p>
+        <table class="gridtable">
+            <tr>
+                <th>image</th>
+                <th>year</th>
+                <th>type</th>
+                <th>complete?</th>
+                <th>updated</th>
+                <th>problem?</th>
+                <th>EDIT</th>
+            </tr>
+    {% for recent_image in recent_image_list %}
+            <tr>
+                <td style="width:200px;"><div style="background-image: url(/images/{{recent_image.year}}/{{recent_image.image_file.img_reel.reel_name}}/{{recent_image.image_file.smaller_image_file_name}}); background-repeat:no-repeat; background-size: cover; background-position-x: left;height:140px;" ><br>&nbsp;</div></td>
+                <td>{{ recent_image.year }}</td>
+                <td>{{ recent_image.image_type }}</td>
+                <td>{{ recent_image.is_complete }}</td>
+                <td>{{ recent_image.last_modified }}</td>
+                <td>{{ recent_image.problem }}</td>
+                <td>
+                    <form action={% url 'EntryApp:code_image' %} method="get">
+                        {% csrf_token %}
+                        <input type="hidden" name="image_id" value="{{ recent_image.id }}" />
+                        <input type="submit" value="Code Image">
+                    </form>
+                </td>
+            </tr>
+    {% endfor %}
+        </table>
+    </p>
+{% endblock content %}
+
+{% block problem %}
+{% if app_instance == "dev" %}
+    <p>Click this button to see 1960 household form in development.</p>
+    <form action={% url 'EntryApp:test_household_1960' %}>
+        {% csrf_token %}
+        <input type="submit" value="View Household 1960">
+    </form>
+    <br>
+    <br>
+    
+    
+    <p>Click the buttons below to view sample record entry pages for each year.</p>
+    <br>
+    <form action={% url 'EntryApp:test_crispy_formset' year=1960 form_type='short'%}>
+        {% csrf_token %}
+        <input type="submit" value="View 1960">
+    </form>
+    <br>
+    <form action={% url 'EntryApp:test_crispy_formset' year=1970 form_type='short' %}>
+        {% csrf_token %}
+        <input type="submit" value="View 1970">
+    </form>
+    <br>
+    <form action={% url 'EntryApp:test_crispy_formset' year=1980 form_type='short' %}>
+        {% csrf_token %}
+        <input type="submit" value="View 1980">
+    </form>
+    <br>
+    <form action={% url 'EntryApp:test_crispy_formset' year=1990 form_type='short' %}>
+        {% csrf_token %}
+        <input type="submit" value="View 1990">
+    </form>
+    <br>
+    <form action={% url 'EntryApp:test_crispy_formset' year=1990 form_type='long' %}>
+        {% csrf_token %}
+        <input type="submit" value="View 1990 long form">
+    </form>
+    <br>
+    <br>
+{% endif %}
+
+{% endblock problem %}
+{% block post_body %}
+
+<script> initIndexPage({% if popOut %}{{"true"}}{% else %}{{"false"}}{% endif %}) </script>
+{% endblock post_body %}
